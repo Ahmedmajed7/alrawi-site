@@ -5,7 +5,7 @@ import type { LoadedHouse } from './types';
 import { applyHouseMaterials } from './materials';
 
 /** Load the client's GLB (DRACO ok). Reads anchor_* / cam_* / door_main nodes. */
-export async function loadHouse(url: string, onProgress?: (p: number) => void): Promise<LoadedHouse> {
+export async function loadHouse(url: string, onProgress?: (p: number) => void, lite = false): Promise<LoadedHouse> {
   const loader = new GLTFLoader();
   const draco = new DRACOLoader(); draco.setDecoderPath('/draco/'); loader.setDRACOLoader(draco);
   const gltf = await loader.loadAsync(url, (e) => { if (e.total) onProgress?.(e.loaded / e.total); else onProgress?.(Math.min(0.95, e.loaded / 8e6)); });
@@ -26,7 +26,7 @@ export async function loadHouse(url: string, onProgress?: (p: number) => void): 
       }
     }
   });
-  applyHouseMaterials(root);
+  applyHouseMaterials(root, lite);
   const bounds = new THREE.Box3().setFromObject(root);
   return { root, anchors, door, bounds };
 }

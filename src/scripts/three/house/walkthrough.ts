@@ -74,6 +74,10 @@ export async function mountWalkthrough(root: HTMLElement) {
   if (tier === 'off' || q.has('slides')) { runSlideshow(); return; }
 
   // ---------- 3D ----------
+  // Headline + tap prompt render at first paint over the poster (LCP); the model streams behind it.
+  if (!author && startStop < 0) ui.prompt.classList.add('is-on');
+  let pendingTap = false; let ready = false;
+  ui.tap.addEventListener('click', () => { if (!ready) { pendingTap = true; ui.load.classList.remove('is-done'); } });
   const canvas = document.createElement('canvas'); canvas.tabIndex = 0; canvas.setAttribute('aria-label', root.dataset.aria || 'House walkthrough');
   root.querySelector('[data-walk-canvas]')!.appendChild(canvas);
   let stage: Stage; let house: LoadedHouse;
@@ -165,6 +169,8 @@ export async function mountWalkthrough(root: HTMLElement) {
     state = 'exterior'; ui.prompt.classList.add('is-on');
     if (!returning) lockScroll(true);
   }
+  ready = true; ui.load.classList.add('is-done');
+  if (pendingTap) { pendingTap = false; setTimeout(advance, 400); }
 
   let first = true;
   const stop = runLoop(root, (dt) => { authorCtl ? authorCtl.update(dt) : rig.update(dt); stage.render(); if (first) { first = false; root.classList.add('is-live'); } });

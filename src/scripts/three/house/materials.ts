@@ -5,7 +5,8 @@
 import * as THREE from 'three';
 
 const tl = new THREE.TextureLoader();
-const tex = (name: string, srgb = false, repeat = 1) => { const t = tl.load(`/textures/house/${name}.webp`); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+let base = '/textures/house/';
+const tex = (name: string, srgb = false, repeat = 1) => { const t = tl.load(`${base}${name}.webp`); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
 
 type Rule = (old: THREE.MeshStandardMaterial) => THREE.Material;
 const std = (o: Partial<THREE.MeshStandardMaterialParameters>) => new THREE.MeshStandardMaterial({ metalness: 0, roughness: 0.85, ...o });
@@ -26,7 +27,8 @@ const rules: Record<string, Rule> = {
   light2: () => std({ color: '#fff2dc', emissive: '#ffe1b8', emissiveIntensity: 1.6, roughness: 0.5 }),
 };
 
-export function applyHouseMaterials(root: THREE.Object3D) {
+export function applyHouseMaterials(root: THREE.Object3D, lite = false) {
+  base = lite ? '/textures/house/1k/' : '/textures/house/';
   const cache = new Map<string, THREE.Material>();
   root.traverse((o) => {
     const m = o as THREE.Mesh; if (!m.isMesh) return;
