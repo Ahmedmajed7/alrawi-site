@@ -41,7 +41,7 @@ const brand = l(site.name, locale);
             <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
             <address>{l(o.address, locale)}</address>
             <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>)}</div>
-            <a class="link-arrow" href={o.map} target="_blank" rel="noopener"><Icon name="pin" /> {t('contact.map')}</a>
+            <a class="link" href={o.map} target="_blank" rel="noopener"><Icon name="pin" /> {t('contact.map')}</a>
           </div>
         ))}
       </div>

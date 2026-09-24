@@ -1,11 +1,11 @@
 ---
 import Base from '@/layouts/Base.astro';
-import Intro from '@/components/Intro.astro';
+import Walkthrough from '@/components/Walkthrough.astro';
 import Icon from '@/components/Icons.astro';
 import ProductCard from '@/components/ProductCard.astro';
 import ContactForm from '@/components/ContactForm.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
-import { allCategories, byCategory, featured } from '@/lib/products';
+import { allCategories, byCategory, featured, categoryOf } from '@/lib/products';
 import site from '@/data/site.json';
 import services from '@/data/services.json';
 
@@ -17,139 +17,143 @@ const wa = `https://wa.me/${site.whatsapp}`;
 const whatPoints = locale === 'ar'
   ? ['الإضاءة والتكييف والستائر من هاتفك أو بصوتك', 'تنبيهات فورية للدخان والغاز والحركة', 'مشاهد جاهزة: صباح، خروج، فيلم، نوم', 'استهلاك طاقة أقل بأجهزة تعمل عند الحاجة فقط']
   : ['Lighting, climate and curtains from your phone or your voice', 'Instant alerts for smoke, gas and movement', 'Ready scenes: morning, away, movie, sleep', 'Lower energy use with devices that run only when needed'];
+const sel = featured();
 ---
 <Base {locale} title={t('meta.siteTitle')} description={t('meta.siteDescription')}>
-  <Intro {locale} />
+  <Walkthrough {locale} />
 
-  <section class="proof" aria-label={t('proof.platforms')}>
-    <div class="wrap proof-inner">
-      <ul class="proof-facts">
-        <li>{t('proof.founded')}</li>
-        <li>{t('proof.experience')}</li>
-        <li>{t('proof.countries')}</li>
-      </ul>
-      <div class="proof-platforms"><span>{t('proof.platforms')}</span>{site.platforms.map((p) => <b>{p}</b>)}</div>
+  <section class="section" id="philosophy">
+    <div class="wrap philo">
+      <div class="philo-text" data-reveal>
+        <span class="eyebrow"><span class="no">{t('home.philoNo')}</span>{t('home.philo')}</span>
+        <h2 set:html={t('what.title')} />
+        <p>{t('what.body')}</p>
+        <ul class="philo-list">{whatPoints.map((x, i) => <li><b class="num">{String(i + 1).padStart(2, '0')}</b><span>{x}</span></li>)}</ul>
+      </div>
+      <figure class="philo-still" data-reveal="fade">
+        <div class="img-plate parallax" style="aspect-ratio:5/4"><img src="/img/house/stop-2.webp" alt="" width="1600" height="900" loading="lazy" decoding="async" data-parallax /></div>
+        <figcaption><span>{t('home.still')}</span><span class="num">{site.founded}</span></figcaption>
+      </figure>
     </div>
   </section>
 
-  <section class="section" id="what">
-    <div class="wrap split split-wide">
-      <div data-reveal="left">
-        <div class="what-visual">
-          <img src="/img/brand/lifestyle-1.webp" alt="" width="900" height="1600" loading="lazy" decoding="async" />
-          <div class="what-badge"><b class="num">2021</b><span>{t('proof.founded')}</span></div>
-        </div>
-      </div>
-      <div data-reveal="right">
-        <div class="section-head">
-          <span class="eyebrow">{t('what.eyebrow')}</span>
-          <h2>{t('what.title')}</h2>
-          <p>{t('what.body')}</p>
-        </div>
-        <ul class="what-list">{whatPoints.map((x) => <li><Icon name="check" /><span>{x}</span></li>)}</ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-dark" id="categories">
-    <div class="glow-orb blue" style="width:520px;height:520px;top:-200px;inset-inline-end:-160px"></div>
+  <section class="section section-stone" id="collection">
     <div class="wrap">
       <div class="section-head" data-reveal>
-        <span class="eyebrow">{t('categories.eyebrow')}</span>
-        <h2>{t('categories.title')}</h2>
+        <span class="eyebrow"><span class="no">{t('home.collectionNo')}</span>{t('home.collection')}</span>
+        <h2>{t('home.collectionTitle')}</h2>
       </div>
-      <div class="grid grid-3" data-stagger>
-        {allCategories.map((c) => {
+      <div class="bands">
+        {allCategories.map((c, i) => {
           const n = byCategory(c.slug).length;
           return (
-            <a class="card cat-card" href={localePath(locale, `products/${c.slug}`)} data-reveal>
-              <div class="cat-media"><img src={c.image} alt="" width="1600" height="1000" loading="lazy" decoding="async" /></div>
-              <span class="cat-icon"><Icon name={c.icon} /></span>
-              <div class="cat-body">
+            <article class="band" data-reveal>
+              <div class="band-media img-plate"><img src={c.image} alt="" width="1600" height="1000" loading="lazy" decoding="async" /></div>
+              <div class="band-text">
+                <span class="band-no num">{String(i + 1).padStart(2, '0')}</span>
                 <h3>{l(c.name, locale)}</h3>
                 <p>{l(c.blurb, locale)}</p>
-                <div class="cat-meta"><span>{n === 1 ? t('categories.countOne') : t('categories.count', { n })}</span><span class="link-arrow">{t('categories.view')} <Icon name="arrow" class="icon-dir" /></span></div>
+                <div class="band-meta"><span class="num">{n}</span><span>{n === 1 ? t('home.device') : t('home.devices')}</span><span class="link">{t('categories.view')} <Icon name="arrow" class="icon-dir" /></span></div>
               </div>
-            </a>
+              <a class="stretch" href={localePath(locale, `products/${c.slug}`)} aria-label={l(c.name, locale)}></a>
+            </article>
           );
         })}
-        <a class="card cat-card" href={localePath(locale, 'services')} data-reveal>
-          <div class="cat-media"><img src="/img/categories/services.webp" alt="" width="1600" height="1000" loading="lazy" decoding="async" /></div>
-          <span class="cat-icon"><Icon name="rack" /></span>
-          <div class="cat-body">
+        <article class="band" data-reveal>
+          <div class="band-media img-plate"><img src="/img/categories/services.webp" alt="" width="1600" height="1000" loading="lazy" decoding="async" /></div>
+          <div class="band-text">
+            <span class="band-no num">{String(allCategories.length + 1).padStart(2, '0')}</span>
             <h3>{t('services.eyebrow')}</h3>
             <p>{services.map((x) => l(x.name, locale)).join(' · ')}</p>
-            <div class="cat-meta"><span></span><span class="link-arrow">{t('services.more')} <Icon name="arrow" class="icon-dir" /></span></div>
+            <div class="band-meta"><span class="link">{t('services.more')} <Icon name="arrow" class="icon-dir" /></span></div>
           </div>
-        </a>
+          <a class="stretch" href={localePath(locale, 'services')} aria-label={t('services.eyebrow')}></a>
+        </article>
       </div>
     </div>
   </section>
 
-  <section class="section" id="featured">
+  <section class="section" id="selected">
     <div class="wrap">
       <div class="section-head" data-reveal>
-        <span class="eyebrow">{t('featured.eyebrow')}</span>
-        <h2>{t('featured.title')}</h2>
+        <span class="eyebrow"><span class="no">{t('home.selectedNo')}</span>{t('home.selected')}</span>
+        <h2>{t('home.selectedTitle')}</h2>
       </div>
-      <div class="grid grid-4" data-stagger>{featured().map((p) => <ProductCard product={p} {locale} />)}</div>
-      <p style="margin-top:32px"><a class="btn btn-ghost" href={localePath(locale, 'products')}>{t('categories.all')} <Icon name="arrow" class="icon-dir" /></a></p>
+      <div class="story" data-story>
+        <div class="story-stage" data-reveal="fade">
+          <span class="story-index num" data-story-index>01</span>
+          {sel.map((p, i) => <img src={p.image} alt={l(p.name, locale)} width="1200" height="1200" loading="lazy" decoding="async" class:list={[{ 'is-on': i === 0 }]} data-story-img={i} />)}
+        </div>
+        <div class="story-items">
+          {sel.map((p, i) => (
+            <div class="story-item" class:list={[{ 'is-on': i === 0 }]} data-story-item={i}>
+              <span class="story-cat">{l(categoryOf(p).name, locale)}</span>
+              <h3>{l(p.name, locale)}</h3>
+              <p>{l(p.description, locale).split('. ')[0]}.</p>
+              <a class="link" href={localePath(locale, `products/${p.category}/${p.slug}`)}>{t('featured.view')} <Icon name="arrow" class="icon-dir" /></a>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p style="margin-top:40px"><a class="btn" href={localePath(locale, 'products')}>{t('categories.all')}</a></p>
     </div>
   </section>
 
-  <section class="section section-alt dots-bg" id="how">
+  <section class="section section-stone" id="process">
     <div class="wrap">
-      <div class="section-head center" data-reveal>
-        <span class="eyebrow">{t('how.eyebrow')}</span>
+      <div class="section-head" data-reveal>
+        <span class="eyebrow"><span class="no">{t('home.processNo')}</span>{t('home.process')}</span>
         <h2>{t('how.title')}</h2>
       </div>
-      <div class="steps" data-stagger>{s.how.steps.map((st) => <div class="step" data-reveal><h3>{st.title}</h3><p>{st.body}</p></div>)}</div>
+      <div class="process" data-stagger>{s.how.steps.map((st, i) => <div class="step" data-reveal><b class="num">{String(i + 1).padStart(2, '0')}</b><h3>{st.title}</h3><p>{st.body}</p></div>)}</div>
     </div>
   </section>
 
-  <section class="section section-dark" id="services">
-    <div class="glow-orb cyan" style="width:420px;height:420px;bottom:-160px;inset-inline-start:-120px"></div>
+  <section class="section section-night" id="services">
     <div class="wrap">
       <div class="section-head" data-reveal>
-        <span class="eyebrow">{t('services.eyebrow')}</span>
-        <h2>{t('services.title')}</h2>
+        <span class="eyebrow"><span class="no">{t('home.servicesNo')}</span>{t('home.services')}</span>
+        <h2 set:html={t('services.title')} />
       </div>
       <div class="svc-grid" data-stagger>{services.map((x) => <div class="svc" data-reveal><span class="svc-icon"><Icon name={x.icon} /></span><h3>{l(x.name, locale)}</h3><p>{l(x.blurb, locale)}</p></div>)}</div>
     </div>
   </section>
 
-  <section class="section" id="about">
-    <div class="wrap split">
-      <div data-reveal="left">
-        <div class="section-head">
-          <span class="eyebrow">{t('about.eyebrow')}</span>
-          <h2>{t('about.title')}</h2>
+  <section class="section" id="studio">
+    <div class="wrap split split-text">
+      <div class="studio-visual img-plate parallax" data-reveal="fade"><img src="/img/brand/logo-wall.webp" alt={l(site.name, locale)} width="1200" height="1600" loading="lazy" decoding="async" data-parallax /></div>
+      <div data-reveal>
+        <div class="section-head" style="margin-bottom:0">
+          <span class="eyebrow"><span class="no">{t('home.studioNo')}</span>{t('home.studio')}</span>
+          <h2 set:html={t('about.title')} />
           <p>{t('about.body')}</p>
         </div>
-        <div class="about-stats">
-          <div><b class="num">2021</b><span>{t('proof.founded')}</span></div>
+        <div class="stats">
+          <div><b class="num">{site.founded}</b><span>{t('proof.founded')}</span></div>
           <div><b class="num">10+</b><span>{t('proof.experience')}</span></div>
           <div><b class="num">2</b><span>{t('about.offices')}</span></div>
         </div>
-        <p style="margin-top:28px"><a class="link-arrow" href={localePath(locale, 'about')}>{t('about.more')} <Icon name="arrow" class="icon-dir" /></a></p>
+        <p style="margin-top:30px"><a class="link" href={localePath(locale, 'about')}>{t('about.more')} <Icon name="arrow" class="icon-dir" /></a></p>
       </div>
-      <div class="about-visual" data-reveal="right"><img src="/img/brand/logo-wall.webp" alt={l(site.name, locale)} width="1200" height="1600" loading="lazy" decoding="async" /></div>
     </div>
   </section>
 
   <section class="cta" id="contact">
-    <div class="glow-orb blue" style="width:600px;height:600px;top:-240px;inset-inline-start:30%"></div>
     <div class="wrap cta-inner">
       <div data-reveal>
-        <span class="eyebrow">{t('cta.eyebrow')}</span>
-        <h2>{t('cta.title')}</h2>
-        <p>{t('cta.body')}</p>
+        <span class="eyebrow">{t('home.contact')}</span>
+        <h2 set:html={t('cta.title')} style="margin-top:16px" />
+        <p style="margin-top:16px">{t('cta.body')}</p>
         <div class="cta-actions">
           <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('cta.whatsapp')}</a>
-          <a class="btn btn-ghost" href={`mailto:${site.email}`}><Icon name="mail" /> {site.email}</a>
+          <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
         </div>
       </div>
-      <div data-reveal="right"><ContactForm {locale} /></div>
+      <div data-reveal="fade"><ContactForm {locale} light /></div>
     </div>
   </section>
+  <script>
+    import { initStory, initParallax } from '@/scripts/motion/home';
+    initStory(); initParallax();
+  </script>
 </Base>

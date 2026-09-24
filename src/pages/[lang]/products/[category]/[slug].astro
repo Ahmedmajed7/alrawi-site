@@ -55,11 +55,11 @@ const jsonLd = [{
         </div>
         <div>
           <h2>{t('product.worksWith')}</h2>
-          <div class="pd-tags">{p.tags.map((x) => <span class="chip">{x}</span>)}</div>
+          <div class="pd-tags">{p.tags.map((x) => <span class="tag">{x}</span>)}</div>
         </div>
         <div class="pd-actions">
           <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('product.quote')}</a>
-          <a class="btn btn-ghost" href={localePath(locale, 'contact')}>{t('nav.contact')}</a>
+          <a class="btn" href={localePath(locale, 'contact')}>{t('nav.contact')}</a>
         </div>
         <nav class="pd-nav" aria-label={t('product.related')}>
           <a href={localePath(locale, `products/${prev.category}/${prev.slug}`)} rel="prev"><Icon name="arrow" class="icon-dir" style="transform:rotate(180deg)" /> {l(prev.name, locale)}</a>

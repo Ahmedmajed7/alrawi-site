@@ -28,15 +28,15 @@ export async function mountViewer(root: HTMLElement) {
   renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
   scene.environment = makeEnvironment(renderer);
-  scene.environmentIntensity = 0.9;
+  scene.environmentIntensity = 0.75;
   const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 50);
 
   const accent = new THREE.Color(root.dataset.accent || '#2f80ff');
-  const key = new THREE.DirectionalLight('#ffffff', 2.2); key.position.set(2.5, 4, 3);
+  const key = new THREE.DirectionalLight('#fff4e6', 2.0); key.position.set(2.5, 4, 3);
   key.castShadow = tier === 'high'; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -0.0005; key.shadow.radius = 4;
-  const rim = new THREE.DirectionalLight(accent, 2.4); rim.position.set(-3, 1.5, -2.5);
-  const fill = new THREE.DirectionalLight('#9bb7ff', 0.6); fill.position.set(-2, -1, 3);
-  scene.add(key, rim, fill, new THREE.AmbientLight('#8aa0d0', 0.25));
+  const rim = new THREE.DirectionalLight('#2a2622', 1.6); rim.position.set(-3, 1.5, -2.5);
+  const fill = new THREE.DirectionalLight('#d9cfc0', 0.5); fill.position.set(-2, -1, 3);
+  scene.add(key, rim, fill, new THREE.AmbientLight('#e8dfd0', 0.3));
 
   // model
   let model: THREE.Object3D;

@@ -1,5 +1,5 @@
 /* ============================ MOTION ============================ */
-[data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0s); will-change: opacity, transform; }
+[data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); transition-delay: var(--d, 0s); will-change: opacity, transform; }
 [data-reveal].is-in { opacity: 1; transform: none; }
 [data-reveal='fade'] { transform: none; }
 [data-reveal='left'] { transform: translateX(-30px); }
@@ -7,8 +7,8 @@
 [dir='rtl'] [data-reveal='left'] { transform: translateX(30px); }
 [dir='rtl'] [data-reveal='right'] { transform: translateX(-30px); }
 html.no-js [data-reveal] { opacity: 1; transform: none; }
-.tilt { transform-style: preserve-3d; transition: transform 0.5s var(--ease); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   [data-reveal] { opacity: 1; transform: none; }
+  .parallax img { transform: none; }
 }

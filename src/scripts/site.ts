@@ -1,10 +1,8 @@
 /** Global client behaviour: nav, cursor, reveal-on-scroll, language memory, smooth scroll. */
 import { initNav } from './nav';
-import { initCursor } from './cursor';
 import { initReveal, initSmoothScroll } from './motion/scroll';
 
 initNav();
-initCursor();
 initReveal();
 initSmoothScroll();
 

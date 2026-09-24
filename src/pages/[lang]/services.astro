@@ -11,10 +11,9 @@ const brand = l(site.name, locale);
 const wa = `https://wa.me/${site.whatsapp}`;
 ---
 <Base {locale} title={`${t('meta.servicesTitle')} | ${brand}`} description={t('services.title') + '. ' + services.map((x) => l(x.name, locale)).join(', ')}>
-  <section class="cat-hero">
+  <section class="cat-hero" data-dark-hero>
     <img src="/img/categories/services.webp" alt="" width="1600" height="1000" fetchpriority="high" />
-    <div class="hero-veil"></div>
-    <div class="wrap" style="position:relative;z-index:2">
+        <div class="wrap" style="position:relative;z-index:2">
       <span class="eyebrow">{t('services.eyebrow')}</span>
       <h1>{t('services.title')}</h1>
     </div>
@@ -32,7 +31,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
       </div>
       <div class="cta-actions" style="margin-top:40px">
         <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('cta.whatsapp')}</a>
-        <a class="btn btn-ghost" href={localePath(locale, 'products')}>{t('categories.all')} <Icon name="arrow" class="icon-dir" /></a>
+        <a class="btn" href={localePath(locale, 'products')}>{t('categories.all')} <Icon name="arrow" class="icon-dir" /></a>
       </div>
     </div>
   </section>

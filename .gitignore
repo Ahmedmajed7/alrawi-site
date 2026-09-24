@@ -7,3 +7,5 @@ dist/
 .DS_Store
 *.log
 scripts/_cache/
+assets/house/*
+!assets/house/.gitkeep

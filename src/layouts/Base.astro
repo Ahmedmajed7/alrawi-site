@@ -30,7 +30,6 @@ const { locale, title, description, image, type, jsonLd, lightNav = false, noind
   <body class={bodyClass}>
     <a class="skip" href="#main">{locale === 'ar' ? 'انتقل إلى المحتوى' : 'Skip to content'}</a>
     <div class="grain" aria-hidden="true"></div>
-    <div class="cursor" aria-hidden="true"></div>
     <Nav {locale} light={lightNav} />
     <main id="main">
       <slot />

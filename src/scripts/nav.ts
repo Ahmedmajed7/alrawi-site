@@ -13,11 +13,9 @@ export function initNav() {
       nav.classList.toggle('is-hidden', y > last && y > 320);
     } else nav.classList.remove('is-hidden');
     last = y;
-    // switch nav to light when scrolled past the dark hero
-    const hero = document.querySelector<HTMLElement>('[data-hero]');
-    if (hero && nav.dataset.light === '0') {
-      nav.classList.toggle('is-light', y > hero.offsetHeight - 80);
-    }
+    // nav sits in light-on-dark mode while over a dark hero (walkthrough or category hero)
+    const dark = document.querySelector<HTMLElement>('[data-dark-hero]');
+    if (dark && nav.dataset.light === '0') nav.classList.toggle('on-night', y < dark.offsetHeight - 80);
   };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });

@@ -30,6 +30,9 @@ try {
   const { sessionId } = at.result;
   await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 1, mobile: +w < 600 }, sessionId);
   await send('Page.enable', {}, sessionId);
+  await send('Runtime.enable', {}, sessionId);
+  const logs = [];
+  ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(m.params.type)) logs.push(m.params.type + ': ' + m.params.args.map((a) => a.value ?? a.description ?? '').join(' ')); if (m.method === 'Runtime.exceptionThrown') logs.push('exception: ' + (m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text)); });
   await send('Page.navigate', { url }, sessionId);
   await sleep(+waitMs);
   if (preJs) { await send('Runtime.evaluate', { expression: preJs }, sessionId); await sleep(400); }
@@ -40,7 +43,8 @@ try {
   }
   const { result: shot } = await send('Page.captureScreenshot', { format: 'png', ...(clip ? { clip } : {}) }, sessionId);
   writeFileSync(out, Buffer.from(shot.data, 'base64'));
-  const { result: dbg } = await send('Runtime.evaluate', { expression: `JSON.stringify({is3d: !!document.querySelector('.is-3d'), errors: (window.__errs||[]).length})`, returnByValue: true }, sessionId);
+  const { result: dbg } = await send('Runtime.evaluate', { expression: `JSON.stringify({is3d: !!document.querySelector('.is-3d, .is-live'), errors: (window.__errs||[]).length})`, returnByValue: true }, sessionId);
   console.log(out, dbg.result.value);
+  if (logs.length) console.log(logs.slice(0, 60).join('\n'));
   ws.close();
 } finally { chrome.kill('SIGKILL'); }

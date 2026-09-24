@@ -17,7 +17,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
     <p>{t('contact.intro')}</p>
     <div class="cta-actions" style="margin-top:22px">
       <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('cta.whatsapp')}</a>
-      <a class="btn btn-ghost" href={`mailto:${site.email}`}><Icon name="mail" /> <span class="latin">{site.email}</span></a>
+      <a class="btn" href={`mailto:${site.email}`}><Icon name="mail" /> <span class="latin">{site.email}</span></a>
     </div>
   </div>
   <section class="section section-tight">
@@ -28,7 +28,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
             <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
             <address><Icon name="pin" style="width:18px;display:inline-block;vertical-align:-3px;margin-inline-end:6px" />{l(o.address, locale)}</address>
             <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}><Icon name="phone" style="width:16px;display:inline-block;vertical-align:-3px;margin-inline-end:4px" />{p}</a>)}</div>
-            <a class="link-arrow" href={o.map} target="_blank" rel="noopener">{t('contact.map')} <Icon name="arrow" class="icon-dir" /></a>
+            <a class="link" href={o.map} target="_blank" rel="noopener">{t('contact.map')} <Icon name="arrow" class="icon-dir" /></a>
           </div>
         ))}
       </div>

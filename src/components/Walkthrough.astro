@@ -1,0 +1,60 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT, strings, l, localePath } from '@/i18n/utils';
+import Logo from '@/components/Logo.astro';
+import Icon from '@/components/Icons.astro';
+import house from '@/data/house.json';
+import { allProducts, categoryOf } from '@/lib/products';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const s = strings(locale);
+const stops = house.stops.map((st) => ({ ...st, product: allProducts.find((p) => p.slug === st.product)! }));
+const roomNames = s.walk.stops as Record<string, string>;
+---
+<section class="walk" data-walk data-dark-hero data-aria={t('walk.title').replace(/<[^>]+>/g, '')} aria-label={t('walk.eyebrow')}>
+  <div class="walk-poster" aria-hidden="true"><img src="/img/brand/intro-poster.webp" alt="" width="1600" height="900" fetchpriority="high" /></div>
+  <div class="walk-canvas" data-walk-canvas aria-hidden="true"></div>
+  <div class="walk-slides" data-walk-slides hidden aria-hidden="true"></div>
+  <div class="walk-shade" aria-hidden="true"></div>
+  <div class="walk-load" data-walk-load><i><b data-walk-bar></b></i><span>{t('walk.loading')}</span></div>
+  <div class="walk-author" data-walk-author hidden></div>
+
+  <div class="walk-ui">
+    <div class="walk-top">
+      <a class="walk-brand" href={localePath(locale)}><Logo gradient={false} /><span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}</span></a>
+      <a class="walk-skip" href="#philosophy" data-walk-skip>{t('walk.skip')}</a>
+    </div>
+    <div class="walk-mid">
+      <div class="walk-prompt" data-walk-prompt>
+        <span class="eyebrow" style="color:var(--brass)">{t('walk.eyebrow')}</span>
+        <h1 set:html={t('walk.title')} />
+        <p>{t('walk.subtitle')}</p>
+        <button class="walk-tap" type="button" data-walk-tap><i></i>{t('walk.tap')}</button>
+      </div>
+    </div>
+    <div class="walk-bottom">
+      <div class="walk-card" data-walk-card>
+        {stops.map((st, i) => (
+          <div data-walk-stop={i} hidden>
+            <span class="walk-room">{roomNames[st.id]} · {l(categoryOf(st.product).name, locale)}</span>
+            <h2>{l(st.product.name, locale)}</h2>
+            <p>{l(st.product.tagline, locale)}</p>
+            <div class="walk-actions">
+              <button class="walk-next" type="button" data-walk-next data-next={t('walk.next')} data-finish={t('walk.finish')}>{t('walk.next')} <Icon name="arrow" class="icon-dir" /></button>
+              <a class="link on-night" style="color:var(--on-night)" href={localePath(locale, `products/${st.product.category}/${st.product.slug}`)}>{t('walk.view')}</a>
+            </div>
+          </div>
+        ))}
+        <span class="walk-hint" data-walk-hint>{t('walk.hint')}</span>
+      </div>
+      <div class="walk-steps" aria-hidden="true">{stops.map(() => <i data-walk-step></i>)}<span data-walk-counter></span></div>
+    </div>
+  </div>
+  <noscript><img src="/img/brand/intro-poster.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" /></noscript>
+</section>
+<script>
+  import { mountWalkthrough } from '@/scripts/three/house/walkthrough';
+  const el = document.querySelector<HTMLElement>('[data-walk]');
+  if (el) mountWalkthrough(el).catch((e) => console.error('[walk]', e));
+</script>

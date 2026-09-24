@@ -9,18 +9,25 @@
     "preview": "astro preview",
     "check": "astro check",
     "extract": "python3 scripts/extract-catalogue.py",
-    "fetch-nalite": "python3 scripts/fetch-nalite.py"
+    "fetch-nalite": "python3 scripts/fetch-nalite.py",
+    "house:build": "node scripts/build-house.mjs",
+    "shoot:stops": "node scripts/shoot-stops.mjs && python3 scripts/make-stops.py"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/sitemap": "^3.7.4",
-    "@fontsource/cairo": "^5.3.0",
-    "@fontsource/manrope": "^5.3.0",
+    "@fontsource/amiri": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
     "@types/three": "^0.186.0",
     "astro": "^7.3.5",
     "gsap": "^3.15.0",
     "lenis": "^1.3.26",
     "three": "^0.186.0",
     "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.5.0",
+    "fbx2gltf": "^0.9.7-p1"
   }
 }

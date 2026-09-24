@@ -1,6 +1,6 @@
 # Al Rawi Smart Home — website
 
-Bilingual (AR/EN) static site for Al Rawi Smart Home with a 3D intro and interactive 3D product viewer. Built with Astro + Three.js. No backend.
+Bilingual (AR/EN) static site for Al Rawi Smart Home: a tap-through 3D walkthrough of the client's villa on the landing page and an interactive 3D viewer per product. Built with Astro + Three.js. No backend.
 
 ## Run
 ```bash
@@ -17,7 +17,7 @@ npm run preview
 - Contact form: put a Web3Forms access key in `src/data/site.json` → `formEndpoint`. Without it the form opens the visitor's email app.
 
 ## 3D
-See `docs/3d-models.md` for dropping in photoreal GLB models. Procedural models are configured per product via `shape` / `shapeParams`.
+House model pipeline: `docs/house-model.md` (raw files stay in `assets/house/`, git-ignored). Per-product photoreal models: `docs/3d-models.md` for dropping in photoreal GLB models. Procedural models are configured per product via `shape` / `shapeParams`.
 
 ## Deploy (Cloudflare Pages)
 Build command `npm run build`, output directory `dist`. Custom headers live in `public/_headers`. Point `alrawioman.com` at the Pages project; `www` → apex redirect via a Cloudflare bulk redirect rule.

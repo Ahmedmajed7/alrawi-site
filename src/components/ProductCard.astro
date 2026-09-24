@@ -11,7 +11,6 @@ const href = localePath(locale, `products/${p.category}/${p.slug}`);
 ---
 <article class="card prod-card" data-reveal>
   <div class="prod-media">
-    <span class="prod-glow" style={`background:${p.accent}`}></span>
     <img src={p.image.replace('.webp', '-card.webp')} alt={l(p.name, locale)} width="480" height="480" loading={eager ? 'eager' : 'lazy'} decoding="async" />
   </div>
   <div class="prod-body">

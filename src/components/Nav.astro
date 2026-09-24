@@ -19,7 +19,7 @@ const links = [
 const isCurrent = (href: string, exact = false) => (exact ? path === href : path.startsWith(href));
 const wa = `https://wa.me/${site.whatsapp}`;
 ---
-<header class:list={['nav', { 'is-light': light }]} data-nav data-light={light ? '1' : '0'}>
+<header class:list={['nav', { 'on-night': !light }]} data-nav data-light={light ? '1' : '0'}>
   <div class="wrap nav-inner">
     <a class="nav-logo" href={localePath(locale)} aria-label={l(site.name, locale)}>
       <Logo />
@@ -30,7 +30,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
     </nav>
     <div class="nav-actions">
       <a class="lang-toggle" href={altLocalePath(path, other)} hreflang={other} lang={other} aria-label={t('nav.langAria')} data-lang-toggle data-lang={other}>{t('nav.lang')}</a>
-      <a class="btn btn-primary btn-sm nav-cta" href={wa} target="_blank" rel="noopener">{t('nav.quote')}</a>
+      <a class="btn btn-sm nav-cta" href={wa} target="_blank" rel="noopener">{t('nav.quote')}</a>
       <button class="nav-burger" type="button" aria-label={t('nav.menu')} aria-expanded="false" aria-controls="drawer" data-burger><span></span></button>
     </div>
   </div>

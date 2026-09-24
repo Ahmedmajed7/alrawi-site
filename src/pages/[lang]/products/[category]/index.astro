@@ -13,10 +13,9 @@ const t = useT(locale);
 const items = byCategory(c.slug);
 ---
 <Base {locale} title={`${l(c.name, locale)} | ${locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home'}`} description={l(c.blurb, locale)} image={c.image}>
-  <section class="cat-hero">
+  <section class="cat-hero" data-dark-hero>
     <img src={c.image} alt="" width="1600" height="1000" fetchpriority="high" />
-    <div class="hero-veil"></div>
-    <div class="wrap" style="position:relative;z-index:2">
+        <div class="wrap" style="position:relative;z-index:2">
       <ol class="breadcrumb" style="color:var(--on-dark-soft)"><li><a href={localePath(locale)}>{t('nav.home')}</a></li><li><a href={localePath(locale, 'products')}>{t('nav.products')}</a></li><li>{l(c.name, locale)}</li></ol>
       <h1>{l(c.name, locale)}</h1>
       <p>{l(c.blurb, locale)}</p>

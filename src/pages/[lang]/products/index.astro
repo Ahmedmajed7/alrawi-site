@@ -24,7 +24,7 @@ const t = useT(locale);
         <div class="section-head" data-reveal>
           <span class="eyebrow">{l(c.name, locale)}</span>
           <h2>{l(c.blurb, locale)}</h2>
-          <a class="link-arrow" href={localePath(locale, `products/${c.slug}`)}>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
+          <a class="link" href={localePath(locale, `products/${c.slug}`)}>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
         </div>
         <div class="grid grid-4" data-stagger>{byCategory(c.slug).map((p) => <ProductCard product={p} {locale} />)}</div>
       </div>

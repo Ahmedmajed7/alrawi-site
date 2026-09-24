@@ -8,42 +8,172 @@
     "servicesTitle": "Services",
     "contactTitle": "Contact us"
   },
-  "nav": { "home": "Home", "products": "Products", "services": "Services", "about": "About", "contact": "Contact", "menu": "Menu", "close": "Close", "lang": "العربية", "langAria": "Switch to Arabic", "skip": "Skip to content", "quote": "Get a quote" },
-  "intro": { "loading": "Loading the connected home", "enter": "Enter", "skip": "Skip intro", "nodes": { "lighting": "Lighting", "climate": "Climate", "security": "Security", "audio": "Audio", "curtains": "Curtains", "access": "Access" } },
-  "hero": {
-    "eyebrow": "The world of smart homes",
-    "title": "Your home, one touch ahead",
-    "subtitle": "Lighting, climate, security and sound, designed and installed as one connected system. Serving Oman and Saudi Arabia since 2021.",
-    "cta": "Explore products",
-    "cta2": "Talk to us",
-    "scroll": "Scroll"
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "services": "Services",
+    "about": "About",
+    "contact": "Contact",
+    "menu": "Menu",
+    "close": "Close",
+    "lang": "العربية",
+    "langAria": "Switch to Arabic",
+    "skip": "Skip to content",
+    "quote": "Get a quote"
   },
-  "proof": { "founded": "Established 2021", "experience": "10+ years of team experience", "countries": "Oman & Saudi Arabia", "platforms": "Works with" },
-  "what": { "eyebrow": "What is a smart home?", "title": "A house that runs itself, the way you like it",
-    "body": "A smart home is a house equipped with technology that allows you to control and automate everyday functions. Lights, air conditioning, security cameras and door locks can be managed through a smartphone or voice commands. It saves time, improves comfort, increases safety and reduces energy consumption by using devices more efficiently." },
-  "categories": { "eyebrow": "Products", "title": "Everything a connected home needs", "all": "All products", "view": "View category", "count": "{n} products", "countOne": "1 product" },
-  "featured": { "eyebrow": "Featured", "title": "Devices our clients ask for first", "view": "View product" },
-  "how": { "eyebrow": "How it works", "title": "From first visit to a home that listens",
+  "proof": {
+    "founded": "Established 2021",
+    "experience": "10+ years of team experience",
+    "countries": "Oman & Saudi Arabia",
+    "platforms": "Works with"
+  },
+  "what": {
+    "eyebrow": "What is a smart home?",
+    "title": "A house that runs itself, <em>the way you like it</em>",
+    "body": "A smart home is a house equipped with technology that allows you to control and automate everyday functions. Lights, air conditioning, security cameras and door locks can be managed through a smartphone or voice commands. It saves time, improves comfort, increases safety and reduces energy consumption by using devices more efficiently."
+  },
+  "categories": {
+    "eyebrow": "Products",
+    "title": "Six families of devices, one quiet system",
+    "all": "All products",
+    "view": "View category",
+    "count": "{n} products",
+    "countOne": "1 product"
+  },
+  "featured": {
+    "eyebrow": "Featured",
+    "title": "Devices our clients ask for first",
+    "view": "View product"
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "title": "From first visit to a home that listens",
     "steps": [
-      { "title": "Consult", "body": "We visit your home or plans and understand how you live." },
-      { "title": "Design", "body": "We propose the devices, scenes and wiring that fit your space and budget." },
-      { "title": "Install", "body": "Our team installs, configures and tests every device with you." },
-      { "title": "Support", "body": "We stay with you after handover for adjustments and expansion." }
-    ] },
-  "services": { "eyebrow": "Other services", "title": "Infrastructure that keeps it all running", "more": "All services" },
-  "about": { "eyebrow": "About Al Rawi", "title": "An Omani company built on ten years of experience",
+      {
+        "title": "Consult",
+        "body": "We visit your home or plans and understand how you live."
+      },
+      {
+        "title": "Design",
+        "body": "We propose the devices, scenes and wiring that fit your space and budget."
+      },
+      {
+        "title": "Install",
+        "body": "Our team installs, configures and tests every device with you."
+      },
+      {
+        "title": "Support",
+        "body": "We stay with you after handover for adjustments and expansion."
+      }
+    ]
+  },
+  "services": {
+    "eyebrow": "Other services",
+    "title": "Infrastructure that keeps it all running, <em>unseen</em>",
+    "more": "All services"
+  },
+  "about": {
+    "eyebrow": "About Al Rawi",
+    "title": "An Omani studio built on <em>ten years</em> of experience",
     "body": "Al Rawi Smart Home is a leading Omani company established in 2021 and run by a team with over 10 years of experience. The company specialises in innovative smart home solutions that make life safer and more comfortable.",
-    "offices": "Our offices", "more": "More about us" },
-  "cta": { "eyebrow": "Start your project", "title": "Tell us about your home", "body": "Send a message on WhatsApp or leave your details and we will call you back.", "whatsapp": "Chat on WhatsApp", "form": "Send a message" },
+    "offices": "Our offices",
+    "more": "More about us"
+  },
+  "cta": {
+    "eyebrow": "Start your project",
+    "title": "Tell us about <em>your home</em>",
+    "body": "Send a message on WhatsApp or leave your details and we will call you back.",
+    "whatsapp": "Chat on WhatsApp",
+    "form": "Send a message"
+  },
   "contact": {
-    "title": "Contact us", "intro": "Two offices, one team. Reach us in Muscat or Riyadh.",
-    "phone": "Phone", "email": "Email", "address": "Address", "map": "Open in Maps",
-    "form": { "name": "Your name", "phone": "Phone number", "message": "Tell us about your project", "send": "Send message", "sending": "Sending", "ok": "Thank you, we will be in touch shortly.", "fail": "Could not send. Please use WhatsApp or email instead.", "mailto": "Opening your email app" }
+    "title": "Contact us",
+    "intro": "Two offices, one team. Reach us in Muscat or Riyadh.",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "map": "Open in Maps",
+    "form": {
+      "name": "Your name",
+      "phone": "Phone number",
+      "message": "Tell us about your project",
+      "send": "Send message",
+      "sending": "Sending",
+      "ok": "Thank you, we will be in touch shortly.",
+      "fail": "Could not send. Please use WhatsApp or email instead.",
+      "mailto": "Opening your email app"
+    }
   },
   "product": {
-    "features": "Features", "worksWith": "Works with", "quote": "Request a quote", "quoteMsg": "Hello Al Rawi, I would like a quote for: ", "gallery": "Gallery", "back": "Back to", "prev": "Previous", "next": "Next", "related": "More in this category",
-    "viewer": { "hint": "Drag to rotate", "loading": "Building 3D model", "fallback": "3D preview is not available on this device.", "reset": "Reset view", "aria": "Interactive 3D model of {name}" }
+    "features": "Features",
+    "worksWith": "Works with",
+    "quote": "Request a quote",
+    "quoteMsg": "Hello Al Rawi, I would like a quote for: ",
+    "gallery": "Gallery",
+    "back": "Back to",
+    "prev": "Previous",
+    "next": "Next",
+    "related": "More in this category",
+    "viewer": {
+      "hint": "Drag to rotate",
+      "loading": "Building 3D model",
+      "fallback": "3D preview is not available on this device.",
+      "reset": "Reset view",
+      "aria": "Interactive 3D model of {name}"
+    }
   },
-  "footer": { "tagline": "Smart home solutions in Oman and Saudi Arabia.", "rights": "All rights reserved.", "links": "Site", "contact": "Contact" },
-  "notFound": { "title": "Page not found", "body": "The page you are looking for has moved or never existed.", "home": "Back to home" }
+  "footer": {
+    "tagline": "Smart home solutions in Oman and Saudi Arabia.",
+    "rights": "All rights reserved.",
+    "links": "Site",
+    "contact": "Contact"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you are looking for has moved or never existed.",
+    "home": "Back to home"
+  },
+  "walk": {
+    "eyebrow": "Al Rawi Smart Home",
+    "title": "A home that <em>listens</em>",
+    "subtitle": "Step inside a villa fitted by Al Rawi. Every device you will see is mounted exactly where it lives.",
+    "tap": "Tap to enter",
+    "loading": "Preparing the house",
+    "skip": "Skip the tour",
+    "next": "Next device",
+    "finish": "Explore the site",
+    "back": "Back",
+    "view": "View product",
+    "tour": "Take the tour",
+    "hint": "Drag to look around · tap to continue",
+    "of": "of",
+    "stops": {
+      "lock": "Entrance",
+      "panel": "Living room",
+      "switch": "Hallway",
+      "curtain": "Living room window",
+      "speaker": "Lounge ceiling",
+      "sensor": "Kitchen"
+    }
+  },
+  "home": {
+    "philoNo": "01",
+    "philo": "Philosophy",
+    "collectionNo": "02",
+    "collection": "The collection",
+    "collectionTitle": "Six families of devices, one quiet system",
+    "selectedNo": "03",
+    "selected": "Selected devices",
+    "selectedTitle": "The pieces our clients start with",
+    "processNo": "04",
+    "process": "Process",
+    "servicesNo": "05",
+    "services": "Infrastructure",
+    "studioNo": "06",
+    "studio": "The studio",
+    "contact": "Begin",
+    "still": "Rendered from the villa model",
+    "devices": "devices",
+    "device": "device"
+  }
 }
