@@ -1,0 +1,20 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT } from '@/i18n/utils';
+import site from '@/data/site.json';
+interface Props { locale: Locale; light?: boolean }
+const { locale, light = false } = Astro.props;
+const t = useT(locale);
+---
+<form class:list={['form', { 'on-light': light }]} data-contact-form data-endpoint={site.formEndpoint} data-mail={site.email} novalidate>
+  <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <div class="field"><label for="cf-name">{t('contact.form.name')}</label><input id="cf-name" name="name" type="text" required autocomplete="name" /></div>
+  <div class="field"><label for="cf-phone">{t('contact.form.phone')}</label><input id="cf-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr" /></div>
+  <div class="field"><label for="cf-msg">{t('contact.form.message')}</label><textarea id="cf-msg" name="message" required></textarea></div>
+  <button class="btn btn-primary" type="submit" data-send data-label={t('contact.form.send')} data-sending={t('contact.form.sending')}>{t('contact.form.send')}</button>
+  <p class="form-status" role="status" aria-live="polite" data-status data-ok={t('contact.form.ok')} data-fail={t('contact.form.fail')} data-mailto={t('contact.form.mailto')}></p>
+</form>
+<script>
+  import { initContactForm } from '@/scripts/contact-form';
+  initContactForm();
+</script>

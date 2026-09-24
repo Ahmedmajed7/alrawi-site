@@ -1,0 +1,44 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT, localePath, altLocalePath, otherLocale, l } from '@/i18n/utils';
+import Logo from '@/components/Logo.astro';
+import site from '@/data/site.json';
+
+interface Props { locale: Locale; light?: boolean }
+const { locale, light = false } = Astro.props;
+const t = useT(locale);
+const path = Astro.url.pathname;
+const other = otherLocale(locale);
+const links = [
+  { href: localePath(locale), label: t('nav.home'), exact: true },
+  { href: localePath(locale, 'products'), label: t('nav.products') },
+  { href: localePath(locale, 'services'), label: t('nav.services') },
+  { href: localePath(locale, 'about'), label: t('nav.about') },
+  { href: localePath(locale, 'contact'), label: t('nav.contact') },
+];
+const isCurrent = (href: string, exact = false) => (exact ? path === href : path.startsWith(href));
+const wa = `https://wa.me/${site.whatsapp}`;
+---
+<header class:list={['nav', { 'is-light': light }]} data-nav data-light={light ? '1' : '0'}>
+  <div class="wrap nav-inner">
+    <a class="nav-logo" href={localePath(locale)} aria-label={l(site.name, locale)}>
+      <Logo />
+      <span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}<small>{locale === 'ar' ? 'للمنازل الذكية' : 'SMART HOME'}</small></span>
+    </a>
+    <nav class="nav-links" aria-label={t('nav.menu')}>
+      {links.map((x) => <a href={x.href} aria-current={isCurrent(x.href, x.exact) ? 'page' : undefined}>{x.label}</a>)}
+    </nav>
+    <div class="nav-actions">
+      <a class="lang-toggle" href={altLocalePath(path, other)} hreflang={other} lang={other} aria-label={t('nav.langAria')} data-lang-toggle data-lang={other}>{t('nav.lang')}</a>
+      <a class="btn btn-primary btn-sm nav-cta" href={wa} target="_blank" rel="noopener">{t('nav.quote')}</a>
+      <button class="nav-burger" type="button" aria-label={t('nav.menu')} aria-expanded="false" aria-controls="drawer" data-burger><span></span></button>
+    </div>
+  </div>
+</header>
+<div class="nav-drawer" id="drawer" data-drawer>
+  {links.map((x) => <a href={x.href} aria-current={isCurrent(x.href, x.exact) ? 'page' : undefined}>{x.label}</a>)}
+  <div class="drawer-foot">
+    <a class="btn btn-primary" href={wa} target="_blank" rel="noopener">{t('nav.quote')}</a>
+    <a class="btn btn-ghost" href={altLocalePath(path, other)} hreflang={other} lang={other} data-lang-toggle data-lang={other}>{t('nav.lang')}</a>
+  </div>
+</div>

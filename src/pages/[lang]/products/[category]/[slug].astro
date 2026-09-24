@@ -1,0 +1,79 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProductViewer from '@/components/ProductViewer.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import Icon from '@/components/Icons.astro';
+import { locales, useT, l, localePath, type Locale } from '@/i18n/utils';
+import { allProducts, byCategory, categoryOf } from '@/lib/products';
+import site from '@/data/site.json';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) => allProducts.map((p) => ({ params: { lang, category: p.category, slug: p.slug }, props: { product: p } })));
+}
+const locale = Astro.params.lang as Locale;
+const { product: p } = Astro.props;
+const t = useT(locale);
+const cat = categoryOf(p);
+const siblings = byCategory(p.category);
+const idx = siblings.findIndex((x) => x.slug === p.slug);
+const prev = siblings[(idx - 1 + siblings.length) % siblings.length];
+const next = siblings[(idx + 1) % siblings.length];
+const related = siblings.filter((x) => x.slug !== p.slug).slice(0, 4);
+const name = l(p.name, locale);
+const brand = locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home';
+const wa = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(t('product.quoteMsg') + name)}`;
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? site.domain;
+const jsonLd = [{
+  '@context': 'https://schema.org', '@type': 'Product', name, description: l(p.description, locale),
+  image: `${siteUrl}${p.image}`, category: l(cat.name, locale), brand: { '@type': 'Organization', name: site.name.en },
+  offers: { '@type': 'Offer', availability: 'https://schema.org/InStock', priceCurrency: 'OMR', price: '0', url: `${siteUrl}${Astro.url.pathname}` },
+}];
+---
+<Base {locale} title={`${name} | ${brand}`} description={l(p.tagline, locale) + '. ' + l(p.description, locale).slice(0, 110)} image={p.image} type="product" {jsonLd} lightNav>
+  <article class="wrap pd">
+    <ol class="breadcrumb">
+      <li><a href={localePath(locale)}>{t('nav.home')}</a></li>
+      <li><a href={localePath(locale, 'products')}>{t('nav.products')}</a></li>
+      <li><a href={localePath(locale, `products/${cat.slug}`)}>{l(cat.name, locale)}</a></li>
+      <li aria-current="page">{name}</li>
+    </ol>
+    <div class="pd-grid">
+      <div class="pd-viewer-col" data-reveal="fade">
+        <ProductViewer product={p} {locale} />
+        {p.gallery.length > 0 && (
+          <div class="gallery">{p.gallery.map((g) => <figure><img src={g} alt={name} loading="lazy" decoding="async" width="800" height="600" /></figure>)}</div>
+        )}
+      </div>
+      <div class="pd-info" data-reveal>
+        <span class="eyebrow">{l(cat.name, locale)}</span>
+        <h1>{name}</h1>
+        <p class="pd-tag">{l(p.tagline, locale)}</p>
+        <p class="pd-desc">{l(p.description, locale)}</p>
+        <div>
+          <h2>{t('product.features')}</h2>
+          <ul class="feat-list">{p.features.map((f) => <li><Icon name="check" /><span>{l(f, locale)}</span></li>)}</ul>
+        </div>
+        <div>
+          <h2>{t('product.worksWith')}</h2>
+          <div class="pd-tags">{p.tags.map((x) => <span class="chip">{x}</span>)}</div>
+        </div>
+        <div class="pd-actions">
+          <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('product.quote')}</a>
+          <a class="btn btn-ghost" href={localePath(locale, 'contact')}>{t('nav.contact')}</a>
+        </div>
+        <nav class="pd-nav" aria-label={t('product.related')}>
+          <a href={localePath(locale, `products/${prev.category}/${prev.slug}`)} rel="prev"><Icon name="arrow" class="icon-dir" style="transform:rotate(180deg)" /> {l(prev.name, locale)}</a>
+          <a href={localePath(locale, `products/${next.category}/${next.slug}`)} rel="next">{l(next.name, locale)} <Icon name="arrow" class="icon-dir" /></a>
+        </nav>
+      </div>
+    </div>
+  </article>
+  {related.length > 0 && (
+    <section class="section section-alt section-tight">
+      <div class="wrap">
+        <div class="section-head" data-reveal><span class="eyebrow">{l(cat.name, locale)}</span><h2>{t('product.related')}</h2></div>
+        <div class="grid grid-4" data-stagger>{related.map((x) => <ProductCard product={x} {locale} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>

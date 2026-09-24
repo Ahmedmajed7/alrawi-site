@@ -1,0 +1,38 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icons.astro';
+import ContactForm from '@/components/ContactForm.astro';
+import { staticLangPaths, useT, l, type Locale } from '@/i18n/utils';
+import site from '@/data/site.json';
+export const getStaticPaths = staticLangPaths;
+const locale = Astro.params.lang as Locale;
+const t = useT(locale);
+const brand = l(site.name, locale);
+const wa = `https://wa.me/${site.whatsapp}`;
+---
+<Base {locale} title={`${t('meta.contactTitle')} | ${brand}`} description={t('contact.intro')} lightNav>
+  <div class="wrap page-head">
+    <span class="eyebrow">{t('cta.eyebrow')}</span>
+    <h1>{t('contact.title')}</h1>
+    <p>{t('contact.intro')}</p>
+    <div class="cta-actions" style="margin-top:22px">
+      <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('cta.whatsapp')}</a>
+      <a class="btn btn-ghost" href={`mailto:${site.email}`}><Icon name="mail" /> <span class="latin">{site.email}</span></a>
+    </div>
+  </div>
+  <section class="section section-tight">
+    <div class="wrap split" style="align-items:start">
+      <div class="offices" style="grid-template-columns:1fr" data-stagger>
+        {site.offices.map((o) => (
+          <div class="office" data-reveal>
+            <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
+            <address><Icon name="pin" style="width:18px;display:inline-block;vertical-align:-3px;margin-inline-end:6px" />{l(o.address, locale)}</address>
+            <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}><Icon name="phone" style="width:16px;display:inline-block;vertical-align:-3px;margin-inline-end:4px" />{p}</a>)}</div>
+            <a class="link-arrow" href={o.map} target="_blank" rel="noopener">{t('contact.map')} <Icon name="arrow" class="icon-dir" /></a>
+          </div>
+        ))}
+      </div>
+      <div data-reveal="right"><ContactForm {locale} light /></div>
+    </div>
+  </section>
+</Base>

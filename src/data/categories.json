@@ -1,0 +1,22 @@
+[
+  { "slug": "main-controllers", "order": 1, "icon": "panel",
+    "name": { "ar": "لوحات التحكم الرئيسية", "en": "Main Controllers" },
+    "blurb": { "ar": "قلب المنزل الذكي: شاشة واحدة تدير الإضاءة والتكييف والستائر والمشاهد.", "en": "The heart of the smart home: one screen for lighting, climate, curtains and scenes." },
+    "image": "/img/categories/main-controllers.webp" },
+  { "slug": "audio", "order": 2, "icon": "audio",
+    "name": { "ar": "الصوت والموسيقى", "en": "Audio & Sound" },
+    "blurb": { "ar": "موسيقى في كل غرفة عبر سماعات مخفية في السقف ولوحات صوت ذكية.", "en": "Music in every room through hidden ceiling speakers and smart audio panels." },
+    "image": "/img/categories/audio.webp" },
+  { "slug": "security", "order": 3, "icon": "shield",
+    "name": { "ar": "السلامة والأمن", "en": "Safety & Security" },
+    "blurb": { "ar": "أقفال ذكية وحساسات دخان وغاز وحركة وتواجد مع تنبيهات فورية على هاتفك.", "en": "Smart locks and smoke, gas, motion and presence sensors with instant alerts on your phone." },
+    "image": "/img/categories/security.webp" },
+  { "slug": "switches", "order": 4, "icon": "switch",
+    "name": { "ar": "المفاتيح الكهربائية", "en": "Switches" },
+    "blurb": { "ar": "مفاتيح إضاءة وتعتيم ومشاهد بتصاميم عصرية وخامات قابلة للتخصيص.", "en": "Light, dimmer and scene switches in modern designs with customisable finishes." },
+    "image": "/img/categories/switches.webp" },
+  { "slug": "control-devices", "order": 5, "icon": "remote",
+    "name": { "ar": "أجهزة التحكم", "en": "Control Devices" },
+    "blurb": { "ar": "ستائر آلية، تحكم بالأشعة تحت الحمراء، وأبواب جراج متصلة.", "en": "Motorised curtains, infrared control and connected garage doors." },
+    "image": "/img/categories/control-devices.webp" }
+]

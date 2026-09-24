@@ -1,0 +1,24 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { l, localePath } from '@/i18n/utils';
+import categories from '@/data/categories.json';
+import type { Product } from '@/lib/products';
+
+interface Props { product: Product; locale: Locale; eager?: boolean }
+const { product: p, locale, eager = false } = Astro.props;
+const cat = categories.find((c) => c.slug === p.category)!;
+const href = localePath(locale, `products/${p.category}/${p.slug}`);
+---
+<article class="card prod-card" data-reveal>
+  <div class="prod-media">
+    <span class="prod-glow" style={`background:${p.accent}`}></span>
+    <img src={p.image.replace('.webp', '-card.webp')} alt={l(p.name, locale)} width="480" height="480" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  </div>
+  <div class="prod-body">
+    <span class="prod-cat">{l(cat.name, locale)}</span>
+    <h3>{l(p.name, locale)}</h3>
+    <p>{l(p.tagline, locale)}</p>
+    <div class="prod-tags">{p.tags.slice(0, 3).map((t) => <span>{t}</span>)}</div>
+  </div>
+  <a class="stretch" href={href} aria-label={l(p.name, locale)}></a>
+</article>

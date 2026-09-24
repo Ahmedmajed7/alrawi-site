@@ -1,0 +1,45 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT, localePath, l } from '@/i18n/utils';
+import Logo from '@/components/Logo.astro';
+import site from '@/data/site.json';
+import categories from '@/data/categories.json';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="nav-logo" href={localePath(locale)} aria-label={l(site.name, locale)}><Logo /><span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}<small>{locale === 'ar' ? 'للمنازل الذكية' : 'SMART HOME'}</small></span></a>
+      <p>{t('footer.tagline')}</p>
+      <a href={`mailto:${site.email}`} class="latin">{site.email}</a>
+    </div>
+    <div>
+      <h4>{t('nav.products')}</h4>
+      <ul>
+        {categories.map((c) => <li><a href={localePath(locale, `products/${c.slug}`)}>{l(c.name, locale)}</a></li>)}
+        <li><a href={localePath(locale, 'services')}>{t('nav.services')}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>{t('footer.contact')}</h4>
+      <ul>
+        {site.offices.map((o) => (
+          <li>
+            <strong>{l(o.city, locale)}</strong><br />
+            {o.phones.map((p, i) => <><a class="latin" href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>{i < o.phones.length - 1 ? ' · ' : ''}</>)}
+          </li>
+        ))}
+        <li><a href={localePath(locale, 'about')}>{t('nav.about')}</a></li>
+        <li><a href={localePath(locale, 'contact')}>{t('nav.contact')}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© <span class="num">{year}</span> {l(site.name, locale)}. {t('footer.rights')}</span>
+    <span class="latin">alrawioman.com</span>
+  </div>
+</footer>

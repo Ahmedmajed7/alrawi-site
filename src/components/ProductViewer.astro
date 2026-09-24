@@ -1,0 +1,20 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT, l } from '@/i18n/utils';
+import Icon from '@/components/Icons.astro';
+import type { Product } from '@/lib/products';
+interface Props { product: Product; locale: Locale }
+const { product: p, locale } = Astro.props;
+const t = useT(locale);
+const name = l(p.name, locale);
+---
+<div class="viewer" data-viewer data-slug={p.slug} data-shape={p.shape} data-params={JSON.stringify(p.shapeParams)} data-model={p.model ? '1' : '0'} data-accent={p.accent} data-aria={t('product.viewer.aria', { name })}>
+  <div class="viewer-fallback"><img src={p.image} alt={name} width="1200" height="1200" fetchpriority="high" decoding="async" /></div>
+  <span class="viewer-badge" data-badge>3D</span>
+  <span class="viewer-status" data-status data-hint={t('product.viewer.hint')} data-fallback={t('product.viewer.fallback')}><i class="ring"></i>{t('product.viewer.loading')}</span>
+  <button class="viewer-reset" type="button" data-reset aria-label={t('product.viewer.reset')}><Icon name="reset" /></button>
+</div>
+<script>
+  import { mountAll } from '@/scripts/three/product-viewer';
+  mountAll();
+</script>

@@ -1,0 +1,18 @@
+---
+import Base from '@/layouts/Base.astro';
+import { useT, localePath } from '@/i18n/utils';
+const t = useT('en'); const ta = useT('ar');
+---
+<Base locale="en" title="404 | Al Rawi Smart Home" description="Page not found" lightNav noindex>
+  <div class="wrap nf">
+    <div>
+      <b>404</b>
+      <h1 style="font-size:var(--fs-h2)">{t('notFound.title')} · <span lang="ar" dir="rtl">{ta('notFound.title')}</span></h1>
+      <p style="color:var(--ink-soft);margin:14px auto 28px">{t('notFound.body')}</p>
+      <div class="cta-actions" style="justify-content:center">
+        <a class="btn btn-primary" href={localePath('en')}>{t('notFound.home')}</a>
+        <a class="btn btn-ghost" href={localePath('ar')} lang="ar">{ta('notFound.home')}</a>
+      </div>
+    </div>
+  </div>
+</Base>

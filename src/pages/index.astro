@@ -1,0 +1,29 @@
+---
+// Root: pick a locale from the saved choice, then browser language, default Arabic.
+---
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Al Rawi Smart Home</title>
+    <meta name="robots" content="noindex" />
+    <link rel="alternate" hreflang="ar" href="/ar/" />
+    <link rel="alternate" hreflang="en" href="/en/" />
+    <link rel="alternate" hreflang="x-default" href="/ar/" />
+    <meta http-equiv="refresh" content="1; url=/ar/" />
+    <script is:inline>
+      (function () {
+        var lang = null;
+        try { lang = localStorage.getItem('alrawi-lang'); } catch (e) {}
+        if (lang !== 'ar' && lang !== 'en') {
+          var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'ar';
+          lang = /^en/i.test(nav) ? 'en' : 'ar';
+        }
+        location.replace('/' + lang + '/');
+      })();
+    </script>
+    <style>body{margin:0;background:#070b14;color:#eef3ff;font-family:system-ui;display:grid;place-items:center;min-height:100vh}</style>
+  </head>
+  <body><p><a href="/ar/" style="color:#35e0ff">العربية</a> · <a href="/en/" style="color:#35e0ff">English</a></p></body>
+</html>

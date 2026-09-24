@@ -1,0 +1,51 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icons.astro';
+import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
+import site from '@/data/site.json';
+export const getStaticPaths = staticLangPaths;
+const locale = Astro.params.lang as Locale;
+const t = useT(locale);
+const s = strings(locale);
+const brand = l(site.name, locale);
+---
+<Base {locale} title={`${t('meta.aboutTitle')} | ${brand}`} description={t('about.body')} lightNav>
+  <div class="wrap page-head">
+    <span class="eyebrow">{t('about.eyebrow')}</span>
+    <h1>{t('about.title')}</h1>
+    <p>{t('about.body')}</p>
+  </div>
+  <section class="section section-tight">
+    <div class="wrap split">
+      <div class="about-visual" data-reveal="left"><img src="/img/brand/logo-wall.webp" alt={brand} width="1200" height="1600" loading="eager" /></div>
+      <div data-reveal="right">
+        <div class="about-stats" style="margin-top:0">
+          <div><b class="num">2021</b><span>{t('proof.founded')}</span></div>
+          <div><b class="num">10+</b><span>{t('proof.experience')}</span></div>
+          <div><b class="num">2</b><span>{t('about.offices')}</span></div>
+        </div>
+        <div class="section-head" style="margin-top:36px;margin-bottom:0">
+          <span class="eyebrow">{t('how.eyebrow')}</span>
+          <h2>{t('how.title')}</h2>
+        </div>
+        <ul class="what-list">{s.how.steps.map((st) => <li><Icon name="check" /><span><strong>{st.title}.</strong> {st.body}</span></li>)}</ul>
+      </div>
+    </div>
+  </section>
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head" data-reveal><span class="eyebrow">{t('about.offices')}</span><h2>{t('contact.intro')}</h2></div>
+      <div class="offices" data-stagger>
+        {site.offices.map((o) => (
+          <div class="office" data-reveal>
+            <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
+            <address>{l(o.address, locale)}</address>
+            <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>)}</div>
+            <a class="link-arrow" href={o.map} target="_blank" rel="noopener"><Icon name="pin" /> {t('contact.map')}</a>
+          </div>
+        ))}
+      </div>
+      <p style="margin-top:32px"><a class="btn btn-primary" href={localePath(locale, 'contact')}>{t('nav.contact')} <Icon name="arrow" class="icon-dir" /></a></p>
+    </div>
+  </section>
+</Base>

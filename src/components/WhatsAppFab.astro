@@ -1,0 +1,11 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { useT } from '@/i18n/utils';
+import Icon from '@/components/Icons.astro';
+import site from '@/data/site.json';
+interface Props { locale: Locale; text?: string }
+const { locale, text } = Astro.props;
+const t = useT(locale);
+const href = `https://wa.me/${site.whatsapp}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
+---
+<a class="wa-fab" href={href} target="_blank" rel="noopener" aria-label={t('cta.whatsapp')}><Icon name="whatsapp" /></a>

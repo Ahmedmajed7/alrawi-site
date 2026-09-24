@@ -1,0 +1,378 @@
+[
+  {
+    "slug": "control-panel", "category": "main-controllers", "order": 1, "featured": true,
+    "name": { "ar": "لوحة التحكم الذكية", "en": "Smart Control Panel" },
+    "tagline": { "ar": "منزلك كله من شاشة واحدة", "en": "Your whole home from one screen" },
+    "description": {
+      "ar": "لوحات تحكم ذكية تُركّب على الجدار وتوفر تجربة متكاملة لإدارة المنزل الذكي من شاشة واحدة. تتيح لك التحكم في الإضاءة والتكييف والستائر والأجهزة المختلفة بسهولة، مع إمكانية الوصول السريع للمشاهد والأتمتة اليومية. تعمل بسلاسة مع تطبيقات مثل Tuya Smart وتدعم التحكم الصوتي عبر Amazon Alexa، كما أن بعض الموديلات تعمل كمحور (Gateway) يربط أجهزة Zigbee، مما يجعلها قلب النظام الذكي في المنزل.",
+      "en": "Smart home control panels, in all sizes, provide a central and easy way to manage your entire smart home from one screen. They give quick access to devices, scenes and automations without always needing your phone, while still working seamlessly with apps like Tuya Smart. With built-in voice control through Amazon Alexa and the ability to act as a hub for connected devices, they offer a smooth experience that makes them ideal for living rooms, entrances and bedrooms."
+    },
+    "features": [
+      { "ar": "تحكم مركزي كامل لكل الأجهزة", "en": "Centralised control for all smart home devices" },
+      { "ar": "واجهة سهلة وسريعة الاستخدام", "en": "Easy access to scenes and automations" },
+      { "ar": "تقليل الاعتماد على الهاتف", "en": "Less reliance on your phone" },
+      { "ar": "دعم الأوامر الصوتية عبر Alexa", "en": "Voice control through built-in Alexa" },
+      { "ar": "تعمل كمحور للأجهزة الذكية", "en": "Acts as a hub that connects your smart devices" },
+      { "ar": "مناسبة للأماكن الرئيسية", "en": "Ideal for main areas of the home" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Zigbee", "Wi-Fi"],
+    "image": "/img/products/control-panel.webp", "gallery": ["/img/products/control-panel/01.webp", "/img/products/control-panel/02.webp"],
+    "sourceImages": ["https://www.nalitesmart.com/product-category/smart-home-control-panel/"],
+    "shape": "panel", "shapeParams": { "w": 1.7, "h": 1.15, "d": 0.09, "screen": true, "bezel": 0.06 },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "audio-panel", "category": "audio", "order": 1, "featured": false,
+    "name": { "ar": "مضخم الصوت الذكي", "en": "Smart Audio Panel" },
+    "tagline": { "ar": "موسيقى الخلفية في كل غرفة", "en": "Background music in every room" },
+    "description": {
+      "ar": "جهاز مخصص لتقوية وتوزيع الصوت على عدة سماعات في مختلف الغرف، مما يسمح بإنشاء نظام صوتي متكامل داخل المنزل أو المكان التجاري. يعمل بكفاءة لتوفير صوت واضح ومتوازن، ويمكن ربطه بالنظام الذكي للتحكم بالموسيقى في كل غرفة بشكل منفصل أو جماعي.",
+      "en": "A smart wall-mounted audio panel with an Android operating system that combines a touchscreen with a built-in amplifier, giving you easy control over your home audio and smart devices in one place."
+    },
+    "features": [
+      { "ar": "توزيع الصوت في عدة مناطق", "en": "Controls home audio from one place" },
+      { "ar": "تشغيل سماعات السقف والجدران", "en": "Powers ceiling and wall speakers efficiently" },
+      { "ar": "نظام تشغيل أندرويد", "en": "Android operating system" },
+      { "ar": "يدعم مصادر صوت متعددة", "en": "Supports multiple audio sources" },
+      { "ar": "قابل للدمج مع النظام الذكي", "en": "Integrates with the smart home system" },
+      { "ar": "مناسب للفلل والمكاتب والمحلات", "en": "Suitable for villas, offices and shops" }
+    ],
+    "tags": ["Android", "Bluetooth", "Wi-Fi"],
+    "image": "/img/products/audio-panel.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "panel", "shapeParams": { "w": 1.2, "h": 1.2, "d": 0.1, "screen": true, "bezel": 0.1, "dark": true },
+    "model": false, "accent": "#35E0FF"
+  },
+  {
+    "slug": "ceiling-speaker", "category": "audio", "order": 2, "featured": false,
+    "name": { "ar": "سماعات السقف", "en": "In-Ceiling Speakers" },
+    "tagline": { "ar": "صوت نقي بلا أسلاك ظاهرة", "en": "Clean sound, nothing on show" },
+    "description": {
+      "ar": "نظام صوتي مخفي يتم تركيبه داخل السقف ليعطي تجربة موسيقى نظيفة بدون أسلاك أو أجهزة ظاهرة. يوفر صوتًا مريحًا للموسيقى الخلفية، ويمكن التحكم فيه بسهولة عبر الهاتف أو النظام الذكي، مما يجعله خيارًا مثاليًا للأماكن العصرية.",
+      "en": "In-ceiling Bluetooth speakers that let you play music wirelessly, without cables. They include a built-in amplifier and work as a single speaker or a connected pair to deliver clear sound for everyday listening. Designed for easy ceiling installation, they are a clean, space-saving option for homes, offices and commercial spaces."
+    },
+    "features": [
+      { "ar": "تصميم مخفي بالكامل", "en": "Hidden in-ceiling design" },
+      { "ar": "تشغيل لاسلكي سهل", "en": "Wireless music streaming" },
+      { "ar": "مناسب للموسيقى اليومية", "en": "Great for everyday listening" },
+      { "ar": "سهل الربط مع الهواتف والتلفزيونات", "en": "Easy connection with phones and TVs" },
+      { "ar": "يعطي مظهرًا نظيفًا ومرتبًا", "en": "Keeps ceilings clean and tidy" }
+    ],
+    "tags": ["Bluetooth"],
+    "image": "/img/products/ceiling-speaker.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "disc", "shapeParams": { "r": 0.75, "d": 0.12 },
+    "model": false, "accent": "#35E0FF"
+  },
+  {
+    "slug": "smart-lock", "category": "security", "order": 1, "featured": true,
+    "name": { "ar": "القفل الذكي", "en": "Smart Door Lock" },
+    "tagline": { "ar": "دخول آمن بدون مفتاح", "en": "Secure entry without a key" },
+    "description": {
+      "ar": "قفل متطور يوفر دخولًا آمنًا بدون مفتاح، مع خيارات متعددة مثل البصمة، بصمة الوجه، الرقم السري، البطاقة، أو التطبيق. يتيح لك التحكم الكامل في من يدخل المنزل، مع إمكانية إعطاء صلاحيات مؤقتة أو دائمة، مما يجعله مناسبًا للعائلات أو الشقق المؤجرة.",
+      "en": "A compact, easy-to-use keyless lock designed for secure and flexible access. Unlock it with a PIN code, face recognition, fingerprint, RFID card or your phone, as well as a mechanical key. With activity tracking and user management, it is a practical solution for homes, rental properties and small businesses."
+    },
+    "features": [
+      { "ar": "دخول بدون مفتاح", "en": "Keyless entry" },
+      { "ar": "طرق دخول متعددة: بصمة، وجه، رقم سري، بطاقة، تطبيق", "en": "Fingerprint, face ID, PIN, card and app access" },
+      { "ar": "تحكم عن بُعد وصلاحيات للضيوف", "en": "Remote access control for guests or tenants" },
+      { "ar": "سجل دخول وخروج", "en": "Activity logs for security tracking" },
+      { "ar": "أمان عالٍ ومرونة", "en": "Ideal for homes, rentals and offices" }
+    ],
+    "tags": ["Tuya Smart", "Wi-Fi"],
+    "image": "/img/products/smart-lock.webp", "gallery": [],
+    "sourceImages": ["https://www.nalitesmart.com/product-category/smart-lock/"],
+    "shape": "lock", "shapeParams": { "w": 0.36, "h": 1.7, "d": 0.16 },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "smoke-detector", "category": "security", "order": 2, "featured": false,
+    "name": { "ar": "كاشف الدخان", "en": "Smoke Detector" },
+    "tagline": { "ar": "كشف مبكر للحريق على مدار الساعة", "en": "Early fire detection, around the clock" },
+    "description": {
+      "ar": "جهاز أمان مهم يقوم باكتشاف الدخان في مراحله المبكرة، ويطلق إنذارًا فوريًا مع إرسال إشعار إلى الهاتف. يساعد في تقليل مخاطر الحريق ويوفر حماية مستمرة على مدار الساعة.",
+      "en": "A wireless smoke detector that keeps your space safe by quickly sensing smoke and triggering instant alerts. It connects to your smart home system so you receive real-time notifications and can monitor everything remotely through apps like Tuya Smart. Reliable, always-on protection with low power usage."
+    },
+    "features": [
+      { "ar": "كشف مبكر للحريق", "en": "Early fire detection" },
+      { "ar": "إنذار صوتي فوري", "en": "Instant alarm" },
+      { "ar": "تنبيهات على الهاتف", "en": "Mobile notifications" },
+      { "ar": "مراقبة مستمرة 24/7", "en": "24/7 safety monitoring" },
+      { "ar": "يتكامل مع إنذارات المنزل الذكي", "en": "Integrates with smart home alarms" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/smoke-detector.webp", "gallery": [],
+    "sourceImages": ["https://www.nalitesmart.com/product-category/smart-home-product/smart-sensor/"],
+    "shape": "puck", "shapeParams": { "r": 0.55, "h": 0.22, "vents": true },
+    "model": false, "accent": "#FF6B57"
+  },
+  {
+    "slug": "gas-sensor", "category": "security", "order": 3, "featured": false,
+    "name": { "ar": "حساس الغاز", "en": "Gas Sensor" },
+    "tagline": { "ar": "حماية إضافية للمطبخ", "en": "Extra protection for the kitchen" },
+    "description": {
+      "ar": "جهاز مصمم لاكتشاف تسرب الغازات الخطرة مثل غاز الطبخ أو الغاز الطبيعي، ويقوم بإطلاق إنذار فوري عند اكتشاف أي تسرب. يساهم بشكل كبير في منع الحوادث ويحافظ على سلامة المستخدمين.",
+      "en": "A smart gas sensor that detects leaks early and keeps your space safe. It senses gases like LPG and natural gas and immediately triggers an alarm when a leak is detected. It connects through a Zigbee gateway and sends real-time alerts to your phone using apps like Tuya Smart, so you are always aware even when you are away."
+    },
+    "features": [
+      { "ar": "كشف تسرب الغاز مبكرًا", "en": "Detects LPG and methane leaks early" },
+      { "ar": "إنذار فوري", "en": "Triggers a loud alarm instantly" },
+      { "ar": "تنبيهات عن بُعد", "en": "Real-time alerts on your phone" },
+      { "ar": "ضروري للمطابخ والمنشآت التجارية", "en": "Critical for kitchens and commercial spaces" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/gas-sensor.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "puck", "shapeParams": { "r": 0.5, "h": 0.28, "vents": true },
+    "model": false, "accent": "#FFB000"
+  },
+  {
+    "slug": "siren", "category": "security", "order": 4, "featured": false,
+    "name": { "ar": "صفارة الإنذار", "en": "Smart Siren" },
+    "tagline": { "ar": "صوت وضوء عند أي خطر", "en": "Sound and light the moment something is wrong" },
+    "description": {
+      "ar": "جهاز إنذار يصدر صوتًا قويًا مع إضاءة عند حدوث أي خطر مثل دخول غير مصرح به أو تشغيل أحد الحساسات. يعمل كعنصر ردع فعال ويزيد من مستوى الأمان في المكان.",
+      "en": "A smart siren that alerts you instantly when something is wrong. It produces a loud sound with flashing light signals when triggered by connected sensors such as motion or door sensors. With adjustable volume, different tones and efficient power use, it is a simple and reliable security solution for homes and businesses."
+    },
+    "features": [
+      { "ar": "صوت عالٍ وتنبيه ضوئي واضح", "en": "Loud sound plus flashing light" },
+      { "ar": "يعمل مع الحساسات", "en": "Works with motion, door and other sensors" },
+      { "ar": "استجابة فورية", "en": "Immediate response to threats" },
+      { "ar": "يعزز نظام الأمان", "en": "Strengthens the security system" },
+      { "ar": "يمكن التحكم به عن بُعد", "en": "Can be controlled remotely" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/siren.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "puck", "shapeParams": { "r": 0.55, "h": 0.3, "vents": true, "ring": true },
+    "model": false, "accent": "#FF3B5C"
+  },
+  {
+    "slug": "temp-humidity-sensor", "category": "security", "order": 5, "featured": false,
+    "name": { "ar": "حساس الحرارة والرطوبة", "en": "Temperature & Humidity Sensor" },
+    "tagline": { "ar": "بيئة مريحة تلقائيًا", "en": "A comfortable environment, automatically" },
+    "description": {
+      "ar": "جهاز ذكي يقيس درجة الحرارة والرطوبة داخل المكان بشكل مستمر، ويرسل البيانات إلى التطبيق. يساعد في الحفاظ على بيئة مريحة ويمكن ربطه بتشغيل التكييف أو التهوية تلقائيًا.",
+      "en": "A smart sensor that tracks temperature and humidity in real time to help you maintain a comfortable environment. It can trigger automations such as turning on the AC or ventilation, making your home more comfortable and energy efficient."
+    },
+    "features": [
+      { "ar": "مراقبة الجو الداخلي لحظيًا", "en": "Monitors indoor climate in real time" },
+      { "ar": "تحسين الراحة", "en": "Helps maintain comfort levels" },
+      { "ar": "أتمتة التكييف والتهوية", "en": "Automates AC, heating or ventilation" },
+      { "ar": "توفير الطاقة", "en": "Improves energy efficiency" },
+      { "ar": "بيانات دقيقة", "en": "Accurate readings" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/temp-humidity-sensor.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "puck", "shapeParams": { "r": 0.45, "h": 0.24, "display": true },
+    "model": false, "accent": "#35E0FF"
+  },
+  {
+    "slug": "motion-sensor", "category": "security", "order": 6, "featured": false,
+    "name": { "ar": "حساس الحركة", "en": "Motion Sensor (PIR)" },
+    "tagline": { "ar": "إضاءة تلقائية وأمان أعلى", "en": "Automatic lighting and better security" },
+    "description": {
+      "ar": "جهاز يكتشف حركة الأشخاص ويستخدم لتشغيل الإضاءة أو التنبيهات تلقائيًا. مناسب لتوفير الطاقة وتعزيز الأمان في نفس الوقت.",
+      "en": "A compact smart motion sensor that detects movement using infrared technology. When motion is detected it can send instant alerts to your phone through apps like Tuya Smart and trigger actions like turning on lights or activating alarms. Simple and effective for security and energy-saving automation."
+    },
+    "features": [
+      { "ar": "تشغيل تلقائي للإضاءة", "en": "Turns lights on automatically" },
+      { "ar": "تعزيز الأمان", "en": "Detects movement for security" },
+      { "ar": "تنبيهات فورية", "en": "Triggers alarms and notifications" },
+      { "ar": "توفير الطاقة عند عدم وجود حركة", "en": "Saves energy when no motion is detected" },
+      { "ar": "مناسب للممرات والمداخل", "en": "Ideal for hallways and entrances" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/motion-sensor.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "orb", "shapeParams": { "r": 0.45 },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "presence-sensor", "category": "security", "order": 7, "featured": false,
+    "name": { "ar": "حساس التواجد", "en": "Presence Sensor" },
+    "tagline": { "ar": "يعرف أنك هنا حتى بدون حركة", "en": "Knows you are there, even when you are still" },
+    "description": {
+      "ar": "حساس متطور قادر على اكتشاف وجود الشخص حتى بدون حركة، مما يوفر دقة أعلى في التحكم بالإضاءة والتكييف. يعطي تجربة أتمتة أكثر ذكاءً وراحة.",
+      "en": "A smart presence sensor that uses radar technology to detect people even when they are still or making very small movements. Unlike traditional motion sensors it senses true presence. It connects through a Zigbee gateway and works with apps like Tuya Smart, ideal for keeping lights on while a room is occupied, controlling AC and improving security."
+    },
+    "features": [
+      { "ar": "كشف دقيق للتواجد بدون حركة", "en": "Detects presence even without movement" },
+      { "ar": "تشغيل الأنظمة حسب الاستخدام", "en": "Keeps lights on while the room is occupied" },
+      { "ar": "أدق من الحساسات التقليدية", "en": "More accurate than traditional motion sensors" },
+      { "ar": "مناسب للمغاسل ودورات المياه", "en": "Ideal for restrooms and washing areas" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/presence-sensor.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "puck", "shapeParams": { "r": 0.42, "h": 0.14, "recessed": true },
+    "model": false, "accent": "#FF8A3D"
+  },
+  {
+    "slug": "door-sensor", "category": "security", "order": 8, "featured": false,
+    "name": { "ar": "حساس الباب والنافذة", "en": "Door / Window Sensor" },
+    "tagline": { "ar": "تنبيه فوري عند الفتح", "en": "Instant alert when something opens" },
+    "description": {
+      "ar": "جهاز بسيط يركب على الأبواب أو النوافذ للكشف عن فتحها أو إغلاقها، ويرسل تنبيهات فورية ويساعد في تشغيل الأتمتة.",
+      "en": "A compact wireless sensor that detects whether doors or windows are open or closed. It uses a sensor and a magnet to trigger alerts and automations when the door or window is opened."
+    },
+    "features": [
+      { "ar": "تنبيه عند الفتح والإغلاق", "en": "Detects opening and closing" },
+      { "ar": "ربط مع الإنذار", "en": "Triggers alarms or automations" },
+      { "ar": "تحسين الأمان", "en": "Improves home security" },
+      { "ar": "سهل التركيب", "en": "Easy to install" },
+      { "ar": "تشغيل الإضاءة عند فتح الباب", "en": "Can automate lights when doors open" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/door-sensor.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "box", "shapeParams": { "w": 0.3, "h": 0.8, "d": 0.16, "magnet": true },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "light-switch", "category": "switches", "order": 1, "featured": true,
+    "name": { "ar": "مفتاح الإضاءة الذكي", "en": "Smart Light Switch" },
+    "tagline": { "ar": "تصميم عصري بخامة تختارها", "en": "Modern design in the finish you choose" },
+    "description": {
+      "ar": "مفتاح حديث يتحكم في الإضاءة مع إمكانية التحكم عن بُعد أو بالصوت، بالإضافة إلى دعم المشاهد المختلفة. كما توجد إمكانية تخصيص الخامة واللون حسب اختيارك ليتناسبا مع ديكور منزلك الداخلي.",
+      "en": "A multi-gang smart light switch that lets you control multiple lights from one panel, with each button controlling a different light. Use it for automation, scheduling and scenes, and customise the material and colour to match your interior."
+    },
+    "features": [
+      { "ar": "تحكم بعدة إضاءات من لوحة واحدة (1 إلى 3 مفاتيح)", "en": "Controls multiple lights (1 to 3 gang) from one panel" },
+      { "ar": "تحكم عن بُعد ودعم الأوامر الصوتية", "en": "Remote and voice control" },
+      { "ar": "يدعم المشاهد والأتمتة", "en": "Scene and automation support" },
+      { "ar": "تصميم عصري وخامات قابلة للتخصيص", "en": "Clean modern designs, customisable finishes" },
+      { "ar": "يحل محل المفاتيح التقليدية", "en": "Replaces traditional switches" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Zigbee", "Wi-Fi"],
+    "image": "/img/products/light-switch.webp", "gallery": ["/img/products/light-switch/01.webp", "/img/products/light-switch/02.webp"],
+    "sourceImages": ["https://www.nalitesmart.com/product-category/uk-type/"],
+    "shape": "switch", "shapeParams": { "gangs": 3, "size": 1.1, "color": "#3a3d42" },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "dimmer-switch", "category": "switches", "order": 2, "featured": false,
+    "name": { "ar": "مفتاح التعتيم", "en": "Dimmer Switch" },
+    "tagline": { "ar": "الإضاءة المناسبة لكل لحظة", "en": "The right light for every moment" },
+    "description": {
+      "ar": "مفتاح يسمح بتغيير شدة الإضاءة بسهولة لخلق أجواء مختلفة حسب الحاجة، بتصميم عصري وتحكم مرن يناسب المنازل والأماكن التجارية.",
+      "en": "A wall-mounted smart dimmer that lets you adjust lighting brightness smoothly to match your mood or needs. With its modern design and flexible control it is a simple way to create the perfect lighting atmosphere in homes or commercial spaces."
+    },
+    "features": [
+      { "ar": "التحكم في السطوع", "en": "Adjusts lighting brightness" },
+      { "ar": "تحسين الأجواء: استرخاء، عمل، وغيرها", "en": "Creates different moods (relax, work, etc.)" },
+      { "ar": "توفير الطاقة", "en": "Saves energy" },
+      { "ar": "تحكم ذكي عن بُعد وبالصوت", "en": "Remote and voice control" },
+      { "ar": "مرونة عالية", "en": "Enhances the lighting experience" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Wi-Fi"],
+    "image": "/img/products/dimmer-switch.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "switch", "shapeParams": { "gangs": 0, "dial": true, "size": 1.1, "color": "#4b4f57" },
+    "model": false, "accent": "#35E0FF"
+  },
+  {
+    "slug": "heater-switch", "category": "switches", "order": 3, "featured": false,
+    "name": { "ar": "مفتاح السخان الذكي", "en": "High-Power Switch" },
+    "tagline": { "ar": "للمكيفات والسخانات بأمان", "en": "Safe control for AC and heaters" },
+    "description": {
+      "ar": "مفتاح مخصص للأجهزة ذات الاستهلاك العالي مثل المكيفات والسخانات، مع ميزات أمان إضافية مثل الحماية من التحميل الزائد وارتفاع الحرارة.",
+      "en": "A high-power smart switch designed to control heavy devices like air conditioners, water heaters and other high-load equipment. Built-in overload and temperature protection give reliable, secure control of powerful electrical devices."
+    },
+    "features": [
+      { "ar": "تشغيل الأجهزة الكبيرة: مكيفات وسخانات", "en": "Controls heavy devices (AC, heaters, etc.)" },
+      { "ar": "تحكم عن بُعد بالتشغيل والإيقاف", "en": "Remote on/off access" },
+      { "ar": "جدولة التشغيل والأتمتة", "en": "Scheduling and automation" },
+      { "ar": "حماية من التحميل الزائد والحرارة", "en": "Overload and temperature protection" }
+    ],
+    "tags": ["Tuya Smart", "Wi-Fi"],
+    "image": "/img/products/heater-switch.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "switch", "shapeParams": { "gangs": 1, "size": 1.1, "color": "#f2f2f0", "led": true },
+    "model": false, "accent": "#FF8A3D"
+  },
+  {
+    "slug": "scene-switch", "category": "switches", "order": 4, "featured": false,
+    "name": { "ar": "مفتاح المشاهد", "en": "Wireless Scene Switch" },
+    "tagline": { "ar": "مشهد كامل بضغطة واحدة", "en": "A whole scene in one press" },
+    "description": {
+      "ar": "زر لاسلكي يسمح بتشغيل عدة أوامر أو مشاهد بضغطة واحدة بدون الحاجة لتمديدات كهربائية. يمكن تثبيته على الجدار أو وضعه في أي مكان.",
+      "en": "A wireless scene switch that lets you control multiple smart actions with a single press. Mount it on the wall or place it anywhere, making it a flexible and simple alternative to traditional switches."
+    },
+    "features": [
+      { "ar": "تنفيذ عدة أوامر بضغطة واحدة", "en": "Controls multiple actions with one press" },
+      { "ar": "بدون تمديدات كهربائية", "en": "No wiring required" },
+      { "ar": "مرن في التركيب في أي مكان", "en": "Flexible placement anywhere" },
+      { "ar": "وصول سريع للمشاهد: فيلم، نوم، وغيرها", "en": "Quick access to scenes (movie, sleep, etc.)" },
+      { "ar": "يوفر الوقت والجهد", "en": "Saves time and effort" }
+    ],
+    "tags": ["Tuya Smart", "Zigbee"],
+    "image": "/img/products/scene-switch.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "switch", "shapeParams": { "gangs": 4, "size": 1.0, "color": "#f4f4f2", "wireless": true },
+    "model": false, "accent": "#2F80FF"
+  },
+  {
+    "slug": "ir-controller", "category": "control-devices", "order": 1, "featured": false,
+    "name": { "ar": "جهاز التحكم بالأشعة تحت الحمراء", "en": "IR Controller" },
+    "tagline": { "ar": "بديل واحد لكل الريموتات", "en": "One replacement for every remote" },
+    "description": {
+      "ar": "جهاز تحكّم ذكي بالأشعة تحت الحمراء يستبدل أجهزة التحكّم المتعددة، حيث يتيح لك التحكم بأجهزة مثل التلفزيونات والمكيّفات من مكان واحد. وبفضل خاصية التعلّم، يمكنه نسخ الأوامر من أجهزة التحكّم الأصلية، مما يجعله متوافقًا مع معظم الأجهزة التي تعمل بالأشعة تحت الحمراء.",
+      "en": "A smart infrared controller that replaces multiple remote controls by letting you control TVs, air conditioners, fans and set-top boxes from one place. With its learning feature it can copy commands from your original remotes, making it compatible with most infrared devices."
+    },
+    "features": [
+      { "ar": "بديل للريموتات المتعددة", "en": "Replaces multiple remote controls" },
+      { "ar": "أتمتة التلفزيون والتكييف وأجهزة الأشعة تحت الحمراء", "en": "Controls TV, AC and other IR devices" },
+      { "ar": "تحكم من الهاتف عن بُعد", "en": "Remote access from your phone" },
+      { "ar": "دعم التحكم الصوتي", "en": "Voice control support" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Wi-Fi"],
+    "image": "/img/products/ir-controller.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "puck", "shapeParams": { "r": 0.55, "h": 0.16, "color": "#141414", "glossy": true },
+    "model": false, "accent": "#FF3B5C"
+  },
+  {
+    "slug": "curtain-motor", "category": "control-devices", "order": 2, "featured": true,
+    "name": { "ar": "نظام الستائر الذكية", "en": "Smart Curtain Motor" },
+    "tagline": { "ar": "ستائر تفتح مع شروق الشمس", "en": "Curtains that open with the sunrise" },
+    "description": {
+      "ar": "نظام يتيح التحكم في الستائر تلقائيًا أو يدويًا عبر التطبيق أو الصوت، مما يوفر راحة وخصوصية. مصمم لحركة سلسة وهادئة مع ميزات ذكية مثل اكتشاف العوائق وتحديد نقطة التوقف واللمس للتشغيل.",
+      "en": "A smart motorised curtain system that lets you open and close your curtains using a remote, your phone or voice commands. Designed for smooth and quiet operation, it includes obstacle detection, stop positioning and touch control, is easy to install and supports different curtain sizes."
+    },
+    "features": [
+      { "ar": "فتح وإغلاق تلقائي للستائر", "en": "Opens and closes curtains automatically" },
+      { "ar": "تحكم صوتي وعبر التطبيق", "en": "Voice and app control" },
+      { "ar": "راحة وخصوصية", "en": "Enhances comfort and privacy" },
+      { "ar": "جدولة حسب الشروق والغروب", "en": "Works with schedules (sunrise / sunset)" },
+      { "ar": "حركة سلسة وهادئة", "en": "Smooth, quiet movement" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Zigbee"],
+    "image": "/img/products/curtain-motor.webp", "gallery": [],
+    "sourceImages": ["https://www.nalitesmart.com/product-category/smart-curtain-motor/"],
+    "shape": "rail", "shapeParams": { "length": 2.4, "motor": 0.7 },
+    "model": false, "accent": "#35E0FF"
+  },
+  {
+    "slug": "garage-module", "category": "control-devices", "order": 3, "featured": false,
+    "name": { "ar": "وحدة باب الجراج", "en": "Garage Door Module" },
+    "tagline": { "ar": "جراجك يفتح من هاتفك", "en": "Your garage opens from your phone" },
+    "description": {
+      "ar": "جهاز يحول باب الجراج التقليدي إلى نظام ذكي يمكن التحكم به عن بُعد، مع جدولة وأتمتة وتحكم صوتي عبر Amazon Alexa لدخول أسهل وأكثر أمانًا.",
+      "en": "A smart garage door module that turns your traditional garage door into a connected system you control from your phone. Set schedules, create automations and use voice control with Amazon Alexa for convenient, secure, hands-free access."
+    },
+    "features": [
+      { "ar": "فتح وإغلاق من الهاتف", "en": "Remote open/close control" },
+      { "ar": "معرفة حالة الباب لحظيًا", "en": "Real-time status monitoring" },
+      { "ar": "إشعارات فورية", "en": "Instant notifications" },
+      { "ar": "أمان أعلى", "en": "Improves security" },
+      { "ar": "تحكم صوتي وأتمتة", "en": "Hands-free access with automation and voice" }
+    ],
+    "tags": ["Tuya Smart", "Alexa", "Zigbee"],
+    "image": "/img/products/garage-module.webp", "gallery": [],
+    "sourceImages": [],
+    "shape": "box", "shapeParams": { "w": 0.9, "h": 0.6, "d": 0.3, "terminals": true },
+    "model": false, "accent": "#2F80FF"
+  }
+]

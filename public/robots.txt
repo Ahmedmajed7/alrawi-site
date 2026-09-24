@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://alrawioman.com/sitemap-index.xml

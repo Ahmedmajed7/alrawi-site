@@ -1,0 +1,14 @@
+[
+  { "slug": "cctv", "icon": "camera",
+    "name": { "ar": "كاميرات المراقبة", "en": "CCTV" },
+    "blurb": { "ar": "تصميم وتركيب أنظمة مراقبة عالية الدقة مع إمكانية المتابعة من هاتفك في أي وقت.", "en": "Design and installation of high-definition surveillance systems you can monitor from your phone at any time." } },
+  { "slug": "intercom", "icon": "intercom",
+    "name": { "ar": "نظام الانتركوم", "en": "Intercom" },
+    "blurb": { "ar": "انتركوم فيديو للفلل والمباني يتيح لك رؤية الزائر والتحدث معه وفتح الباب عن بُعد.", "en": "Video intercom for villas and buildings so you can see visitors, talk to them and open the door remotely." } },
+  { "slug": "wifi", "icon": "wifi",
+    "name": { "ar": "توزيع الإنترنت", "en": "Wi-Fi Coverage" },
+    "blurb": { "ar": "شبكة واي فاي مستقرة تغطي كل زوايا المنزل لضمان عمل جميع الأجهزة الذكية بسلاسة.", "en": "Stable Wi-Fi that reaches every corner of the home so every smart device works without interruption." } },
+  { "slug": "rack", "icon": "rack",
+    "name": { "ar": "تركيب وتنظيم الراك", "en": "Rack Management" },
+    "blurb": { "ar": "تركيب وترتيب خزائن الشبكة والأجهزة بشكل منظم يسهّل الصيانة والتوسع مستقبلاً.", "en": "Installation and tidy organisation of network racks that makes maintenance and future expansion easy." } }
+]

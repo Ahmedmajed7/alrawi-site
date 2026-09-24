@@ -1,0 +1,34 @@
+{
+  "name": { "ar": "الراوي للمنازل الذكية", "en": "Al Rawi Smart Home" },
+  "shortName": "Al Rawi",
+  "domain": "https://alrawioman.com",
+  "email": "info@alrawioman.com",
+  "whatsapp": "96877103161",
+  "founded": 2021,
+  "offices": [
+    {
+      "id": "oman",
+      "country": { "ar": "سلطنة عُمان", "en": "Sultanate of Oman" },
+      "city": { "ar": "مسقط", "en": "Muscat" },
+      "address": {
+        "ar": "العذيبة، شارع 18 نوفمبر، مبنى المشرق، الطابق الرابع، مكتب 43",
+        "en": "Azaiba, 18 November St, Al Mashriq Building, 4th floor, office 43"
+      },
+      "phones": ["+968 77103161", "+968 78022126"],
+      "map": "https://www.google.com/maps/search/?api=1&query=Al+Mashriq+Building+Azaiba+Muscat"
+    },
+    {
+      "id": "ksa",
+      "country": { "ar": "المملكة العربية السعودية", "en": "Kingdom of Saudi Arabia" },
+      "city": { "ar": "الرياض", "en": "Riyadh" },
+      "address": {
+        "ar": "3141 طريق أنس بن مالك، حي الملقا، الرياض",
+        "en": "3141 Anas Ibn Malik Rd, Al Malqa, Riyadh"
+      },
+      "phones": ["+966 538305817", "+966 536575631"],
+      "map": "https://www.google.com/maps/search/?api=1&query=3141+Anas+Ibn+Malik+Rd+Al+Malqa+Riyadh"
+    }
+  ],
+  "platforms": ["Tuya Smart", "Amazon Alexa", "Zigbee", "Wi-Fi", "Bluetooth"],
+  "formEndpoint": ""
+}

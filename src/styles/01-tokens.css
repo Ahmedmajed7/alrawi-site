@@ -1,0 +1,60 @@
+/* ============================ TOKENS ============================ */
+:root {
+  /* brand */
+  --bg-deep: #070b14;
+  --bg: #0b1220;
+  --bg-soft: #111a2c;
+  --surface: #ffffff;
+  --surface-alt: #f3f6fb;
+  --surface-2: #e9eef7;
+  --ink: #0e1626;
+  --ink-soft: #5b6577;
+  --ink-mute: #8b95a7;
+  --on-dark: #eef3ff;
+  --on-dark-soft: rgba(238, 243, 255, 0.68);
+  --accent: #2f80ff;
+  --accent-deep: #1d5fd0;
+  --accent-glow: #35e0ff;
+  --accent-soft: rgba(47, 128, 255, 0.12);
+  --line: rgba(14, 22, 38, 0.12);
+  --line-dark: rgba(238, 243, 255, 0.12);
+  --success: #22c55e;
+  --danger: #ff3b5c;
+
+  /* type */
+  --f-ar: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+  --f-en: 'Manrope', 'Cairo', system-ui, -apple-system, sans-serif;
+  --f-body: var(--f-ar);
+  --f-display: var(--f-en);
+  --fs-hero: clamp(2.4rem, 6.2vw, 5.4rem);
+  --fs-h1: clamp(2rem, 4.6vw, 3.6rem);
+  --fs-h2: clamp(1.7rem, 3.4vw, 2.6rem);
+  --fs-h3: clamp(1.15rem, 1.8vw, 1.45rem);
+  --fs-body: clamp(1rem, 1.05vw, 1.1rem);
+  --fs-small: 0.86rem;
+  --lh-body: 1.65;
+
+  /* space & shape */
+  --pad: clamp(20px, 5vw, 80px);
+  --maxw: 1280px;
+  --maxw-text: 68ch;
+  --sec: clamp(72px, 10vw, 140px);
+  --gap: clamp(16px, 2.4vw, 32px);
+  --r-sm: 10px;
+  --r: 18px;
+  --r-lg: 28px;
+  --shadow: 0 18px 50px -24px rgba(14, 22, 38, 0.35);
+  --shadow-glow: 0 0 0 1px rgba(47, 128, 255, 0.25), 0 24px 70px -30px rgba(47, 128, 255, 0.55);
+
+  /* motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur: 0.6s;
+  --dur-fast: 0.25s;
+
+  color-scheme: light;
+}
+html[lang='ar'] {
+  --f-display: var(--f-ar);
+  --lh-body: 1.85;
+}

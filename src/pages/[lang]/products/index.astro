@@ -1,0 +1,33 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProductCard from '@/components/ProductCard.astro';
+import Icon from '@/components/Icons.astro';
+import { staticLangPaths, useT, l, localePath, type Locale } from '@/i18n/utils';
+import { allCategories, byCategory } from '@/lib/products';
+export const getStaticPaths = staticLangPaths;
+const locale = Astro.params.lang as Locale;
+const t = useT(locale);
+---
+<Base {locale} title={`${t('meta.productsTitle')} | ${locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home'}`} description={t('meta.productsDescription')} lightNav>
+  <div class="wrap page-head">
+    <span class="eyebrow">{t('categories.eyebrow')}</span>
+    <h1>{t('categories.all')}</h1>
+    <p>{t('meta.productsDescription')}</p>
+    <nav class="cat-tabs" aria-label={t('nav.products')}>
+      <a href={localePath(locale, 'products')} aria-current="page">{t('categories.all')}</a>
+      {allCategories.map((c) => <a href={localePath(locale, `products/${c.slug}`)}>{l(c.name, locale)}</a>)}
+    </nav>
+  </div>
+  {allCategories.map((c) => (
+    <section class="section-tight section">
+      <div class="wrap">
+        <div class="section-head" data-reveal>
+          <span class="eyebrow">{l(c.name, locale)}</span>
+          <h2>{l(c.blurb, locale)}</h2>
+          <a class="link-arrow" href={localePath(locale, `products/${c.slug}`)}>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
+        </div>
+        <div class="grid grid-4" data-stagger>{byCategory(c.slug).map((p) => <ProductCard product={p} {locale} />)}</div>
+      </div>
+    </section>
+  ))}
+</Base>

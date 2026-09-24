@@ -1,0 +1,78 @@
+---
+import type { Locale } from '@/i18n/utils';
+import { altLocalePath, useT } from '@/i18n/utils';
+import site from '@/data/site.json';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'product';
+  jsonLd?: Record<string, unknown>[];
+  noindex?: boolean;
+}
+const { locale, title, description, image = '/og.jpg', type = 'website', jsonLd = [], noindex = false } = Astro.props;
+const t = useT(locale);
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? site.domain;
+const path = Astro.url.pathname;
+const canonical = `${siteUrl}${path}`;
+const alt = (l: Locale) => `${siteUrl}${altLocalePath(path, l)}`;
+const ogLocale = locale === 'ar' ? 'ar_OM' : 'en_US';
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.name.en,
+  alternateName: site.name.ar,
+  url: siteUrl,
+  logo: `${siteUrl}/icon-512.png`,
+  email: site.email,
+  foundingDate: String(site.founded),
+  telephone: site.offices[0].phones[0],
+  sameAs: [],
+};
+const offices = site.offices.map((o) => ({
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: `${site.name.en} - ${o.city.en}`,
+  parentOrganization: { '@type': 'Organization', name: site.name.en },
+  telephone: o.phones[0],
+  email: site.email,
+  address: { '@type': 'PostalAddress', streetAddress: o.address.en, addressLocality: o.city.en, addressCountry: o.id === 'oman' ? 'OM' : 'SA' },
+  url: siteUrl,
+}));
+const ld = [org, ...offices, ...jsonLd];
+---
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<link rel="alternate" hreflang="ar" href={alt('ar')} />
+<link rel="alternate" hreflang="en" href={alt('en')} />
+<link rel="alternate" hreflang="x-default" href={alt('ar')} />
+{noindex && <meta name="robots" content="noindex" />}
+<meta name="theme-color" content="#070b14" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="apple-touch-icon" href="/icon-180.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta property="og:type" content={type === 'product' ? 'product' : 'website'} />
+<meta property="og:site_name" content={locale === 'ar' ? site.name.ar : site.name.en} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={`${siteUrl}${image}`} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:locale:alternate" content={locale === 'ar' ? 'en_US' : 'ar_OM'} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={`${siteUrl}${image}`} />
+<meta name="generator" content={Astro.generator} />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.web3forms.com; font-src 'self' data:; frame-src https://www.google.com; base-uri 'self'; form-action 'self' https://api.web3forms.com mailto:;" />
+<script type="application/ld+json" set:html={JSON.stringify(ld)} />
+<script is:inline>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
+<span class="sr-only">{t('meta.siteTitle')}</span>
