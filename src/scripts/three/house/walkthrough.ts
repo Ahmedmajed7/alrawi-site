@@ -166,6 +166,7 @@ export async function mountWalkthrough(root: HTMLElement) {
     if (!returning) lockScroll(true);
   }
 
-  const stop = runLoop(root, (dt) => { authorCtl ? authorCtl.update(dt) : rig.update(dt); stage.render(); });
+  let first = true;
+  const stop = runLoop(root, (dt) => { authorCtl ? authorCtl.update(dt) : rig.update(dt); stage.render(); if (first) { first = false; root.classList.add('is-live'); } });
   return () => { stop(); stopSize(); rig.dispose(); disposeObject(scene); stage.dispose(); };
 }
