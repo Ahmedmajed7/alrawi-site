@@ -75,8 +75,9 @@ export async function mountWalkthrough(root: HTMLElement) {
 
   // ---------- 3D ----------
   // Headline + tap prompt render at first paint over the poster (LCP); the model streams behind it.
-  if (!author && startStop < 0) ui.prompt.classList.add('is-on');
-  let pendingTap = false; let ready = false;
+  if (author || startStop > 0) ui.prompt.classList.remove('is-on');
+  let pendingTap = root.dataset.autoenter === '1'; let ready = false;
+  if (pendingTap) ui.load.classList.remove('is-done');
   ui.tap.addEventListener('click', () => { if (!ready) { pendingTap = true; ui.load.classList.remove('is-done'); } });
   const canvas = document.createElement('canvas'); canvas.tabIndex = 0; canvas.setAttribute('aria-label', root.dataset.aria || 'House walkthrough');
   root.querySelector('[data-walk-canvas]')!.appendChild(canvas);

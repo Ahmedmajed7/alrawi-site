@@ -20,6 +20,7 @@ const whatPoints = locale === 'ar'
 const sel = featured();
 ---
 <Base {locale} title={t('meta.siteTitle')} description={t('meta.siteDescription')}>
+  <link slot="head" rel="preload" as="image" href="/img/brand/intro-poster.webp" fetchpriority="high" />
   <Walkthrough {locale} />
 
   <section class="section" id="philosophy">

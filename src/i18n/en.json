@@ -119,7 +119,8 @@
       "loading": "Building 3D model",
       "fallback": "3D preview is not available on this device.",
       "reset": "Reset view",
-      "aria": "Interactive 3D model of {name}"
+      "aria": "Interactive 3D model of {name}",
+      "tap": "Tap to view in 3D"
     }
   },
   "footer": {

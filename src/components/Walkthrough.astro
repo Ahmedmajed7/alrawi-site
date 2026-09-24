@@ -26,7 +26,7 @@ const roomNames = s.walk.stops as Record<string, string>;
       <a class="walk-skip" href="#philosophy" data-walk-skip>{t('walk.skip')}</a>
     </div>
     <div class="walk-mid">
-      <div class="walk-prompt" data-walk-prompt>
+      <div class="walk-prompt is-on" data-walk-prompt>
         <span class="eyebrow" style="color:var(--brass)">{t('walk.eyebrow')}</span>
         <h1 set:html={t('walk.title')} />
         <p>{t('walk.subtitle')}</p>
@@ -54,7 +54,19 @@ const roomNames = s.walk.stops as Record<string, string>;
   <noscript><img src="/img/brand/intro-poster.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" /></noscript>
 </section>
 <script>
-  import { mountWalkthrough } from '@/scripts/three/house/walkthrough';
+  // The 3D bundle (three.js + walkthrough) loads after the page's own load event so the
+  // poster and headline paint first; the prompt is visible from the start.
   const el = document.querySelector<HTMLElement>('[data-walk]');
-  if (el) mountWalkthrough(el).catch((e) => console.error('[walk]', e));
+  let started = false;
+  const start = () => { if (started) return; started = true; import('@/scripts/three/house/walkthrough').then(({ mountWalkthrough }) => mountWalkthrough(el!)).catch((e) => console.error('[walk]', e)); };
+  if (el) {
+    const q = new URLSearchParams(location.search);
+    // Phones: keep the landing static until the visitor taps (no WebGL, no model download before intent).
+    const phone = (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760) && !q.has('stop') && !q.has('cam') && !q.has('tier');
+    if (phone) {
+      el.querySelector('[data-walk-load]')?.classList.add('is-done');
+      el.querySelector('[data-walk-tap]')?.addEventListener('click', () => { el.dataset.autoenter = '1'; start(); }, { once: true });
+    } else if (document.readyState === 'complete') start();
+    else window.addEventListener('load', () => setTimeout(start, 50), { once: true });
+  }
 </script>

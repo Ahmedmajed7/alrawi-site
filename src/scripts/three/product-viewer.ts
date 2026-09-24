@@ -107,12 +107,3 @@ export async function mountViewer(root: HTMLElement) {
 
   return () => { stop(); stopSize(); controls.dispose(); disposeObject(scene); renderer.dispose(); canvas.remove(); };
 }
-
-export function mountAll() {
-  document.querySelectorAll<HTMLElement>('[data-viewer]').forEach((el) => {
-    if (el.dataset.mounted) return; el.dataset.mounted = '1';
-    // defer until near viewport
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); mountViewer(el).catch((err) => console.error('[viewer]', err)); } }, { rootMargin: '200px' });
-    io.observe(el);
-  });
-}
