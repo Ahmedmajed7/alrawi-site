@@ -1,7 +1,7 @@
 /* ============================ LAYOUT ============================ */
 .wrap { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad); width: 100%; }
 .wrap-narrow { max-width: 900px; }
-.section { padding-block: var(--sec); position: relative; }
+.section { padding-block: var(--sec); position: relative; overflow: clip; }
 .section-tight { padding-block: calc(var(--sec) * 0.6); }
 .section-dark { background: var(--bg); color: var(--on-dark); }
 .section-alt { background: var(--surface-alt); }
@@ -30,8 +30,8 @@ html[lang='ar'] .eyebrow { text-transform: none; letter-spacing: 0.02em; font-si
 .btn-primary:hover { background: var(--accent-deep); }
 .btn-ghost { border-color: var(--line); color: var(--ink); background: transparent; }
 .btn-ghost:hover { border-color: var(--ink); }
-.section-dark .btn-ghost, .on-dark .btn-ghost { border-color: var(--line-dark); color: var(--on-dark); }
-.section-dark .btn-ghost:hover, .on-dark .btn-ghost:hover { border-color: var(--on-dark); background: rgba(255, 255, 255, 0.06); }
+.section-dark .btn-ghost, .on-dark .btn-ghost, .hero .btn-ghost, .cta .btn-ghost, .cat-hero .btn-ghost { border-color: var(--line-dark); color: var(--on-dark); }
+.section-dark .btn-ghost:hover, .on-dark .btn-ghost:hover, .hero .btn-ghost:hover, .cta .btn-ghost:hover { border-color: var(--on-dark); background: rgba(255, 255, 255, 0.06); }
 .btn-wa { background: #22c55e; color: #fff; }
 .btn-wa:hover { background: #16a34a; }
 .btn svg { width: 1.1em; height: 1.1em; flex: none; }

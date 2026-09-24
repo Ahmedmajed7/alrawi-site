@@ -58,7 +58,7 @@ export async function mountViewer(root: HTMLElement) {
   } else model = procedural();
   scene.add(model);
 
-  const { center, dist, size } = fitCameraTo(model, camera, 1.5);
+  const { center, dist, size } = fitCameraTo(model, camera, 1.25);
   model.position.sub(center); // centre at origin
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(size.x, size.z) * 2.2, Math.max(size.x, size.z) * 2.2), new THREE.MeshBasicMaterial({ map: contactShadowTexture(), transparent: true, depthWrite: false, opacity: 0.8 }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = -size.y / 2 - 0.02; scene.add(shadow);

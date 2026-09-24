@@ -8,11 +8,15 @@ export function initReveal() {
   const io = new IntersectionObserver((entries) => {
     for (const en of entries) if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-  els.forEach((e, i) => {
+  const vh = window.innerHeight;
+  els.forEach((e) => {
     if (!e.style.getPropertyValue('--d') && e.parentElement?.hasAttribute('data-stagger')) {
       const idx = Array.from(e.parentElement.children).indexOf(e);
       e.style.setProperty('--d', `${Math.min(idx, 8) * 0.08}s`);
     }
+    // Above-the-fold content reveals immediately without waiting for the observer.
+    const r = e.getBoundingClientRect();
+    if (r.top < vh * 0.92 && r.bottom > 0) { e.classList.add('is-in'); return; }
     io.observe(e);
   });
 }

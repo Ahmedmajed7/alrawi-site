@@ -43,6 +43,8 @@ export function mountIntro(hero: HTMLElement) {
   const seen = (() => { try { return sessionStorage.getItem('alrawi-intro') === '1'; } catch { return false; } })();
   try { sessionStorage.setItem('alrawi-intro', '1'); } catch { /* ignore */ }
   loader?.querySelector('[data-skip]')?.addEventListener('click', () => { finishLoader(); revealContent(true); });
+  // Never trap the visitor behind the loader (throttled tabs, slow GPUs, stalled rAF).
+  setTimeout(() => { if (!loader?.classList.contains('is-done')) { finishLoader(); revealContent(true); } }, seen ? 2500 : 4500);
 
   if (tier === 'off') { finishLoader(); revealContent(true); hero.classList.add('is-static'); return; }
 
@@ -54,9 +56,23 @@ export function mountIntro(hero: HTMLElement) {
   const fog = new THREE.FogExp2(0x070b14, 0.045);
   scene.fog = fog;
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  const camHome = new THREE.Vector3(9.5, 6.2, 11);
+  const camHome = new THREE.Vector3(12.5, 8.2, 14.5);
   camera.position.copy(camHome).multiplyScalar(1.5);
-  const lookAt = new THREE.Vector3(0, 1.0, 0);
+  // Keep the villa on the side opposite the headline: shift the look-at point along the
+  // camera's right axis by a fraction of the visible half-width (screen-space, not world X).
+  const rtl = document.documentElement.dir === 'rtl';
+  const centre = new THREE.Vector3(0, 1.0, 0);
+  const lookAt = centre.clone();
+  const right = new THREE.Vector3();
+  const applyOffset = () => {
+    const w = hero.clientWidth, h = hero.clientHeight;
+    const fwd = new THREE.Vector3().subVectors(centre, camHome).normalize();
+    right.crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+    const dist = camHome.distanceTo(centre);
+    const halfW = dist * Math.tan((camera.fov * Math.PI) / 360) * (w / h);
+    const k = w < 900 ? 0 : halfW * 0.5; // villa centred at ~25% / 75% of the width
+    lookAt.copy(centre).addScaledVector(right, rtl ? k : -k);
+  };
 
   /* ---- ground grid (shader, radial fade) ---- */
   const grid = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShaderMaterial({
@@ -133,7 +149,7 @@ export function mountIntro(hero: HTMLElement) {
     bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.85, 0.7, 0.25); composer.addPass(bloom);
     composer.addPass(new OutputPass());
   }
-  const stopSize = trackSize(hero, renderer, camera, (w, h) => { composer?.setSize(w, h); bloom?.resolution.set(w, h); });
+  const stopSize = trackSize(hero, renderer, camera, (w, h) => { composer?.setSize(w, h); bloom?.resolution.set(w, h); applyOffset(); });
 
   /* ---- interaction state ---- */
   const mouse = new THREE.Vector2(0, 0), mouseS = new THREE.Vector2(0, 0);
@@ -186,7 +202,7 @@ export function mountIntro(hero: HTMLElement) {
     base.y += mouseS.y * -0.6 + scroll.p * 6;
     base.multiplyScalar(1 + scroll.p * 0.35);
     if (state.build) camera.position.lerp(base, 0.06);
-    camera.lookAt(tmp.set(lookAt.x, lookAt.y - scroll.p * 2, lookAt.z));
+    camera.lookAt(tmp.set(lookAt.x, lookAt.y - scroll.p * 2 - (hero.clientWidth < 900 ? 2.2 : 0), lookAt.z));
     house.position.y = -scroll.p * 1.2;
     fog.density = 0.045 + scroll.p * 0.06;
     for (const n of nodes) n.ring.lookAt(camera.position);
