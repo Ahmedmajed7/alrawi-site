@@ -4,7 +4,7 @@ Client: Al Rawi Smart Home (alrawioman.com), Omani smart-home integrator, office
 Bilingual (Arabic default, English) static marketing + product site. Landing = tap-through walkthrough of the client's real villa model (exterior → six mounted devices), plus a 3D viewer per product. Design: luxury light cinematic (paper/stone/brass, Cormorant + Amiri + IBM Plex Sans Arabic). No backend.
 
 ## Stack
-- Astro 7 (static output, `trailingSlash: 'always'`), vanilla CSS with tokens (`src/styles/01-tokens.css`), self-hosted fonts (Cairo, Manrope via @fontsource).
+- Astro 7 (static output, `trailingSlash: 'always'`), vanilla CSS with tokens (`src/styles/01-tokens.css`), self-hosted fonts (Cormorant Garamond, Amiri, IBM Plex Sans Arabic via @fontsource).
 - Three.js walkthrough in `src/scripts/three/house/` (walkthrough.ts orchestrates; loader/materials/renderer/camera-rig/devices/slideshow/author) driven by `src/data/house.json`; product viewer `src/scripts/three/product-viewer.ts`; procedural device models `src/scripts/three/procedural/index.ts`; GSAP; Lenis (desktop only).
 - Deploy: Cloudflare Pages, output `dist/`. Headers in `public/_headers`.
 
