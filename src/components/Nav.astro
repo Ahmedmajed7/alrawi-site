@@ -27,7 +27,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
       <span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}<small>{locale === 'ar' ? 'للمنازل الذكية' : 'SMART HOME'}</small></span>
     </a>
     <nav class="nav-links" aria-label={t('nav.menu')}>
-      {links.map((x) => <a href={x.href} aria-current={isCurrent(x.href, x.exact) ? 'page' : undefined}><span>{x.label}</span><i class="nb nb0"></i><i class="nb nb1"></i><i class="nb nb2"></i><i class="nb nb3"></i></a>)}
+      {links.map((x) => <a href={x.href} aria-current={isCurrent(x.href, x.exact) ? 'page' : undefined}><span>{x.label}</span></a>)}
     </nav>
     <div class="nav-actions">
       <a class="lang-toggle" href={altLocalePath(path, other)} hreflang={other} lang={other} aria-label={t('nav.langAria')} data-lang-toggle data-lang={other}>{t('nav.lang')}</a>
@@ -38,7 +38,6 @@ const wa = `https://wa.me/${site.whatsapp}`;
   <i class="nav-progress" aria-hidden="true"></i>
 </header>
 <div class="nav-drawer" id="drawer" data-drawer>
-  <div class="drawer-grid" aria-hidden="true"></div>
   <nav class="drawer-links">
     {links.map((x, i) => <a href={x.href} style={`--i:${i}`} aria-current={isCurrent(x.href, x.exact) ? 'page' : undefined}><b class="num">{String(i + 1).padStart(2, '0')}</b><span>{x.label}</span></a>)}
   </nav>

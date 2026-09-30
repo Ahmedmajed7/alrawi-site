@@ -1,0 +1,9 @@
+---
+/** A quiet figure: a fine numeral that counts up once (scripts/motion/count.ts) over a small-caps label. */
+interface Props { n: number; suffix?: string; label: string; big?: boolean }
+const { n, suffix = '', label, big = false } = Astro.props;
+---
+<div class:list={['stat', { 'stat--big': big }]}>
+  <b class="stat-n num" data-count={n} data-suffix={suffix}>0{suffix}</b>
+  <span class="stat-l">{label}</span>
+</div>

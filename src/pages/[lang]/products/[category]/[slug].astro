@@ -1,7 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
 import ProductCard from '@/components/ProductCard.astro';
-import HudFrame from '@/components/HudFrame.astro';
 import SecHead from '@/components/SecHead.astro';
 import Icon from '@/components/Icons.astro';
 import { locales, useT, l, localePath, type Locale } from '@/i18n/utils';
@@ -42,19 +41,18 @@ const jsonLd = [{
       </ol>
       <div class="pd-grid">
         <div class="pd-media" data-gallery>
-          <HudFrame class="pd-stage" tag={`${String(idx + 1).padStart(2, '0')} / ${String(siblings.length).padStart(2, '0')}`}>
-            <div class="pd-shot" data-reveal="mask">
+          <div class="pd-stage">
+            <div class="pd-shot">
               {shots.map((g, i) => <img src={g} alt={i ? '' : name} width="1200" height="1200" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" class:list={[{ 'is-on': i === 0 }]} data-shot={i} />)}
-              <i class="pd-scan" aria-hidden="true"></i>
             </div>
-          </HudFrame>
+          </div>
           {shots.length > 1 && (
             <div class="pd-thumbs">{shots.map((g, i) => <button type="button" class:list={[{ 'is-on': i === 0 }]} data-thumb={i} aria-label={`${name} ${i + 1}`}><img src={g} alt="" width="120" height="120" loading="lazy" decoding="async" /></button>)}</div>
           )}
         </div>
         <div class="pd-info">
-          <span class="sh-coord" data-reveal><span class="num">§{String(idx + 1).padStart(2, '0')}</span><span data-decode>{l(cat.name, locale)}</span></span>
-          <h1 class="pd-title" data-split>{name}</h1>
+          <span class="kicker" data-reveal>{l(cat.name, locale)}</span>
+          <h1 class="pd-title" data-reveal style="--d:0.05s">{name}</h1>
           <p class="pd-tag" data-reveal>{l(p.tagline, locale)}</p>
           <p class="pd-desc" data-reveal style="--d:0.08s">{l(p.description, locale)}</p>
           <div data-reveal style="--d:0.14s">
@@ -80,8 +78,8 @@ const jsonLd = [{
   {related.length > 0 && (
     <section class="band band--mist" data-tone="lime">
       <div class="wrap">
-        <SecHead no="02" label={l(cat.name, locale)} title={t('product.related')} />
-        <div class="prod-grid" data-stagger="0.08">{related.map((x, i) => <ProductCard product={x} {locale} index={i} />)}</div>
+        <SecHead label={l(cat.name, locale)} title={t('product.related')} />
+        <div class="prod-grid" data-stagger="0.08">{related.map((x) => <ProductCard product={x} {locale} />)}</div>
       </div>
     </section>
   )}

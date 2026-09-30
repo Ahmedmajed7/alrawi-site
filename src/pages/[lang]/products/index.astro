@@ -12,7 +12,7 @@ const t = useT(locale);
 const brand = locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home';
 ---
 <Base {locale} title={`${t('meta.productsTitle')} | ${brand}`} description={t('meta.productsDescription')}>
-  <PageHero title={t('nav.products')} figure="devices" tag={t('nav.products')} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: t('nav.products') }]}>
+  <PageHero title={t('nav.products')} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: t('nav.products') }]}>
     <nav class="cat-tabs" aria-label={t('nav.products')} data-ph-in style="--d:0.7s">
       {allCategories.map((c) => <a href={`#${c.slug}`}>{l(c.name, locale)}</a>)}
     </nav>
@@ -20,10 +20,10 @@ const brand = locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al
   {allCategories.map((c, i) => (
     <section class:list={['band', i % 2 ? 'band--mist' : 'band--paper', 'cat-band']} id={c.slug} data-tone="lime">
       <div class="wrap">
-        <SecHead no={String(i + 1).padStart(2, '0')} label={l(c.name, locale)} title={l(c.name, locale)} lead={l(c.blurb, locale)}>
+        <SecHead title={l(c.name, locale)} lead={l(c.blurb, locale)}>
           <a class="link" href={localePath(locale, `products/${c.slug}`)} data-reveal>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
         </SecHead>
-        <div class="prod-grid" data-stagger="0.08">{byCategory(c.slug).map((p, k) => <ProductCard product={p} {locale} index={k} />)}</div>
+        <div class="prod-grid" data-stagger="0.08">{byCategory(c.slug).map((p) => <ProductCard product={p} {locale} />)}</div>
       </div>
     </section>
   ))}

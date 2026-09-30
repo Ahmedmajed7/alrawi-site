@@ -3,7 +3,6 @@ import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icons.astro';
 import PageHero from '@/components/PageHero.astro';
 import SecHead from '@/components/SecHead.astro';
-import HudFrame from '@/components/HudFrame.astro';
 import ContactForm from '@/components/ContactForm.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
@@ -15,35 +14,35 @@ const brand = l(site.name, locale);
 const office = site.offices[0];
 ---
 <Base {locale} title={`${t('meta.contactTitle')} | ${brand}`} description={c.body}>
-  <PageHero title={c.title} figure="signal" tag={c.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: c.title }]} />
+  <PageHero title={c.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: c.title }]} />
 
   <section class="band band--paper" data-tone="lime">
     <div class="wrap contact-grid">
       <div class="contact-info">
-        <SecHead no="01" title={c.h2} lead={c.body} />
+        <SecHead title={c.h2} lead={c.body} />
         <ul class="contact-list" data-stagger="0.1">
-          <li data-reveal="rise" data-spot>
+          <li data-reveal>
             <span class="ci-ic"><Icon name="pin" /></span>
             <span class="label">{c.office}</span>
             <a href={office.map} target="_blank" rel="noopener">{l(office.address, locale)}</a>
           </li>
-          <li data-reveal="rise" data-spot>
+          <li data-reveal>
             <span class="ci-ic"><Icon name="phone" /></span>
             <span class="label">{c.call}</span>
             <span class="ci-phones">{office.phones.map((p) => <a class="num" href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>)}</span>
           </li>
-          <li data-reveal="rise" data-spot>
+          <li data-reveal>
             <span class="ci-ic"><Icon name="mail" /></span>
             <span class="label">{c.mail}</span>
             <a class="latin" href={`mailto:${site.email}`}>{site.email}</a>
           </li>
         </ul>
       </div>
-      <HudFrame class="contact-card" tag="TX · READY">
-        <div class="contact-card-in" data-reveal="blur">
+      <div class="contact-card" data-reveal>
+        <div class="contact-card-in">
           <ContactForm {locale} />
         </div>
-      </HudFrame>
+      </div>
     </div>
   </section>
 </Base>

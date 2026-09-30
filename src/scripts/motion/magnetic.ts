@@ -17,14 +17,3 @@ export function initMagnetic() {
   };
   window.addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
 }
-
-/** [data-spot] surfaces carry a pointer spotlight (--mx/--my) for their hover ring and wash (Dartz). */
-export function initSpot() {
-  if (!finePointer()) return;
-  document.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
-    el.addEventListener('pointermove', (e) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--mx', `${e.clientX - r.left}px`); el.style.setProperty('--my', `${e.clientY - r.top}px`);
-    }, { passive: true });
-  });
-}

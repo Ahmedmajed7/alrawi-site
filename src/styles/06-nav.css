@@ -2,13 +2,13 @@
 .nav { position: fixed; top: 0; inset-inline: 0; z-index: 900; color: var(--ink); transition: background-color 0.5s var(--ease-out), box-shadow 0.5s, transform 0.6s var(--ease-out), opacity 0.6s, color 0.45s; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 84px; transition: height 0.5s var(--ease-out); }
 .nav.is-scrolled .nav-inner { height: 68px; }
-.nav.is-scrolled { background: rgba(245, 240, 232, 0.84); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 1px 0 var(--line); }
-.nav.on-night { color: var(--on-dusk); }
-.nav.on-night.is-scrolled { background: rgba(10, 15, 28, 0.72); box-shadow: 0 1px 0 var(--line-dusk); }
+.nav.is-scrolled { background: rgba(248, 244, 236, 0.86); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 1px 0 var(--line); }
+.nav.on-night { color: var(--on-esp); }
+.nav.on-night.is-scrolled { background: rgba(30, 25, 21, 0.74); box-shadow: 0 1px 0 var(--line-esp); }
 .nav.is-hidden { transform: translateY(-100%); }
 .nav.is-off { opacity: 0; pointer-events: none; }
-.nav-progress { position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: linear-gradient(to right, var(--brass), var(--sun)); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); opacity: 0; transition: opacity 0.4s; }
-[dir='rtl'] .nav-progress { transform-origin: 100% 50%; background: linear-gradient(to left, var(--brass), var(--sun)); }
+.nav-progress { position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: linear-gradient(to right, var(--brass), var(--brass-light)); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); opacity: 0; transition: opacity 0.4s; }
+[dir='rtl'] .nav-progress { transform-origin: 100% 50%; background: linear-gradient(to left, var(--brass), var(--brass-light)); }
 .nav.is-scrolled .nav-progress { opacity: 1; }
 .nav-logo { display: inline-flex; align-items: center; gap: 12px; font-family: var(--f-display); font-size: 1.12rem; letter-spacing: 0.1em; line-height: 1.1; }
 .nav-logo svg { width: 36px; height: 29px; transition: transform 0.6s var(--ease-out); }
@@ -18,21 +18,17 @@
 html[lang='ar'] .nav-logo small { text-transform: none; letter-spacing: 0.02em; font-size: 0.72rem; }
 .nav-links { display: none; align-items: center; gap: 6px; font-family: var(--f-sans); font-weight: 400; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; }
 html[lang='ar'] .nav-links { text-transform: none; letter-spacing: 0; font-size: 0.98rem; }
-/* each link locks on like the film's reticle: four corner brackets close in on hover / on the current page */
+/* each link: a brass hairline drawn under it on hover and on the current page */
 .nav-links a { position: relative; padding: 10px 14px; opacity: 0.78; transition: opacity 0.3s; }
+.nav-links a::after { content: ''; position: absolute; inset-inline: 14px; bottom: 4px; height: 1px; background: var(--brass); transform: scaleX(0); transition: transform 0.5s var(--ease-out); }
 .nav-links a:hover, .nav-links a[aria-current='page'] { opacity: 1; }
-.nb { position: absolute; width: 6px; height: 6px; border: 0 solid var(--brass); opacity: 0; transition: opacity 0.25s, translate 0.35s var(--ease-snap); }
-.nb0 { top: 2px; left: 2px; border-top-width: 1px; border-left-width: 1px; translate: -5px -5px; }
-.nb1 { top: 2px; right: 2px; border-top-width: 1px; border-right-width: 1px; translate: 5px -5px; }
-.nb2 { bottom: 2px; right: 2px; border-bottom-width: 1px; border-right-width: 1px; translate: 5px 5px; }
-.nb3 { bottom: 2px; left: 2px; border-bottom-width: 1px; border-left-width: 1px; translate: -5px 5px; }
-.nav-links a:hover .nb, .nav-links a[aria-current='page'] .nb { opacity: 1; translate: 0 0; }
+.nav-links a:hover::after, .nav-links a[aria-current='page']::after { transform: scaleX(1); }
 .nav-actions { display: flex; align-items: center; gap: 16px; }
 .lang-toggle { font-family: var(--f-sans); font-size: 0.8rem; letter-spacing: 0.1em; padding: 8px 2px; position: relative; }
 .lang-toggle::after { content: ''; position: absolute; inset-inline: 0; bottom: 2px; height: 1px; background: currentColor; transform: scaleX(0); transition: transform 0.4s var(--ease-out); }
 .lang-toggle:hover::after { transform: scaleX(1); }
 .nav .nav-cta { display: none; color: inherit; border-color: currentColor; }
-.nav.on-night .nav-cta { border-color: rgba(238, 241, 246, 0.4); }
+.nav.on-night .nav-cta { border-color: rgba(239, 231, 218, 0.4); }
 .nav-burger { display: inline-grid; place-items: center; width: 44px; height: 44px; }
 .nav-burger span { display: block; width: 24px; height: 1px; background: currentColor; position: relative; transition: background 0.3s; }
 .nav-burger span::before, .nav-burger span::after { content: ''; position: absolute; inset-inline: 0; height: 1px; background: currentColor; transition: transform 0.45s var(--ease-out), width 0.45s var(--ease-out); }
@@ -40,17 +36,20 @@ html[lang='ar'] .nav-links { text-transform: none; letter-spacing: 0; font-size:
 .nav.is-open .nav-burger span { background: transparent; }
 .nav.is-open .nav-burger span::before { transform: translateY(7px) rotate(45deg); }
 .nav.is-open .nav-burger span::after { transform: translateY(-7px) rotate(-45deg); width: 100%; }
-.nav.is-open { color: var(--on-dusk); background: transparent !important; box-shadow: none !important; }
+.nav.is-open { color: var(--on-esp); background: transparent !important; box-shadow: none !important; }
 @media (min-width: 1040px) { .nav-links { display: flex; } .nav .nav-cta { display: inline-flex; } .nav-burger { display: none; } }
 
-/* drawer: the night glass with the HUD grid; links rise in one after another */
-.nav-drawer { position: fixed; inset: 0; z-index: 890; background: var(--dusk); color: var(--on-dusk); display: grid; align-content: center; padding: 110px var(--pad) 60px; gap: 34px; clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path 0.8s var(--ease-io), visibility 0.8s; }
+/* drawer: warm espresso with a faint golden-hour light; links rise in one after another */
+.nav-drawer { position: fixed; inset: 0; z-index: 890; background: radial-gradient(ellipse 80% 60% at 85% 0%, rgba(216, 192, 146, 0.12), transparent 70%), var(--espresso); color: var(--on-esp); display: grid; align-content: center; padding: 110px var(--pad) 60px; gap: 34px; clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path 0.8s var(--ease-io), visibility 0.8s; }
 .nav-drawer.is-open { clip-path: inset(0 0 0 0); visibility: visible; }
-.drawer-grid { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(var(--line-dusk) 1px, transparent 1px), linear-gradient(90deg, var(--line-dusk) 1px, transparent 1px); background-size: 72px 72px; -webkit-mask-image: radial-gradient(ellipse at 70% 40%, #000, transparent 75%); mask-image: radial-gradient(ellipse at 70% 40%, #000, transparent 75%); }
 .drawer-links { display: grid; position: relative; }
-.drawer-links a { display: flex; align-items: baseline; gap: 18px; font-family: var(--f-display); font-size: clamp(2rem, 8vw, 3.4rem); padding-block: 12px; border-bottom: 1px solid var(--line-dusk); opacity: 0; transform: translateY(30px); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out), color 0.3s; }
-.drawer-links a b { font-size: 0.8rem; color: var(--sun); letter-spacing: 0.1em; }
+.drawer-links a { display: flex; align-items: baseline; gap: 18px; font-family: var(--f-display); font-size: clamp(2rem, 8vw, 3.4rem); padding-block: 12px; border-bottom: 1px solid var(--line-esp); opacity: 0; transform: translateY(30px); transition: opacity 0.6s var(--ease-out), transform 0.8s var(--ease-out), color 0.3s; }
+.drawer-links a b { font-size: 0.8rem; font-weight: 300; color: var(--brass-light); letter-spacing: 0.1em; }
 .nav-drawer.is-open .drawer-links a { opacity: 1; transform: none; transition-delay: calc(0.25s + var(--i) * 0.07s); }
-.drawer-links a[aria-current='page'], .drawer-links a:hover { color: var(--sun); }
+.drawer-links a[aria-current='page'], .drawer-links a:hover { color: var(--brass-light); }
 .drawer-foot { display: flex; flex-wrap: wrap; gap: 14px; position: relative; opacity: 0; transition: opacity 0.6s 0.6s; }
 .nav-drawer.is-open .drawer-foot { opacity: 1; }
+
+/* the landing's own brand row and skip link duplicate the nav whenever the nav is showing (a returning visitor, or once
+   the tour is done): the film keeps its row only while the nav is off */
+.nav:not(.is-off) ~ main .walk-top { opacity: 0; pointer-events: none; }

@@ -1,14 +1,11 @@
 ---
-/** Section head: a coordinate readout (§ number, plus a label when the live site has one, decoded in like the film's
-    HUD), a title whose letters rise in (words in Arabic) with a lit underline, and an optional lead.
-    The head is also a waypoint on the page route (label = `label`, else the title). */
-interface Props { no: string; label?: string; title: string; lead?: string; center?: boolean; tag?: 'h1' | 'h2'; wp?: boolean }
-const { no, label, title, lead, center = false, tag: Tag = 'h2', wp = true } = Astro.props;
-const wpLabel = (label ?? title).replace(/<[^>]+>/g, '');
+/** Section head: an optional small-caps kicker with a brass hairline, a serif title, a short brass rule and a lead. */
+interface Props { label?: string; title: string; lead?: string; center?: boolean; tag?: 'h1' | 'h2' }
+const { label, title, lead, center = false, tag: Tag = 'h2' } = Astro.props;
 ---
-<header class:list={['sh', { center }]} data-reveal="sh" data-wp={wp ? wpLabel : undefined} data-wp-no={no}>
-  <span class="sh-coord"><span class="num">§{no}</span>{label && <span data-decode>{label}</span>}</span>
-  <Tag class="sh-title" data-split set:html={title} />
-  {lead && <p class="sh-lead" data-reveal style="--d:0.25s">{lead}</p>}
+<header class:list={['sh', { center }]} data-reveal>
+  {label && <span class="kicker">{label}</span>}
+  <Tag class="sh-title" set:html={title} />
+  {lead && <p class="sh-lead">{lead}</p>}
   <slot />
 </header>

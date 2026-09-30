@@ -14,12 +14,12 @@ const t = useT(locale);
 const items = byCategory(c.slug);
 ---
 <Base {locale} title={`${l(c.name, locale)} | ${locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home'}`} description={l(c.blurb, locale)} image={c.image}>
-  <PageHero title={l(c.name, locale)} figure="devices" tag={l(c.name, locale)} lead={l(c.blurb, locale)} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { href: localePath(locale, 'products'), label: t('nav.products') }, { label: l(c.name, locale) }]}>
+  <PageHero title={l(c.name, locale)} lead={l(c.blurb, locale)} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { href: localePath(locale, 'products'), label: t('nav.products') }, { label: l(c.name, locale) }]}>
     <nav class="cat-tabs" aria-label={t('nav.products')} data-ph-in style="--d:0.75s">
       {allCategories.map((x) => <a href={localePath(locale, `products/${x.slug}`)} aria-current={x.slug === c.slug ? 'page' : undefined}>{l(x.name, locale)}</a>)}
     </nav>
   </PageHero>
   <section class="band band--paper" data-tone="lime">
-    <div class="wrap"><div class="prod-grid" data-stagger="0.08">{items.map((p, i) => <ProductCard product={p} {locale} eager={i < 4} index={i} />)}</div></div>
+    <div class="wrap"><div class="prod-grid" data-stagger="0.08">{items.map((p, i) => <ProductCard product={p} {locale} eager={i < 4} />)}</div></div>
   </section>
 </Base>

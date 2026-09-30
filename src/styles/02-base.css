@@ -16,7 +16,7 @@ html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { letter-spacing: 0; 
 h1 em, h2 em { font-style: normal; color: var(--brass-deep); }
 p { max-width: var(--maxw-text); text-wrap: pretty; }
 strong { font-weight: 500; }
-::selection { background: var(--brass); color: var(--dusk); }
+::selection { background: var(--brass-light); color: var(--espresso); }
 :focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
 .latin { font-family: var(--f-sans); direction: ltr; unicode-bidi: isolate; }
 .num, .serif-num { font-family: var(--f-num); font-variant-numeric: lining-nums tabular-nums; direction: ltr; unicode-bidi: isolate; }

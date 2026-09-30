@@ -1,30 +1,17 @@
-/** Global client behaviour: nav, reveals, the page route, the HUD cursor, magnetic buttons, parallax, accordions,
-    the page hero, language memory and smooth scroll. */
+/** Global client behaviour: nav, reveals, magnetic buttons, accordions, the page hero, language memory and smooth scroll. */
 import { initNav } from './nav';
 import { initReveal } from './motion/reveal';
-import { initRoute } from './motion/route';
-import { initCursor } from './motion/cursor';
-import { initMagnetic, initSpot } from './motion/magnetic';
-import { initParallax } from './motion/parallax';
+import { initMagnetic } from './motion/magnetic';
 import { initAccordions } from './motion/accordion';
 import { initPageHero } from './motion/hero';
-import { initNets } from './motion/net';
-import { initFans } from './motion/fan';
 import { reduced } from './motion/loop';
 
 initNav();
 initPageHero();
 initReveal();
 initAccordions();
-initParallax();
 initMagnetic();
-initSpot();
-initCursor();
-initRoute();
-initNets();
-initFans();
 initSmoothScroll();
-
 /** Lenis on fine-pointer desktops only; loaded lazily so phones ship no extra JS. The film locks scroll with
     body.no-scroll while it plays, so Lenis stops with it. */
 async function initSmoothScroll() {

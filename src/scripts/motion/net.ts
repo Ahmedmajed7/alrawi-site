@@ -1,15 +1,15 @@
-/** The Dartz constellation, in brass and navy: drifting points joined by hairlines when close, warming toward the
-    pointer. ~40 ticks/s, DPR ≤ 2, paused off-screen, when the tab is hidden and under reduced motion. */
+/** The constellation behind the home hero after the film (canvas[data-net="logo"]): drifting points in the logo's navy
+    joined by hairlines when close, lit blue and green toward the pointer. ~40 ticks/s, DPR ≤ 2, paused off-screen,
+    when the tab is hidden and under reduced motion. */
 import { reduced, finePointer } from './loop';
 
 export function initNets() {
   if (reduced()) return;
-  document.querySelectorAll<HTMLCanvasElement>('canvas[data-net]').forEach((cv) => {
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-net="logo"]').forEach((cv) => {
     const ctx = cv.getContext('2d'); if (!ctx) return;
     const host = cv.parentElement!;
-    // palette: brass on navy by default; the hero after the film uses the logo's navy, blue and green
-    const logo = cv.dataset.net === 'logo';
-    const far = '#18254f', hot = logo ? ['#3b99d4', '#60bc50'] : ['#a98a5b', '#a98a5b'];
+    // the logo's navy, blue and green
+    const far = '#18254f', hot = ['#3b99d4', '#60bc50'];
     let W = 0, H = 0, dpr = 1, pts: { x: number; y: number; vx: number; vy: number }[] = [];
     let mx = -999, my = -999, on = false, raf = 0, last = 0;
     const size = () => {
@@ -36,7 +36,7 @@ export function initNets() {
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
         const near = Math.hypot(a.x - mx, a.y - my) < 130;
-        ctx.globalAlpha = near ? 0.9 : (logo && i % 5 === 0 ? 0.6 : 0.35); ctx.fillStyle = near ? nearC(i) : (logo && i % 5 === 0 ? (i % 2 ? hot[0] : hot[1]) : far);
+        ctx.globalAlpha = near ? 0.9 : (i % 5 === 0 ? 0.6 : 0.35); ctx.fillStyle = near ? nearC(i) : (i % 5 === 0 ? (i % 2 ? hot[0] : hot[1]) : far);
         ctx.beginPath(); ctx.arc(a.x, a.y, near ? 2 : 1.4, 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;

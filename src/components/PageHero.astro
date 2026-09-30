@@ -1,24 +1,18 @@
 ---
-/** Inner-page opening (Dartz hero, our vibe): drafting paper with target rings and a live constellation, a § coordinate,
-    the title in the film's spaced caps, and a blueprint drawing of the page's device with the HUD reticle locking on. */
-import Figure from '@/components/Figure.astro';
-interface Props { no?: string; eyebrow?: string; title: string; lead?: string; figure?: 'panel' | 'lock' | 'villa' | 'devices' | 'signal'; tag?: string; crumbs?: { href?: string; label: string }[] }
-const { no = '00', eyebrow, title, lead, figure, tag, crumbs = [] } = Astro.props;
+/** Inner-page opening: breadcrumbs, an optional kicker, the title in the display serif over a short brass rule, a lead,
+    on warm ivory with a faint golden-hour light from the top corner (the film's warmth, no ornament). */
+interface Props { eyebrow?: string; title: string; lead?: string; crumbs?: { href?: string; label: string }[] }
+const { eyebrow, title, lead, crumbs = [] } = Astro.props;
 ---
 <section class="ph band band--paper" data-tone="lime" data-ph>
-  <canvas class="net" data-net aria-hidden="true"></canvas>
-  <div class="rings" aria-hidden="true"></div>
   <div class="wrap ph-inner">
-    <div class="ph-text">
-      {crumbs.length > 0 && (
-        <ol class="breadcrumb" data-ph-in style="--d:0.05s">{crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
-      )}
-      <span class="sh-coord" data-ph-in style="--d:0.15s"><span class="num">§{no}</span>{eyebrow && <span data-decode>{eyebrow}</span>}</span>
-      <h1 class="ph-title caps" data-split set:html={title} />
-      {lead && <p class="ph-lead" data-ph-in style="--d:0.55s">{lead}</p>}
-      <slot />
-    </div>
-    {figure && <Figure kind={figure} label={tag} class="ph-fig" />}
+    {crumbs.length > 0 && (
+      <ol class="breadcrumb" data-ph-in>{crumbs.map((c) => <li>{c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
+    )}
+    {eyebrow && <span class="kicker" data-ph-in style="--d:0.08s">{eyebrow}</span>}
+    <h1 class="ph-title" data-ph-in style="--d:0.12s" set:html={title} />
+    <i class="ph-rule" data-ph-in style="--d:0.3s" aria-hidden="true"></i>
+    {lead && <p class="ph-lead" data-ph-in style="--d:0.38s">{lead}</p>}
+    <slot />
   </div>
-  <span class="ph-cue" aria-hidden="true"><i></i></span>
 </section>

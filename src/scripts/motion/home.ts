@@ -1,7 +1,10 @@
-/** Home only: the process rail draws with scroll and lights each step as the line reaches it. */
+/** Home only: the hero after the film (constellation, beams that lean with the pointer and spread on scroll) and the
+    process rail, which draws with scroll and lights each step as the line reaches it. */
 import { onScroll, reduced, finePointer } from './loop';
+import { initNets } from './net';
 
 export function initHome() {
+  initNets();
   // the hero after the film: its beams and mark lean with the pointer (--px/--py in -1..1)
   const hero = document.querySelector<HTMLElement>('[data-hero2]');
   if (hero && !reduced()) {

@@ -3,10 +3,8 @@ import Base from '@/layouts/Base.astro';
 import Walkthrough from '@/components/Walkthrough.astro';
 import Icon from '@/components/Icons.astro';
 import SecHead from '@/components/SecHead.astro';
-import HudFrame from '@/components/HudFrame.astro';
-import Dial from '@/components/Dial.astro';
+import Stat from '@/components/Stat.astro';
 import ServiceArt from '@/components/ServiceArt.astro';
-import Wm from '@/components/Wm.astro';
 import { staticLangPaths, useT, strings, l, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 import services from '@/data/services.json';
@@ -67,10 +65,9 @@ const helpline = site.offices[0].phones[0];
 
   <!-- 01 About us -->
   <section class="band band--paper" id="about-us" data-tone="lime">
-    <Wm kind="rings" class="wm-end" />
     <div class="wrap about-grid">
       <div class="about-text">
-        <SecHead no="01" label={t('aboutUs.eyebrow')} title={t('aboutUs.title')} />
+        <SecHead label={t('aboutUs.eyebrow')} title={t('aboutUs.title')} />
         <blockquote class="about-quote" data-reveal>
           <span class="label">{t('aboutUs.brand')}</span>
           <p>“{t('aboutUs.quote')}”</p>
@@ -86,25 +83,21 @@ const helpline = site.offices[0].phones[0];
           <Icon name="phone" />
         </a>
       </div>
-      <HudFrame class="panel" tag="A · 01">
-        <div class="panel-in" data-reveal="blur">
-          <div class="dials" data-stagger="0.15">
-            {s.aboutUs.stats.map((x, i) => <Dial n={x.n} suffix={x.suffix} label={x.label} fill={[0.35, 0.68, 0.92][i]} />)}
-          </div>
-          <div class="panel-foot" aria-hidden="true">{Array.from({ length: 32 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
+      <div class="panel" data-reveal>
+        <div class="stats">
+          {s.aboutUs.stats.map((x) => <Stat n={x.n} suffix={x.suffix} label={x.label} />)}
         </div>
-      </HudFrame>
+      </div>
     </div>
   </section>
 
   <!-- 02 Our Services: the editorial ledger -->
   <section class="band band--mist" id="services" data-tone="lime">
-    <Wm kind="arc" class="wm-start" />
     <div class="wrap">
-      <SecHead no="02" label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
+      <SecHead label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
       <div class="ledger">
         {services.map((x, i) => (
-          <article class="row" data-reveal="rise" data-spot>
+          <article class="row" data-reveal>
             <span class="row-no num">{two(i + 1)}</span>
             <div class="row-name"><h3>{l(x.name, locale)}</h3><em>{l(x.sub, locale)}</em></div>
             <p class="row-body">{l(x.body, locale)}</p>
@@ -117,12 +110,11 @@ const helpline = site.offices[0].phones[0];
 
   <!-- 03 Why Choose Us -->
   <section class="band band--paper" id="why" data-tone="lime">
-    <Wm kind="protractor" class="wm-end" />
     <div class="wrap">
-      <SecHead no="03" title={t('why.title')} />
+      <SecHead title={t('why.title')} />
       <ol class="why-grid">
         {s.why.items.map((x, i) => (
-          <li class="why" data-reveal="rise" data-spot style={`--d:${(i % 2) * 0.1}s`}>
+          <li class="why" data-reveal style={`--d:${(i % 2) * 0.1}s`}>
             <span class="why-no num">{two(i + 1)}</span>
             <div><h3>{x.title}</h3><p>{x.body}</p></div>
           </li>
@@ -134,7 +126,7 @@ const helpline = site.offices[0].phones[0];
   <!-- 04 How It Works: the flight arc -->
   <section class="band band--mist" id="how" data-tone="lime">
     <div class="wrap">
-      <SecHead no="04" title={t('how.title')} />
+      <SecHead title={t('how.title')} />
       <div class="rail" data-rail>
         <svg class="rail-arc" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
           <path class="rail-ghost" d="M0 96 C 250 10, 750 10, 1000 96" />
@@ -157,10 +149,9 @@ const helpline = site.offices[0].phones[0];
   <!-- 05 the live site's two questions -->
   <section class="band band--paper faq" id="faq" data-tone="lime">
     <div class="wrap faq-grid">
-      <header class="sh faq-head" data-reveal="sh" data-wp={s.faq.items[0].q} data-wp-no="05">
-        <span class="sh-coord"><span class="num">§05</span></span>
-        <span class="faq-q" aria-hidden="true">?</span>
-      </header>
+      <div class="faq-head" data-reveal aria-hidden="true">
+        <span class="faq-q">{locale === 'ar' ? '؟' : '?'}</span>
+      </div>
       <div class="faq-list" data-acc-group>
         {s.faq.items.map((x, i) => (
           <details class="qa" data-acc data-reveal open={i === 0} style={`--d:${i * 0.12}s`}>

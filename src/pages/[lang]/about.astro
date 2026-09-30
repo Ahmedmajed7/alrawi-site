@@ -3,9 +3,7 @@ import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icons.astro';
 import PageHero from '@/components/PageHero.astro';
 import SecHead from '@/components/SecHead.astro';
-import HudFrame from '@/components/HudFrame.astro';
-import Dial from '@/components/Dial.astro';
-import Wm from '@/components/Wm.astro';
+import Stat from '@/components/Stat.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 import services from '@/data/services.json';
@@ -14,50 +12,42 @@ const locale = Astro.params.lang as Locale;
 const t = useT(locale);
 const a = strings(locale).aboutPage;
 const brand = l(site.name, locale);
-const two = (n: number) => String(n).padStart(2, '0');
 // the live About page, in its order: the company, years of experience, vision and mission, services, range of products
 ---
 <Base {locale} title={`${t('meta.aboutTitle')} | ${brand}`} description={a.p1.slice(0, 160)}>
-  <PageHero title={a.title} figure="villa" tag={brand} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: a.title }]} />
+  <PageHero title={a.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: a.title }]} />
 
   <section class="band band--paper" data-tone="lime">
-    <Wm kind="rings" class="wm-end" />
     <div class="wrap about-co">
       <div class="about-co-text">
-        <SecHead no="01" title={a.h2} />
+        <SecHead title={a.h2} />
         <p class="about-co-lead" data-reveal>{a.p1}</p>
         <p data-reveal style="--d:0.12s">{a.p2}</p>
       </div>
-      <HudFrame class="panel panel--solo" tag="A · 01">
-        <div class="panel-in" data-reveal="blur">
-          <Dial n={a.years.n} label={a.years.label} fill={0.5} big />
-          <div class="panel-foot" aria-hidden="true">{Array.from({ length: 32 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
-        </div>
-      </HudFrame>
+      <div class="panel panel--solo" data-reveal>
+        <Stat n={a.years.n} label={a.years.label} big />
+      </div>
     </div>
   </section>
 
   <section class="band band--mist" data-tone="lime">
-    <div class="wrap vm">
+    <div class="wrap"><div class="vm">
       {[a.vision, a.mission].map((x, i) => (
-        <article class="vm-card" data-reveal="rise" data-spot style={`--d:${i * 0.12}s`}>
-          <span class="sh-coord"><span class="num">§0{i + 2}</span></span>
+        <article class="vm-card" data-reveal style={`--d:${i * 0.12}s`}>
           <span class="vm-ring" aria-hidden="true"><Icon name={i ? 'bolt' : 'sun'} /></span>
-          <h2 class="vm-title" data-split>{x.title}</h2>
+          <h2 class="vm-title">{x.title}</h2>
           <p>{x.body}</p>
         </article>
       ))}
-    </div>
+    </div></div>
   </section>
 
   <section class="band band--paper" id="services" data-tone="lime">
-    <Wm kind="arc" class="wm-start" />
     <div class="wrap">
-      <SecHead no="04" label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
+      <SecHead label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
       <div class="cells" data-stagger="0.07">
-        {services.map((x, i) => (
-          <article class="cell" data-reveal="rise" data-spot>
-            <span class="cell-no num">{two(i + 1)}</span>
+        {services.map((x) => (
+          <article class="cell" data-reveal>
             <span class="cell-ic"><Icon name={x.icon} /></span>
             <h3>{l(x.name, locale)}</h3>
             <p>{l(x.sub, locale)}</p>
@@ -69,10 +59,10 @@ const two = (n: number) => String(n).padStart(2, '0');
 
   <section class="band band--mist" data-tone="lime">
     <div class="wrap">
-      <SecHead no="05" title={a.range} />
+      <SecHead title={a.range} />
       <ul class="brands" data-stagger="0.05">
-        {site.brands.map((b, i) => (
-          <li data-reveal="rise" data-spot><span class="brand-no num" aria-hidden="true">{two(i + 1)}</span><img src={b.logo} alt={b.name} width={b.w} height={b.h} loading="lazy" decoding="async" /></li>
+        {site.brands.map((b) => (
+          <li data-reveal><img src={b.logo} alt={b.name} width={b.w} height={b.h} loading="lazy" decoding="async" /></li>
         ))}
       </ul>
     </div>
