@@ -3,7 +3,7 @@ export function mountSlideshow(root: HTMLElement, count: number, onIndex: (i: nu
   const host = root.querySelector<HTMLElement>('[data-walk-slides]')!;
   host.hidden = false;
   const imgs: HTMLImageElement[] = [];
-  for (let i = 0; i <= count; i++) { const im = new Image(); im.src = `/img/house/stop-${i}.webp`; im.alt = ''; im.decoding = 'async'; host.appendChild(im); imgs.push(im); }
+  for (let i = 0; i <= count; i++) { const im = new Image(); im.src = `/img/villa/stop-${i}.webp`; im.alt = ''; im.decoding = 'async'; host.appendChild(im); imgs.push(im); }
   let idx = -1;
   const show = (i: number) => { idx = i; imgs.forEach((im, k) => im.classList.toggle('is-on', k === i)); onIndex(i); };
   show(0);

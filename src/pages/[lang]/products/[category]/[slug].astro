@@ -1,7 +1,8 @@
 ---
 import Base from '@/layouts/Base.astro';
-import ProductViewer from '@/components/ProductViewer.astro';
 import ProductCard from '@/components/ProductCard.astro';
+import HudFrame from '@/components/HudFrame.astro';
+import SecHead from '@/components/SecHead.astro';
 import Icon from '@/components/Icons.astro';
 import { locales, useT, l, localePath, type Locale } from '@/i18n/utils';
 import { allProducts, byCategory, categoryOf } from '@/lib/products';
@@ -23,6 +24,7 @@ const name = l(p.name, locale);
 const brand = locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home';
 const wa = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(t('product.quoteMsg') + name)}`;
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? site.domain;
+const shots = [p.image, ...p.gallery];
 const jsonLd = [{
   '@context': 'https://schema.org', '@type': 'Product', name, description: l(p.description, locale),
   image: `${siteUrl}${p.image}`, category: l(cat.name, locale), brand: { '@type': 'Organization', name: site.name.en },
@@ -30,50 +32,67 @@ const jsonLd = [{
 }];
 ---
 <Base {locale} title={`${name} | ${brand}`} description={l(p.tagline, locale) + '. ' + l(p.description, locale).slice(0, 110)} image={p.image} type="product" {jsonLd} lightNav>
-  <article class="wrap pd">
-    <ol class="breadcrumb">
-      <li><a href={localePath(locale)}>{t('nav.home')}</a></li>
-      <li><a href={localePath(locale, 'products')}>{t('nav.products')}</a></li>
-      <li><a href={localePath(locale, `products/${cat.slug}`)}>{l(cat.name, locale)}</a></li>
-      <li aria-current="page">{name}</li>
-    </ol>
-    <div class="pd-grid">
-      <div class="pd-viewer-col" data-reveal="fade">
-        <ProductViewer product={p} {locale} />
-        {p.gallery.length > 0 && (
-          <div class="gallery">{p.gallery.map((g) => <figure><img src={g} alt={name} loading="lazy" decoding="async" width="800" height="600" /></figure>)}</div>
-        )}
-      </div>
-      <div class="pd-info" data-reveal>
-        <span class="eyebrow">{l(cat.name, locale)}</span>
-        <h1>{name}</h1>
-        <p class="pd-tag">{l(p.tagline, locale)}</p>
-        <p class="pd-desc">{l(p.description, locale)}</p>
-        <div>
-          <h2>{t('product.features')}</h2>
-          <ul class="feat-list">{p.features.map((f) => <li><Icon name="check" /><span>{l(f, locale)}</span></li>)}</ul>
+  <section class="band band--paper pd" data-tone="lime">
+    <div class="wrap">
+      <ol class="breadcrumb pd-crumbs" data-reveal>
+        <li><a href={localePath(locale)}>{t('nav.home')}</a></li>
+        <li><a href={localePath(locale, 'products')}>{t('nav.products')}</a></li>
+        <li><a href={localePath(locale, `products/${cat.slug}`)}>{l(cat.name, locale)}</a></li>
+        <li aria-current="page">{name}</li>
+      </ol>
+      <div class="pd-grid">
+        <div class="pd-media" data-gallery>
+          <HudFrame class="pd-stage" tag={`${String(idx + 1).padStart(2, '0')} / ${String(siblings.length).padStart(2, '0')}`}>
+            <div class="pd-shot" data-reveal="mask">
+              {shots.map((g, i) => <img src={g} alt={i ? '' : name} width="1200" height="1200" loading={i ? 'lazy' : 'eager'} fetchpriority={i ? undefined : 'high'} decoding="async" class:list={[{ 'is-on': i === 0 }]} data-shot={i} />)}
+              <i class="pd-scan" aria-hidden="true"></i>
+            </div>
+          </HudFrame>
+          {shots.length > 1 && (
+            <div class="pd-thumbs">{shots.map((g, i) => <button type="button" class:list={[{ 'is-on': i === 0 }]} data-thumb={i} aria-label={`${name} ${i + 1}`}><img src={g} alt="" width="120" height="120" loading="lazy" decoding="async" /></button>)}</div>
+          )}
         </div>
-        <div>
-          <h2>{t('product.worksWith')}</h2>
-          <div class="pd-tags">{p.tags.map((x) => <span class="tag">{x}</span>)}</div>
+        <div class="pd-info">
+          <span class="sh-coord" data-reveal><span class="num">§{String(idx + 1).padStart(2, '0')}</span><span data-decode>{l(cat.name, locale)}</span></span>
+          <h1 class="pd-title" data-split>{name}</h1>
+          <p class="pd-tag" data-reveal>{l(p.tagline, locale)}</p>
+          <p class="pd-desc" data-reveal style="--d:0.08s">{l(p.description, locale)}</p>
+          <div data-reveal style="--d:0.14s">
+            <h2 class="label">{t('product.features')}</h2>
+            <ul class="feat-list">{p.features.map((f) => <li><Icon name="check" /><span>{l(f, locale)}</span></li>)}</ul>
+          </div>
+          <div data-reveal style="--d:0.2s">
+            <h2 class="label">{t('product.worksWith')}</h2>
+            <div class="pd-tags">{p.tags.map((x) => <span class="tag">{x}</span>)}</div>
+          </div>
+          <div class="pd-actions" data-reveal style="--d:0.26s">
+            <a class="btn btn-wa" href={wa} target="_blank" rel="noopener" data-magnetic><Icon name="whatsapp" /> {t('product.quote')}</a>
+            <a class="btn" href={localePath(locale, 'contact')}>{t('nav.contact')}</a>
+          </div>
+          {siblings.length > 1 && <nav class="pd-nav" aria-label={t('product.related')}>
+            <a href={localePath(locale, `products/${prev.category}/${prev.slug}`)} rel="prev"><Icon name="arrow" class="icon-dir" style="transform:rotate(180deg)" /> <span>{l(prev.name, locale)}</span></a>
+            <a href={localePath(locale, `products/${next.category}/${next.slug}`)} rel="next"><span>{l(next.name, locale)}</span> <Icon name="arrow" class="icon-dir" /></a>
+          </nav>}
         </div>
-        <div class="pd-actions">
-          <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('product.quote')}</a>
-          <a class="btn" href={localePath(locale, 'contact')}>{t('nav.contact')}</a>
-        </div>
-        <nav class="pd-nav" aria-label={t('product.related')}>
-          <a href={localePath(locale, `products/${prev.category}/${prev.slug}`)} rel="prev"><Icon name="arrow" class="icon-dir" style="transform:rotate(180deg)" /> {l(prev.name, locale)}</a>
-          <a href={localePath(locale, `products/${next.category}/${next.slug}`)} rel="next">{l(next.name, locale)} <Icon name="arrow" class="icon-dir" /></a>
-        </nav>
       </div>
     </div>
-  </article>
+  </section>
   {related.length > 0 && (
-    <section class="section section-alt section-tight">
+    <section class="band band--mist" data-tone="lime">
       <div class="wrap">
-        <div class="section-head" data-reveal><span class="eyebrow">{l(cat.name, locale)}</span><h2>{t('product.related')}</h2></div>
-        <div class="grid grid-4" data-stagger>{related.map((x) => <ProductCard product={x} {locale} />)}</div>
+        <SecHead no="02" label={l(cat.name, locale)} title={t('product.related')} />
+        <div class="prod-grid" data-stagger="0.08">{related.map((x, i) => <ProductCard product={x} {locale} index={i} />)}</div>
       </div>
     </section>
   )}
+  <script>
+    // gallery: thumbnails cross-fade the stage
+    document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((g) => {
+      const shots = g.querySelectorAll<HTMLElement>('[data-shot]'), thumbs = g.querySelectorAll<HTMLElement>('[data-thumb]');
+      thumbs.forEach((b) => b.addEventListener('click', () => {
+        const i = Number(b.dataset.thumb);
+        shots.forEach((s, k) => s.classList.toggle('is-on', k === i)); thumbs.forEach((s, k) => s.classList.toggle('is-on', k === i));
+      }));
+    });
+  </script>
 </Base>

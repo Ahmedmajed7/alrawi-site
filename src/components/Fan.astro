@@ -1,0 +1,21 @@
+---
+/** Dartz's fanned cards, in the live site's own photo shape (600 × 400, no stretch or forced crop): three rounded
+    cards, the middle one upright and lifted, the outer two turned ±14°. Each starts as a hairline outline (the draft)
+    and fills top-down as the fan scrolls in, while the outer cards open out (scripts/motion/fan.ts sets --o 0 → 1). */
+interface Shot { src: string; alt?: string; callout?: string }
+interface Props { shots: Shot[]; class?: string }
+const { shots, class: cls = '' } = Astro.props;
+const w = 600, h = 400;
+---
+<div class:list={['fan', cls]} data-fan>
+  {shots.slice(0, 3).map((s, i) => (
+    <figure class={`fc fc${i + 1}`} data-callout={s.callout}>
+      <svg class="draft" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+        <rect class="dl" x="1" y="1" width={w - 2} height={h - 2} rx="14" />
+        <path class="dd" d={`M30 ${h * 0.72}H${w - 30}M30 ${h * 0.84}H${w * 0.5}`} />
+      </svg>
+      <img src={s.src} alt={s.alt ?? ''} width={w} height={h} loading="lazy" decoding="async" />
+      {s.callout && <b class="fc-tag" aria-hidden="true" dir="ltr">{s.callout}</b>}
+    </figure>
+  ))}
+</div>

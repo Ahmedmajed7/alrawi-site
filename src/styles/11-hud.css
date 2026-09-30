@@ -1,0 +1,328 @@
+/* ============================ DEVICE HUD ============================
+   When the tour stops on a device, its information unfolds beside it like a lab hologram: a transparent glass panel opens
+   from the edge that faces the device, the title and the specs decode, one widget shows the device at work. No marker on
+   the device and no leader line (removed at the client's request, 29 Sep 2026): the panel's near edge lights up level
+   with the device, and the room falls back a little round it.
+   Placed by scripts/film/callout.ts (film and live 3D alike); markup in components/Walkthrough.astro.
+
+   Rules of the house:
+   - everything that moves is transform / opacity / stroke-dashoffset / clip-path, switched by `.is-on`; entries are
+     delayed transitions (the timeline is in the delays), exits are the same properties without delay, under 300 ms
+   - the glass never sits under an ancestor with opacity, filter or clip-path (that would cut its backdrop blur off from
+     the film): the glass itself unfolds, the text is a sibling layer on top
+   - numbers that count are CSS counters fed by registered custom properties: no script runs while the HUD idles
+   - sides are physical (they depend on where the device is in the picture); everything inside the panel is logical */
+@property --hud-n { syntax: '<integer>'; inherits: true; initial-value: 0; } /* a readout's figure */
+@property --hud-f { syntax: '<number>'; inherits: true; initial-value: 0; } /* … and its fill, 0..100 */
+@property --hud-mx { syntax: '<number>'; inherits: false; initial-value: 0; } /* pointer, -1..1 (hud.ts) */
+@property --hud-my { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --hud-pan { syntax: '<length>'; inherits: true; initial-value: 0px; } /* the film slid sideways / up so the device is in view on a phone */
+@property --hud-pan-y { syntax: '<length>'; inherits: true; initial-value: 0px; }
+
+.walk {
+  /* hologram blue out of the brand's blue and green; brass (site token) for the key figures */
+  --hud-1: #6fe3ff; --hud-2: #3d9bff; --hud-ok: #72e6a0; --hud-key: var(--brass-light);
+  --hud-label: #b4efff; --hud-dim: rgba(111, 227, 255, 0.55); --hud-line: rgba(140, 232, 255, 0.3); --hud-faint: rgba(111, 227, 255, 0.14);
+  --hud-ink: #f7fbff; --hud-soft: rgba(232, 242, 255, 0.95);
+  /* the glass is mostly air: a thin tint over a lightly blurred, dimmed view of the room (the backdrop filter does the
+     darkening, so the wall behind still shows through); --hud-solid is for machines without a live blur */
+  --hud-glass: rgba(6, 40, 72, 0.17); --hud-solid: rgba(8, 18, 34, 0.56); --hud-halo: rgba(2, 8, 18, 0.9);
+  /* legibility over a pale wall or a dark door without a slab behind the text: a tight dark rim and a soft local shade under every glyph */
+  --hud-ts: 0 0 1px rgba(2, 8, 18, 0.95), 0 1px 2px rgba(2, 8, 18, 0.75), 0 0 8px rgba(2, 10, 22, 0.55), 0 0 18px rgba(2, 10, 22, 0.35);
+  --hud-e: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --hud-shade: 0.26; --hud-dir: 1;
+  transition: --hud-pan 0.7s var(--hud-e), --hud-pan-y 0.7s var(--hud-e);
+}
+[dir='rtl'] .walk { --hud-dir: -1; }
+.walk[data-bg-top='light'], .walk[data-bg-bottom='light'] { --hud-shade: 0.14; } /* dark ink chrome in the corners: the room falls back less */
+
+/* the layer: drifts with the held frame (05-walkthrough.css), and slides with the film when a phone needs the device in view */
+.walk-callouts { position: absolute; inset: 0; z-index: 3; pointer-events: none; transform: scale(1); transform-origin: 50% 50%; transition: transform 1.6s var(--ease-io); }
+.walk-callouts a, .walk-callouts button { pointer-events: auto; }
+.hud-pan { position: absolute; inset: 0; translate: var(--hud-pan) var(--hud-pan-y); }
+.walk-video, .walk-slides img { object-position: calc(50% + var(--hud-pan)) calc(50% + var(--hud-pan-y)); }
+/* focus: the room falls back a little around the device, which stays as lit as the film shows it */
+.hud-pan::before { content: ''; position: absolute; inset: -240px; background: radial-gradient(circle at calc(var(--hx, 50%) + 240px) calc(var(--hy, 50%) + 240px), transparent 0, transparent 110px, rgba(2, 6, 14, calc(var(--hud-shade) * 0.55)) 300px, rgba(2, 6, 14, var(--hud-shade)) 700px); opacity: 0; transition: opacity 0.25s linear; }
+.walk-callouts.is-on .hud-pan::before { opacity: 1; transition: opacity 0.6s linear 0.1s; }
+
+/* ---------------- the glass panel ---------------- */
+.walk-callout { position: absolute; inset-inline-start: var(--pad); bottom: 150px; width: clamp(340px, 25vw, 392px); max-width: calc(100% - 24px); perspective: 1100px; color: var(--hud-ink); text-align: start; text-shadow: var(--hud-ts); transition: display 0.3s allow-discrete; --port: 47px; }
+.walk-callout[hidden] { display: none; }
+.walk-callout.is-placed { inset-inline-start: auto; bottom: auto; }
+/* beside the device: leaning a few degrees toward it, the far top and the near bottom corners cut */
+.walk-callout.is-right { --tilt: -5deg; --ox: 0%; --oy: var(--port); --c-tr: 20px; --c-bl: 20px; }
+.walk-callout.is-left { --tilt: 5deg; --ox: 100%; --oy: var(--port); --c-tl: 20px; --c-br: 20px; }
+.walk-callout.is-below { --ox: var(--port); --oy: 0%; --c-tr: 16px; }
+.walk-callout.is-above { --ox: var(--port); --oy: 100%; --c-tr: 16px; }
+/* flat on purpose: a preserve-3d context switches the glass's backdrop blur off in Chrome (tested 29 Sep 2026) */
+.hud-tilt { position: relative; transform-origin: var(--ox, 0%) 50%; transform: rotateY(var(--tilt, 0deg)); }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-tilt { transform: rotateY(calc(var(--tilt, 0deg) + var(--hud-mx) * 2.4deg)) rotateX(calc(var(--hud-my) * -1.8deg)); transition: transform 0.5s var(--hud-e); animation: hud-swing 0.6s var(--hud-e) 0.2s backwards; }
+@keyframes hud-swing { from { transform: rotateY(calc(var(--tilt, 0deg) * 3.2)); } }
+/* the glass: a line of light shoots out from the edge that faces the device, level with it, then opens */
+.hud-glass-x, .hud-glass { position: absolute; inset: 0; }
+.hud-glass-x { transform: scaleX(0); transform-origin: var(--ox, 0%) 50%; transition: transform 0.12s var(--hud-e) 0.16s; }
+.hud-glass { transform: scaleY(0.008); transform-origin: 50% var(--oy, 47px); opacity: 0; overflow: hidden; transition: transform 0.22s var(--hud-e) 0.04s, opacity 0.1s linear 0.16s;
+  clip-path: polygon(var(--c-tl, 0px) 0, calc(100% - var(--c-tr, 0px)) 0, 100% var(--c-tr, 0px), 100% calc(100% - var(--c-br, 0px)), calc(100% - var(--c-br, 0px)) 100%, var(--c-bl, 0px) 100%, 0 calc(100% - var(--c-bl, 0px)), 0 var(--c-tl, 0px));
+  background: linear-gradient(to bottom, rgba(111, 227, 255, 0.1), rgba(111, 227, 255, 0.02) 36%, rgba(61, 155, 255, 0.05)), var(--hud-glass);
+  box-shadow: inset 0 0 22px rgba(111, 227, 255, 0.13), inset 0 0 2px rgba(111, 227, 255, 0.35); /* the edges glow inward, like light caught in the glass */
+  -webkit-backdrop-filter: blur(5px) brightness(0.8) saturate(1.15); backdrop-filter: blur(5px) brightness(0.8) saturate(1.15); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .hud-glass { background: linear-gradient(to bottom, rgba(111, 227, 255, 0.1), rgba(111, 227, 255, 0) 36%), var(--hud-solid); } }
+.hud-lite .hud-glass { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(to bottom, rgba(111, 227, 255, 0.1), rgba(111, 227, 255, 0) 36%), var(--hud-solid); }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-glass-x { transform: none; transition: transform 0.2s var(--hud-e) 0.2s; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-glass { transform: none; opacity: 1; transition: transform 0.26s var(--hud-e) 0.32s, opacity 0.06s linear 0.2s; }
+/* 1 px luminous edges, following the cut corners (the clip would shave a border off) */
+.hud-glass::before { content: ''; position: absolute; inset: 0; --e: rgba(140, 234, 255, 0.8); --g: transparent calc(50% - 0.3px), var(--e) 50%, var(--e) calc(50% + 1px), transparent calc(50% + 1.5px);
+  background:
+    linear-gradient(to right, #fff, var(--e) 30%, rgba(111, 227, 255, 0.3)) var(--c-tl, 0px) 0 / calc(100% - var(--c-tl, 0px) - var(--c-tr, 0px)) 1px no-repeat,
+    linear-gradient(to right, rgba(111, 227, 255, 0.4), var(--e)) var(--c-bl, 0px) 100% / calc(100% - var(--c-bl, 0px) - var(--c-br, 0px)) 1px no-repeat,
+    linear-gradient(to bottom, var(--e), rgba(111, 227, 255, 0.4)) 0 var(--c-tl, 0px) / 1px calc(100% - var(--c-tl, 0px) - var(--c-bl, 0px)) no-repeat,
+    linear-gradient(to bottom, rgba(111, 227, 255, 0.4), var(--e)) 100% var(--c-tr, 0px) / 1px calc(100% - var(--c-tr, 0px) - var(--c-br, 0px)) no-repeat,
+    linear-gradient(to bottom right, var(--g)) 0 0 / var(--c-tl, 0px) var(--c-tl, 0px) no-repeat,
+    linear-gradient(to bottom left, var(--g)) 100% 0 / var(--c-tr, 0px) var(--c-tr, 0px) no-repeat,
+    linear-gradient(to top left, var(--g)) 100% 100% / var(--c-br, 0px) var(--c-br, 0px) no-repeat,
+    linear-gradient(to top right, var(--g)) 0 100% / var(--c-bl, 0px) var(--c-bl, 0px) no-repeat; }
+/* faint scanlines and a dot grid */
+.hud-glass::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(140, 234, 255, 0.07) 0 1px, transparent 1px 3px), radial-gradient(circle, rgba(111, 227, 255, 0.22) 0.6px, transparent 1.2px) 0 0 / 16px 16px; opacity: 0.8; -webkit-mask-image: linear-gradient(to bottom, #000, rgba(0, 0, 0, 0.3) 70%); mask-image: linear-gradient(to bottom, #000, rgba(0, 0, 0, 0.3) 70%); }
+/* idle: a band of light drifts down the glass. It fades out at its leading edge too: cut off there, it drew a hard seam across the
+   specs that read as a fault in the glass on every still frame */
+.hud-scan { position: absolute; left: 0; right: 0; top: 0; height: 110px; background: linear-gradient(to bottom, transparent, rgba(111, 227, 255, 0.035) 55%, rgba(111, 227, 255, 0.08) 88%, transparent); translate: 0 -100%; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-scan { animation: hud-band 8s linear 1.2s infinite; }
+@keyframes hud-band { from { translate: 0 -100%; } 70%, to { translate: 0 620%; } }
+
+/* the text layer, a little in front of the glass */
+.hud-body { position: relative; display: grid; gap: 11px; padding: 16px 22px 20px; }
+.hud-body > * { opacity: 0; transition: opacity 0.1s linear; } /* out: the text first, the glass folds behind it */
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-body > * { opacity: 1; transition: opacity 0.35s linear var(--at, 0.5s); }
+.hud-head { --at: 0.42s; } .walk-callout h2 { --at: 0.4s; } .hud-blurb { --at: 0.56s; } .hud-specs { --at: 0.6s; } .hud-w { --at: 0.8s; } .walk-callout .walk-view { --at: 0.95s; }
+/* header strip: index, room and family, status */
+.hud-head { position: relative; display: flex; align-items: center; gap: 12px; min-height: 21px; padding-bottom: 10px; font: 500 0.58rem/1.4 var(--f-sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--hud-soft); }
+.hud-head::before { content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: var(--hud-line); }
+.hud-head::after { content: ''; position: absolute; inset-inline-start: 0; bottom: 0; width: 44px; height: 1px; background: var(--hud-1); box-shadow: 0 0 6px var(--hud-2); }
+.hud-idx { font: 500 0.82rem/1 var(--f-num); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; color: var(--hud-key); white-space: nowrap; }
+.hud-idx i { font-style: normal; font-size: 0.64rem; color: var(--hud-label); }
+.walk-callout .walk-room { flex: 1; min-width: 0; display: grid; gap: 1px; } /* the room over the family: two short lines, never a broken one */
+.walk-room i { display: none; } .walk-room span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .walk-room span:first-child { color: var(--hud-ink); } .walk-room span:last-child { color: var(--hud-label); }
+.hud-status { display: inline-flex; align-items: center; gap: 6px; color: var(--hud-ok); white-space: nowrap; }
+.hud-status i, .hud-w-cap span i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; animation: hud-beat 2.4s ease-in-out infinite; }
+@keyframes hud-beat { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+html[lang='ar'] .hud-head { text-transform: none; letter-spacing: 0; font-size: 0.76rem; } /* tracking breaks Arabic joining */
+.walk-callout h2 { margin: 2px 0 0; font-family: var(--f-display); font-size: 1.46rem; line-height: 1.2; font-weight: 400; letter-spacing: 0.01em; color: var(--hud-ink); text-shadow: var(--hud-ts), 0 0 16px rgba(61, 155, 255, 0.5); }
+html[lang='ar'] .walk-callout h2 { font-size: 1.42rem; line-height: 1.4; letter-spacing: 0; }
+.hud-blurb { margin: 0; max-width: 42ch; font: 400 0.85rem/1.5 var(--f-body); color: var(--hud-soft); }
+html[lang='ar'] .hud-blurb { font-size: 0.92rem; line-height: 1.75; }
+/* decode (hud.ts drives --p, 0 → 1): the text is unveiled from its start, hex noise covers what is still to come */
+.hud-dc { position: relative; display: inline-block; vertical-align: top; }
+.hud-tx { display: block; clip-path: inset(-6px calc((1 - var(--p, 1)) * 100%) -6px -6px); }
+[dir='rtl'] .hud-tx { clip-path: inset(-6px -6px -6px calc((1 - var(--p, 1)) * 100%)); }
+.hud-nz { position: absolute; inset: 0; overflow: hidden; font: 500 0.78em/inherit var(--f-num); font-style: normal; letter-spacing: 0.1em; white-space: nowrap; direction: ltr; color: var(--hud-1); opacity: 0.8; clip-path: inset(0 0 0 calc(var(--p, 1) * 100%)); text-shadow: none; }
+[dir='rtl'] .hud-nz { clip-path: inset(0 calc(var(--p, 1) * 100%) 0 0); text-align: right; }
+.hud-dc::after { content: ''; position: absolute; top: 10%; bottom: 10%; inset-inline-start: calc(var(--p, 1) * 100%); width: 2px; background: #fff; box-shadow: 0 0 8px 1px var(--hud-1); opacity: 0; }
+.hud-dc.is-decoding::after { opacity: 1; }
+/* spec rows: label at the start, value at the end, a hairline that draws itself */
+.hud-specs { display: grid; margin: 0; }
+.hud-specs > div { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 18px; align-items: baseline; padding: 6px 0 7px; opacity: 0; translate: 0 6px; transition: opacity 0.15s linear, translate 0.15s linear; }
+.hud-specs > div::after { content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: var(--hud-line); transform: scaleX(0); transform-origin: 0 50%; transition: transform 0.15s linear; }
+[dir='rtl'] .hud-specs > div::after { transform-origin: 100% 50%; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-specs > div { --t: calc(0.6s + var(--j, 0) * 0.06s); opacity: 1; translate: 0 0; transition: opacity 0.25s linear var(--t), translate 0.4s var(--hud-e) var(--t); }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-specs > div::after { transform: none; transition: transform 0.5s var(--hud-e) var(--t); }
+.hud-specs dt { font: 500 0.58rem/1.5 var(--f-sans); letter-spacing: 0.18em; text-transform: uppercase; color: var(--hud-label); white-space: nowrap; }
+.hud-specs dd { margin: 0; font: 400 0.82rem/1.4 var(--f-sans); letter-spacing: 0.01em; color: var(--hud-ink); text-align: end; font-variant-numeric: tabular-nums; }
+html[lang='ar'] .hud-specs dt { text-transform: none; letter-spacing: 0; font-size: 0.74rem; }
+html[lang='ar'] .hud-specs dd { font-size: 0.88rem; letter-spacing: 0; }
+/* "view product": a real button, the one thing on the glass that takes the pointer */
+.walk-view { display: inline-flex; align-items: center; gap: 0.7em; justify-self: start; margin-top: 2px; padding: 10px 16px; border: 1px solid var(--hud-dim); background: rgba(20, 70, 120, 0.3); font: 500 0.66rem/1 var(--f-sans); letter-spacing: 0.18em; text-transform: uppercase; color: var(--hud-ink); transition: background var(--dur-fast), border-color var(--dur-fast); }
+html[lang='ar'] .walk-view { text-transform: none; letter-spacing: 0; font-size: 0.84rem; }
+.walk-view svg { width: 1.1em; height: 1.1em; }
+.walk-view:hover { background: rgba(61, 155, 255, 0.36); border-color: var(--hud-1); }
+.walk-view:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+/* in front of everything: corner marks, a ruler on the far edge, and a bar of light on the near edge, level with the device */
+.hud-deco { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .hud-deco { opacity: 1; transition: opacity 0.3s linear 0.52s; }
+.hud-deco i { position: absolute; }
+.hud-corner { width: 13px; height: 13px; border: 0 solid #fff; filter: drop-shadow(0 0 4px var(--hud-1)); }
+.is-right .hud-corner-a, .is-below .hud-corner-a, .is-above .hud-corner-a { left: -5px; top: -5px; border-width: 2px 0 0 2px; }
+.is-right .hud-corner-b, .is-below .hud-corner-b, .is-above .hud-corner-b { right: -5px; bottom: -5px; border-width: 0 2px 2px 0; }
+.is-left .hud-corner-a { right: -5px; top: -5px; border-width: 2px 2px 0 0; }
+.is-left .hud-corner-b { left: -5px; bottom: -5px; border-width: 0 0 2px 2px; }
+.hud-rule { top: 64px; bottom: 44px; width: 6px; background: linear-gradient(to bottom, var(--hud-dim) 1px, transparent 1px) 0 0 / 100% 9px; opacity: 0.8; }
+.is-right .hud-rule { right: -12px; } .is-left .hud-rule { left: -12px; }
+.is-below .hud-rule, .is-above .hud-rule { display: none; }
+.hud-port { background: linear-gradient(var(--hud-pd, to bottom), transparent, #fff 50%, transparent); box-shadow: 0 0 10px 1px rgba(111, 227, 255, 0.55); border-radius: 2px; }
+.is-right .hud-port, .is-left .hud-port { top: calc(var(--port) - 26px); width: 2px; height: 52px; }
+.is-right .hud-port { left: -1px; } .is-left .hud-port { right: -1px; }
+.is-below .hud-port, .is-above .hud-port { --hud-pd: to right; left: calc(var(--port) - 26px); width: 52px; height: 2px; }
+.is-below .hud-port { top: -1px; } .is-above .hud-port { bottom: -1px; }
+
+/* ---------------- the signature widgets ---------------- */
+.hud-w { position: relative; display: grid; gap: 9px; padding: 10px 13px 12px; border: 1px solid var(--hud-line); background: linear-gradient(to bottom, rgba(61, 155, 255, 0.1), rgba(61, 155, 255, 0.02)); }
+.hud-w::before, .hud-w::after { content: ''; position: absolute; width: 7px; height: 7px; border: 0 solid var(--hud-1); }
+.hud-w::before { left: -1px; top: -1px; border-width: 1px 0 0 1px; } .hud-w::after { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; }
+.hud-w-cap { display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 0.54rem/1.3 var(--f-sans); letter-spacing: 0.2em; text-transform: uppercase; }
+.hud-w-cap span { display: inline-flex; align-items: center; gap: 7px; color: var(--hud-ok); }
+.hud-w-cap b { font-weight: 500; color: var(--hud-label); }
+html[lang='ar'] .hud-w-cap { text-transform: none; letter-spacing: 0; font-size: 0.72rem; }
+.hud-w-body { min-height: 66px; font: 500 0.58rem/1.3 var(--f-sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--hud-label); }
+html[lang='ar'] .hud-w-body { text-transform: none; letter-spacing: 0; font-size: 0.72rem; }
+.hud-w-body b { font: 400 1.3rem/1 var(--f-num); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; color: var(--hud-key); white-space: nowrap; }
+.hud-w-body b i { font: 500 0.56rem/1 var(--f-num); font-style: normal; letter-spacing: 0.1em; color: var(--hud-label); margin-inline-start: 3px; }
+.hud-n::after { counter-reset: hud var(--hud-n); content: counter(hud); }
+/* every figure counts up from zero as its widget arrives (the end value is the element's own --hud-n / --hud-f) */
+@keyframes hud-count { from { --hud-n: 0; --hud-f: 0; } }
+.walk-callouts.is-on .walk-callout:not([hidden]) :is(.w-dial, .w-ch, .w-sound) { animation: hud-count 0.9s var(--hud-e) calc(0.85s + var(--k, 0) * 0.09s) backwards; }
+
+/* control panel: climate dial and the scenes */
+.w-climate { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 16px; align-items: center; }
+.w-dial { position: relative; width: 74px; height: 74px; }
+.w-dial svg { width: 100%; height: 100%; fill: none; overflow: visible; }
+.w-ticks { stroke: var(--hud-dim); stroke-width: 1; } .w-track { stroke: rgba(111, 227, 255, 0.16); stroke-width: 4; }
+.w-fill { stroke: var(--hud-1); stroke-width: 4; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--hud-f)); filter: drop-shadow(0 0 3px var(--hud-2)); }
+.w-dial b { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 3px; padding-top: 4px; font-size: 1.42rem; }
+.w-dial b i { margin: 0; }
+.w-side { display: grid; gap: 7px; min-width: 0; }
+.w-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.w-chips li { position: relative; padding: 5px 8px; border: 1px solid var(--hud-line); color: var(--hud-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.56rem; letter-spacing: 0.1em; }
+html[lang='ar'] .w-chips li { font-size: 0.7rem; letter-spacing: 0; }
+.w-chips li::before { content: ''; position: absolute; inset: -1px; border: 1px solid var(--hud-1); background: rgba(61, 155, 255, 0.36); opacity: 0; z-index: -1; }
+.w-chips li:first-child::before { opacity: 1; }
+.w-side small { font: inherit; color: var(--hud-label); opacity: 0.85; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-chips li::before { opacity: 0; animation: w-chip 12s linear calc(1.95s + var(--k) * 3s) infinite; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-chips li:first-child::before { animation-name: w-chip, w-chip-first; animation-duration: 12s, 1.95s; animation-delay: 1.95s, 0s; animation-iteration-count: infinite, 1; }
+@keyframes w-chip { 0%, 23% { opacity: 1; } 26%, 100% { opacity: 0; } }
+@keyframes w-chip-first { from, to { opacity: 1; } }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-dial { animation: hud-count 0.9s var(--hud-e) 0.85s backwards, w-dial 12s var(--hud-e) 1.95s infinite; }
+@keyframes w-dial { 0%, 23% { --hud-n: 22; --hud-f: 43; } 27%, 48% { --hud-n: 23; --hud-f: 50; } 52%, 73% { --hud-n: 24; --hud-f: 57; } 77%, 96% { --hud-n: 27; --hud-f: 79; } 100% { --hud-n: 22; --hud-f: 43; } }
+
+/* light switch: three channels */
+.w-chan { display: grid; gap: 10px; align-content: center; }
+.w-ch { display: grid; grid-template-columns: 24px minmax(0, 1fr) 52px; gap: 12px; align-items: center; }
+.w-chan .w-ch > b { font: 500 0.66rem/1 var(--f-num); letter-spacing: 0.12em; color: var(--hud-label); }
+.w-bar { position: relative; height: 8px; overflow: hidden; background: rgba(111, 227, 255, 0.14); -webkit-mask: repeating-linear-gradient(to right, #000 0 5px, transparent 5px 7px); mask: repeating-linear-gradient(to right, #000 0 5px, transparent 5px 7px); }
+.w-bar i { position: absolute; inset: 0; background: linear-gradient(to right, #f0a23a, #ffdc9a); transform-origin: 0 50%; transform: scaleX(calc(var(--hud-f) / 100)); }
+[dir='rtl'] .w-bar i { background: linear-gradient(to left, #f0a23a, #ffdc9a); transform-origin: 100% 50%; }
+.w-ch > span { text-align: end; font: 400 0.95rem/1 var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--hud-key); white-space: nowrap; }
+.w-ch > span i { font: 500 0.56rem/1 var(--f-num); font-style: normal; color: var(--hud-label); margin-inline-start: 2px; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-ch-1 { animation: hud-count 0.9s var(--hud-e) 0.94s backwards, w-ch-1 11s ease-in-out 2.8s infinite; }
+@keyframes w-ch-1 { 0%, 12%, 88%, 100% { --hud-n: 64; --hud-f: 64; } 40%, 60% { --hud-n: 38; --hud-f: 38; } }
+
+/* curtain motor: the track, the fabric gathering as it opens, the carriage and how far open it is */
+.w-rail { display: grid; gap: 6px; align-content: center; }
+.w-run { position: relative; height: 50px; }
+.w-line { position: absolute; inset-inline: 0; top: 20px; height: 8px; border-top: 1px solid var(--hud-1); background: linear-gradient(to right, var(--hud-dim) 1px, transparent 1px) 0 0 / 10% 100%; }
+.w-line::after { content: ''; position: absolute; inset-inline-end: 0; top: 0; width: 1px; height: 100%; background: var(--hud-dim); }
+.w-drape { position: absolute; inset-inline: 0; top: 22px; bottom: 0; background: repeating-linear-gradient(to right, rgba(111, 227, 255, 0.5) 0 1.5px, rgba(111, 227, 255, 0.1) 1.5px 9px); transform-origin: 0 50%; transform: scaleX(calc(var(--hud-f) / 100)); -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent); mask-image: linear-gradient(to bottom, #000 30%, transparent); }
+[dir='rtl'] .w-drape { transform-origin: 100% 50%; }
+.w-car { position: absolute; inset: 0; transform: translateX(calc(var(--hud-f) * 1% * var(--hud-dir))); }
+.w-car::before { content: ''; position: absolute; inset-inline-start: -1px; top: 15px; bottom: 0; width: 2px; background: var(--hud-key); box-shadow: 0 0 8px var(--hud-key); }
+.w-car b { position: absolute; left: 0; top: -3px; translate: -50% 0; font-size: 0.95rem; }
+/* the figure is dir="ltr", so a logical inset on it resolves left-to-right even in Arabic: it flew ~300 px off the glass. Physical
+   sides, centred on the carriage's line (which stands at the start edge: the right in Arabic) */
+[dir='rtl'] .w-car b { left: auto; right: 0; translate: 50% 0; }
+.w-ends { display: flex; justify-content: space-between; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-rail { animation: w-rail-in 1.3s var(--hud-e) 0.85s backwards, w-rail 14s ease-in-out 3.2s infinite; }
+@keyframes w-rail-in { from { --hud-n: 0; --hud-f: 100; } }
+@keyframes w-rail { 0%, 10%, 90%, 100% { --hud-n: 72; --hud-f: 28; } 42%, 58% { --hud-n: 40; --hud-f: 60; } }
+
+/* ceiling speaker: sound leaving the cone, the spectrum, the volume */
+.w-sound { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.w-cone { width: 54px; height: 54px; fill: none; stroke: var(--hud-1); stroke-width: 1.6; stroke-linecap: round; overflow: visible; }
+.w-cone circle { fill: #fff; stroke: none; }
+.w-cone path { opacity: 0.7; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-cone path { animation: w-wave 2.6s ease-out calc(var(--k) * 0.32s) infinite; }
+@keyframes w-wave { 0%, 100% { opacity: 0.18; } 25% { opacity: 1; } }
+.w-spec { display: flex; align-items: center; gap: 2px; height: 46px; }
+.w-spec i { flex: 1; height: 100%; background: linear-gradient(to top, var(--hud-2), var(--hud-1) 50%, var(--hud-2)); transform: scaleY(var(--a)); }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-spec i { animation: w-eq calc(1.7s + var(--k) * 0.061s) ease-in-out calc(var(--k) * -0.37s) infinite alternate; }
+@keyframes w-eq { from { transform: scaleY(calc(var(--a) * 0.32)); } to { transform: scaleY(var(--a)); } }
+.w-read { display: grid; gap: 5px; justify-items: end; text-align: end; }
+
+/* smoke detector: a radar sweep and the air it reads */
+.w-radar { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 18px; align-items: center; }
+.w-dish { position: relative; width: 70px; height: 70px; border-radius: 50%; overflow: hidden; }
+.w-dish svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--hud-dim); stroke-width: 1; }
+.w-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(111, 227, 255, 0) 0 240deg, rgba(111, 227, 255, 0.55) 360deg); rotate: 40deg; }
+.w-blip { position: absolute; left: var(--x); top: var(--y); width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--hud-ok); box-shadow: 0 0 6px var(--hud-ok); opacity: 0.5; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-sweep { animation: hud-spin 5s linear infinite; rotate: 0deg; }
+@keyframes hud-spin { to { rotate: 360deg; } }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-blip { opacity: 0; animation: w-blip 5s linear calc(var(--t) * 5s) infinite; }
+@keyframes w-blip { 0% { opacity: 1; } 55%, 100% { opacity: 0; } }
+.w-reads { display: grid; gap: 8px; }
+.w-radar .w-read { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--hud-faint); text-align: start; }
+.w-radar .w-read b { font-size: 1rem; } .w-radar .w-read b.is-ok { font: 500 0.78rem/1 var(--f-sans); letter-spacing: 0.14em; color: var(--hud-ok); }
+html[lang='ar'] .w-radar .w-read b.is-ok { font-size: 0.9rem; letter-spacing: 0; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-radar { animation: w-air 10s step-end 2s infinite; }
+@keyframes w-air { 0% { --hud-n: 1; } 35% { --hud-n: 0; } 70% { --hud-n: 2; } }
+
+/* smart lock: the fingerprint is read, access is granted */
+.w-print { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 18px; align-items: center; --hud-f: 100; }
+.w-pad { position: relative; width: 58px; height: 66px; }
+.w-pad svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: rgba(111, 227, 255, 0.3); stroke-width: 1.7; stroke-linecap: round; }
+.w-pad svg.is-lit { stroke: var(--hud-1); filter: drop-shadow(0 0 2px var(--hud-2)); clip-path: inset(0 0 calc(100% - var(--hud-f) * 1%) 0); }
+.w-beam { position: absolute; left: -5px; right: -5px; top: 0; height: 2px; background: #fff; box-shadow: 0 0 10px 2px var(--hud-1); translate: 0 calc(var(--hud-f) * 0.66px); opacity: 0; }
+.w-state { display: grid; gap: 9px; align-items: center; }
+.w-state > span { grid-area: 1 / 1; }
+.w-scanning { opacity: 0; }
+.w-granted { display: inline-flex; align-items: center; gap: 8px; color: var(--hud-ok); font-size: 0.7rem; }
+html[lang='ar'] .w-granted { font-size: 0.86rem; }
+.w-granted svg { width: 17px; height: 17px; padding: 2px; border: 1px solid currentColor; border-radius: 50%; box-shadow: 0 0 8px rgba(114, 230, 160, 0.6); stroke-width: 2.6; }
+.w-prog { grid-area: 2 / 1; position: relative; height: 3px; overflow: hidden; background: rgba(111, 227, 255, 0.16); }
+.w-prog i { position: absolute; inset: 0; background: var(--hud-1); transform-origin: 0 50%; transform: scaleX(calc(var(--hud-f) / 100)); }
+[dir='rtl'] .w-prog i { transform-origin: 100% 50%; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-print { animation: w-scan 7s linear 1.2s infinite backwards; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-beam { animation: w-beam 7s linear 1.2s infinite; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-scanning { animation: w-scanning 7s linear 1.2s infinite backwards; }
+.walk-callouts.is-on .walk-callout:not([hidden]) .w-granted { animation: w-granted 7s linear 1.2s infinite backwards; }
+@keyframes w-scan { 0% { --hud-f: 0; } 32%, 93% { --hud-f: 100; } 100% { --hud-f: 0; } }
+@keyframes w-beam { 0%, 31% { opacity: 1; } 34%, 100% { opacity: 0; } }
+@keyframes w-scanning { 0%, 33% { opacity: 1; } 37%, 95% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes w-granted { 0%, 35% { opacity: 0; translate: 0 4px; } 40%, 93% { opacity: 1; translate: 0 0; } 97%, 100% { opacity: 0; translate: 0 0; } }
+
+/* ---------------- short windows: the panel tightens before it would run under the chrome ---------------- */
+.walk-callout.is-tight .hud-body { gap: 9px; padding-block: 14px 16px; }
+.walk-callout.is-tight .hud-blurb { display: none; }
+.walk-callout.is-tight .hud-specs > div { padding-block: 4px 5px; }
+.walk-callout.is-min .hud-w { display: none; }
+
+/* ---------------- phones: a sheet docked at the bottom, the film slid up so the device stands clear above it ---------------- */
+.walk-callout.is-dock { width: min(460px, calc(100% - 24px)); perspective: none; }
+.walk-callout.is-dock .hud-tilt { transform: none; animation: none; }
+.walk-callout.is-dock .hud-body { gap: 9px; padding: 13px 16px 15px; }
+.walk-callout.is-dock h2 { font-size: 1.24rem; margin: 0; }
+.walk-callout.is-dock .hud-blurb { display: none; }
+.walk-callout.is-dock .hud-specs { grid-template-columns: 1fr 1fr; column-gap: 18px; }
+.walk-callout.is-dock .hud-specs > div { grid-template-columns: minmax(0, 1fr); padding: 3px 0 5px; }
+.walk-callout.is-dock .hud-specs dd { text-align: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.walk-callout.is-dock .hud-dc { max-width: 100%; }
+.walk-callout.is-dock .hud-tx { overflow: hidden; text-overflow: ellipsis; }
+.walk-callout.is-dock .hud-w { padding: 8px 11px 9px; gap: 7px; }
+.walk-callout.is-dock .hud-w-body { min-height: 56px; }
+.walk-callout.is-dock.is-tight .hud-specs > div:nth-child(n + 5) { display: none; }
+/* the sheet runs to the bottom edge, under the next button; "view product" sits beside that button (--act: its centre) */
+.walk-callout.is-sheet { width: 100%; max-width: none; }
+/* the sheet stays glass where the text is and deepens only toward the bottom edge, where the next button and the progress row sit on it */
+.walk-callout.is-sheet .hud-glass { background: linear-gradient(to bottom, rgba(111, 227, 255, 0.1), rgba(111, 227, 255, 0) 30%), linear-gradient(to bottom, var(--hud-glass) 55%, rgba(6, 14, 28, 0.6)); }
+.walk-callout.is-sheet .hud-body { padding-bottom: calc(var(--zone, 0px) + 14px); }
+.walk-callout.is-sheet .walk-view { position: absolute; inset-inline-end: 16px; top: var(--act, auto); translate: 0 -50%; margin: 0; padding: 14px 16px; }
+.walk-callout.is-sheet .hud-corner-b { display: none; }
+/* the chrome over the sheet reads on dark, whatever the picture under the sheet is */
+.walk.hud-sheet .walk-hint, .walk.hud-sheet .walk-steps span { color: var(--on-night-soft); text-shadow: none; }
+.walk.hud-sheet .walk-steps i { background: rgba(241, 237, 230, 0.28); } .walk.hud-sheet .walk-steps i.is-done { background: var(--brass); } .walk.hud-sheet .walk-steps i.is-on { background: var(--on-night); }
+.walk.hud-sheet .walk-next { background: rgba(14, 13, 12, 0.42); border-color: rgba(241, 237, 230, 0.55); }
+
+/* ---------------- never placed (the image-only fallback of the live 3D): the panel stands in the corner, complete ---------------- */
+.walk-slides:not([hidden]) ~ .walk-callouts .walk-callout:not(.is-placed):not([hidden]) :is(.hud-glass-x, .hud-glass) { transform: none; opacity: 1; }
+.walk-slides:not([hidden]) ~ .walk-callouts .walk-callout:not(.is-placed):not([hidden]) :is(.hud-body > *, .hud-specs > div, .hud-deco) { opacity: 1; translate: 0 0; }
+.walk-callout:not(.is-placed) :is(.hud-port, .hud-rule) { display: none; }
+.walk-callout:not(.is-placed) { --c-tr: 20px; --c-bl: 20px; }
+
+/* ---------------- reduced motion: no decode, no unfold; everything is there at once, with a short fade ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  .walk { transition: none; }
+  /* opacity only: forcing a duration on every element also gave the ones with no transition of their own a 0.3 s `all`
+     transition, so the panel's padding and fonts eased between layouts and the placer measured the old size (the phone sheet ran under the next button) */
+  .walk-callouts *, .walk-callouts *::before, .walk-callouts *::after { animation: none !important; transition-property: opacity !important; transition-delay: 0s !important; transition-duration: 0.3s !important; transition-timing-function: linear !important; }
+  .hud-glass-x, .hud-glass, .hud-specs > div, .hud-specs > div::after { transform: none; translate: 0 0; }
+  .hud-scan, .w-beam { display: none; }
+  .walk-callouts.is-on .walk-callout:not([hidden]) .hud-tilt { transform: rotateY(var(--tilt, 0deg)); }
+  .walk-callouts.is-on .walk-callout:not([hidden]) .w-chips li::before { opacity: 0; } .walk-callouts.is-on .walk-callout:not([hidden]) .w-chips li:first-child::before { opacity: 1; }
+  .walk-callouts.is-on .walk-callout:not([hidden]) .w-blip { opacity: 0.6; }
+}

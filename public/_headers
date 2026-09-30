@@ -11,3 +11,5 @@
   Cache-Control: public, max-age=31536000, immutable
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+/film/*
+  Cache-Control: public, max-age=31536000, immutable

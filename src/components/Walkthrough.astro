@@ -3,31 +3,133 @@ import type { Locale } from '@/i18n/utils';
 import { useT, strings, l, localePath } from '@/i18n/utils';
 import Logo from '@/components/Logo.astro';
 import Icon from '@/components/Icons.astro';
+import PanelScreen from '@/components/PanelScreen.astro';
 import house from '@/data/house.json';
+import film from '@/data/film.json';
 import { allProducts, categoryOf } from '@/lib/products';
+import { arc, ticks, fingerprint } from '@/scripts/film/hud-geometry';
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = useT(locale);
 const s = strings(locale);
 const stops = house.stops.map((st) => ({ ...st, product: allProducts.find((p) => p.slug === st.product)! }));
 const roomNames = s.walk.stops as Record<string, string>;
+const heroPoster = film.clips.find((c) => c.id === 'hero')?.poster ?? '/img/brand/villa-poster.webp';
+// the HUD (styles/11-hud.css, scripts/film/callout.ts + hud.ts): strings, and the drawn parts as finished paths
+const h = s.walk.hud;
+const two = (n: number) => String(n).padStart(2, '0');
+const print = fingerprint();
+// the spectrum's resting shape: a fixed curve (bass high, a dip, a presence bump), never random — the film must not flicker
+const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k / 5) + 0.3 * Math.exp(-((k - 13) ** 2) / 14) + 0.08 * Math.sin(k * 2.4)).toFixed(2));
 ---
-<section class="walk" data-walk data-dark-hero data-aria={t('walk.title').replace(/<[^>]+>/g, '')} aria-label={t('walk.eyebrow')}>
-  <div class="walk-poster" aria-hidden="true"><img src="/img/brand/intro-poster.webp" alt="" width="1600" height="900" fetchpriority="high" /></div>
+<section class="walk is-prompt" data-walk data-dark-hero data-aria={t('walk.title').replace(/<[^>]+>/g, '')} aria-label={t('walk.eyebrow')}>
+  <div class="walk-poster" aria-hidden="true"><img src={heroPoster} alt="" width="1600" height="900" fetchpriority="high" /></div>
   <div class="walk-canvas" data-walk-canvas aria-hidden="true"></div>
   <div class="walk-slides" data-walk-slides hidden aria-hidden="true"></div>
   <div class="walk-shade" aria-hidden="true"></div>
   <div class="walk-load" data-walk-load><i><b data-walk-bar></b></i><span>{t('walk.loading')}</span></div>
   <div class="walk-author" data-walk-author hidden></div>
 
+  <!-- the device HUD: a transparent hologram panel beside the device with its specs and one live widget
+       (placed by scripts/film/callout.ts, styled in styles/11-hud.css). All of it is real text; the drawn parts are hidden from readers -->
+  <div class="walk-callouts" data-walk-callouts aria-live="polite"><div class="hud-pan">
+    <!-- live devices: real HTML pinned onto the paused device (scripts/film/device-live.ts); under the panel -->
+    <div class="walk-live" data-walk-live data-t-light={t('walk.live.light')} data-t-test={t('walk.live.test')} data-t-unlocked={t('walk.live.unlocked')} data-t-sound={t('walk.live.sound')}>
+      <PanelScreen locale={locale} />
+    </div>
+    <!-- inert: player.ts still looks this node up (the reticle it held was removed, 29 Sep 2026) -->
+    <i class="walk-hotspot" data-walk-hotspot hidden aria-hidden="true"></i>
+    {stops.map((st, i) => {
+      const p = st.product;
+      return (
+        <div class="walk-callout" data-walk-stop={i} data-shape={p.shape} data-side={(st as { side?: string }).side} data-clear={(st as { clear?: number }).clear} hidden>
+          <div class="hud-tilt">
+            <div class="hud-glass-x" aria-hidden="true"><div class="hud-glass"><i class="hud-scan"></i></div></div>
+            <div class="hud-body">
+              <div class="hud-head">
+                <b class="hud-idx" dir="ltr">{two(i + 1)}<i> / {two(stops.length)}</i></b>
+                <span class="walk-room"><span>{roomNames[st.id]}</span><i aria-hidden="true"> · </i><span>{l(categoryOf(p).name, locale)}</span></span>
+                <span class="hud-status"><i></i>{h.status}</span>
+              </div>
+              <h2><span class="hud-dc" data-hud-decode="title"><span class="hud-tx">{l(p.name, locale)}</span><i class="hud-nz" aria-hidden="true"></i></span></h2>
+              <p class="hud-blurb">{l(p.blurb ?? p.tagline, locale)}</p>
+              {p.specs?.length ? (
+                <dl class="hud-specs" aria-label={h.specs}>
+                  {p.specs.map((row, j) => (
+                    <div style={`--j:${j}`}><dt>{l(row.k, locale)}</dt><dd><span class="hud-dc" data-hud-decode><span class="hud-tx">{l(row.v, locale)}</span><i class="hud-nz" aria-hidden="true"></i></span></dd></div>
+                  ))}
+                </dl>
+              ) : null}
+              {/* the signature widget: an illustration of the device at work (readouts are demonstrations, captioned as live readouts) */}
+              <div class="hud-w" data-w={p.shape} aria-hidden="true">
+                <div class="hud-w-cap"><span><i></i>{h.live}</span><b>{{ panel: h.climate, switch: h.channels, rail: h.travel, disc: h.sound, puck: h.air, lock: h.scan }[p.shape]}</b></div>
+                {p.shape === 'panel' && (
+                  <div class="hud-w-body w-climate">
+                    <div class="w-dial" style="--hud-n:22;--hud-f:43">
+                      <svg viewBox="0 0 84 84"><path class="w-ticks" d={ticks(42, 42, 37, 40.5, 28, 135, 270)} /><path class="w-track" d={arc(42, 42, 31, 135, 405)} /><path class="w-fill" pathLength="100" d={arc(42, 42, 31, 135, 405)} /></svg>
+                      <b dir="ltr"><span class="hud-n"></span><i>°C</i></b>
+                    </div>
+                    <div class="w-side">
+                      <ul class="w-chips">{s.walk.panel.scenes.map((name, k) => <li style={`--k:${k}`}>{name}</li>)}</ul>
+                      <small>{s.walk.panel.climateSub}</small>
+                    </div>
+                  </div>
+                )}
+                {p.shape === 'switch' && (
+                  <div class="hud-w-body w-chan">
+                    {[100, 64, 28].map((v, k) => <div class={`w-ch w-ch-${k}`} style={`--k:${k};--hud-n:${v};--hud-f:${v}`}><b dir="ltr">L{k + 1}</b><i class="w-bar"><i></i></i><span dir="ltr"><span class="hud-n"></span><i>%</i></span></div>)}
+                  </div>
+                )}
+                {p.shape === 'rail' && (
+                  <div class="hud-w-body w-rail" style="--hud-n:72;--hud-f:28">
+                    <div class="w-run"><i class="w-drape"></i><i class="w-line"></i><i class="w-car"><b dir="ltr"><span class="hud-n"></span><i>%</i></b></i></div>
+                    <div class="w-ends"><span>{h.open}</span><span>{h.closed}</span></div>
+                  </div>
+                )}
+                {p.shape === 'disc' && (
+                  <div class="hud-w-body w-sound" style="--hud-n:32;--hud-f:32">
+                    <svg class="w-cone" viewBox="0 0 84 84"><circle cx="42" cy="42" r="4.5" />{[13, 22, 31].map((r, k) => <path style={`--k:${k}`} d={arc(42, 42, r, -52, 52) + arc(42, 42, r, 128, 232)} />)}</svg>
+                    <div class="w-spec">{spectrum.map((a, k) => <i style={`--k:${k};--a:${a}`}></i>)}</div>
+                    <div class="w-read"><span>{h.volume}</span><b dir="ltr"><span class="hud-n"></span><i>%</i></b></div>
+                  </div>
+                )}
+                {p.shape === 'puck' && (
+                  <div class="hud-w-body w-radar" style="--hud-n:1">
+                    <div class="w-dish"><i class="w-sweep"></i><svg viewBox="0 0 84 84"><circle cx="42" cy="42" r="40" /><circle cx="42" cy="42" r="27" /><circle cx="42" cy="42" r="14" /><path d="M42 2V82M2 42H82" /></svg><i class="w-blip" style="--x:64%;--y:30%;--t:0.13"></i><i class="w-blip" style="--x:30%;--y:66%;--t:0.62"></i></div>
+                    <div class="w-reads">
+                      <div class="w-read"><span>{h.air}</span><b class="is-ok">{h.clear}</b></div>
+                      <div class="w-read"><span>{h.smoke}</span><b dir="ltr">0.<span class="hud-n"></span><i>%/m</i></b></div>
+                    </div>
+                  </div>
+                )}
+                {p.shape === 'lock' && (
+                  <div class="hud-w-body w-print">
+                    <div class="w-pad"><svg viewBox="0 0 64 72"><path class="w-ridge" d={print} /><path class="w-ridge is-lit" d={print} /></svg><i class="w-beam"></i></div>
+                    <div class="w-state">
+                      <span class="w-scanning">{h.scanning}</span>
+                      <span class="w-granted"><Icon name="check" />{h.granted}</span>
+                      <i class="w-prog"><i></i></i>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <a class="walk-view" href={localePath(locale, `products/${p.category}/${p.slug}`)}>{t('walk.view')} <Icon name="arrow" class="icon-dir" /></a>
+            </div>
+            <div class="hud-deco" aria-hidden="true"><i class="hud-corner hud-corner-a"></i><i class="hud-corner hud-corner-b"></i><i class="hud-rule"></i><i class="hud-port"></i></div>
+          </div>
+        </div>
+      );
+    })}
+  </div></div>
+
   <div class="walk-ui">
     <div class="walk-top">
-      <a class="walk-brand" href={localePath(locale)}><Logo gradient={false} /><span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}</span></a>
+      <a class="walk-brand" href={localePath(locale)}><Logo /><span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}</span></a>
       <a class="walk-skip" href="#philosophy" data-walk-skip>{t('walk.skip')}</a>
     </div>
     <div class="walk-mid">
       <div class="walk-prompt is-on" data-walk-prompt>
-        <span class="eyebrow" style="color:var(--brass)">{t('walk.eyebrow')}</span>
+        <span class="eyebrow" style="color:var(--brass-deep)">{t('walk.eyebrow')}</span>
         <h1 set:html={t('walk.title')} />
         <p>{t('walk.subtitle')}</p>
         <button class="walk-tap" type="button" data-walk-tap><i></i>{t('walk.tap')}</button>
@@ -35,38 +137,40 @@ const roomNames = s.walk.stops as Record<string, string>;
     </div>
     <div class="walk-bottom">
       <div class="walk-card" data-walk-card>
-        {stops.map((st, i) => (
-          <div data-walk-stop={i} hidden>
-            <span class="walk-room">{roomNames[st.id]} · {l(categoryOf(st.product).name, locale)}</span>
-            <h2>{l(st.product.name, locale)}</h2>
-            <p>{l(st.product.tagline, locale)}</p>
-            <div class="walk-actions">
-              <button class="walk-next" type="button" data-walk-next data-next={t('walk.next')} data-finish={t('walk.finish')}>{t('walk.next')} <Icon name="arrow" class="icon-dir" /></button>
-              <a class="link on-night" style="color:var(--on-night)" href={localePath(locale, `products/${st.product.category}/${st.product.slug}`)}>{t('walk.view')}</a>
-            </div>
-          </div>
-        ))}
+        <button class="walk-next" type="button" data-walk-next data-next={t('walk.next')} data-finish={t('walk.finish')}>{t('walk.next')} <Icon name="arrow" class="icon-dir" /></button>
         <span class="walk-hint" data-walk-hint>{t('walk.hint')}</span>
       </div>
-      <div class="walk-steps" aria-hidden="true">{stops.map(() => <i data-walk-step></i>)}<span data-walk-counter></span></div>
+      <div class="walk-steps" aria-hidden="true">{stops.map(() => <i data-walk-step></i>)}<span data-walk-counter dir="ltr"></span></div>
     </div>
   </div>
-  <noscript><img src="/img/brand/intro-poster.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" /></noscript>
+  <noscript><img src={heroPoster} alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" /></noscript>
 </section>
 <script>
-  // The 3D bundle (three.js + walkthrough) loads after the page's own load event so the
-  // poster and headline paint first; the prompt is visible from the start.
+  // Default: the landing film (<video>, no WebGL) — smooth on any machine. The live 3D walkthrough
+  // stays available for authoring and recording the film: ?live3d, ?stop=N, ?cam, ?author, ?record, ?tier.
   const el = document.querySelector<HTMLElement>('[data-walk]');
   let started = false;
-  const start = () => { if (started) return; started = true; import('@/scripts/three/house/walkthrough').then(({ mountWalkthrough }) => mountWalkthrough(el!)).catch((e) => console.error('[walk]', e)); };
+  const q = new URLSearchParams(location.search);
+  const live3d = ['live3d', 'stop', 'cam', 'author', 'record', 'tier'].some((k) => q.has(k));
+  const start = () => {
+    if (started) return; started = true;
+    const boot = live3d
+      ? import('@/scripts/three/house/walkthrough').then(({ mountWalkthrough }) => mountWalkthrough(el!))
+      : import('@/scripts/film/player').then(({ mountFilm }) => mountFilm(el!));
+    boot.catch((e) => console.error('[walk]', e));
+  };
   if (el) {
-    const q = new URLSearchParams(location.search);
-    // Phones: keep the landing static until the visitor taps (no WebGL, no model download before intent).
-    const phone = (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 760) && !q.has('stop') && !q.has('cam') && !q.has('tier');
-    if (phone) {
-      el.querySelector('[data-walk-load]')?.classList.add('is-done');
-      el.querySelector('[data-walk-tap]')?.addEventListener('click', () => { el.dataset.autoenter = '1'; start(); }, { once: true });
-    } else if (document.readyState === 'complete') start();
-    else window.addEventListener('load', () => setTimeout(start, 50), { once: true });
+    if (!live3d) el.querySelector('[data-walk-load]')?.classList.add('is-done');
+    // taps before the player is ready queue the entry
+    el.addEventListener('click', (e) => { if (!(e.target as Element).closest('a')) el.dataset.autoenter = '1'; }, { once: true });
+    if (live3d) { // the 3D build is heavy: let the page finish first
+      if (document.readyState === 'complete') start();
+      else window.addEventListener('load', () => setTimeout(start, 30), { once: true });
+    } else { // the film starts as soon as the poster is on screen, not after every font and image of the page
+      const poster = el.querySelector<HTMLImageElement>('.walk-poster img');
+      const go = () => requestAnimationFrame(() => start());
+      if (!poster || poster.complete) go();
+      else { poster.decode().then(go, go); setTimeout(go, 1200); }
+    }
   }
 </script>

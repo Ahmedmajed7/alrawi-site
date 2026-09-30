@@ -1,38 +1,49 @@
 ---
 import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icons.astro';
+import PageHero from '@/components/PageHero.astro';
+import SecHead from '@/components/SecHead.astro';
+import HudFrame from '@/components/HudFrame.astro';
 import ContactForm from '@/components/ContactForm.astro';
-import { staticLangPaths, useT, l, type Locale } from '@/i18n/utils';
+import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 export const getStaticPaths = staticLangPaths;
 const locale = Astro.params.lang as Locale;
 const t = useT(locale);
+const c = strings(locale).contactPage;
 const brand = l(site.name, locale);
-const wa = `https://wa.me/${site.whatsapp}`;
+const office = site.offices[0];
 ---
-<Base {locale} title={`${t('meta.contactTitle')} | ${brand}`} description={t('contact.intro')} lightNav>
-  <div class="wrap page-head">
-    <span class="eyebrow">{t('cta.eyebrow')}</span>
-    <h1>{t('contact.title')}</h1>
-    <p>{t('contact.intro')}</p>
-    <div class="cta-actions" style="margin-top:22px">
-      <a class="btn btn-wa" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> {t('cta.whatsapp')}</a>
-      <a class="btn" href={`mailto:${site.email}`}><Icon name="mail" /> <span class="latin">{site.email}</span></a>
-    </div>
-  </div>
-  <section class="section section-tight">
-    <div class="wrap split" style="align-items:start">
-      <div class="offices" style="grid-template-columns:1fr" data-stagger>
-        {site.offices.map((o) => (
-          <div class="office" data-reveal>
-            <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
-            <address><Icon name="pin" style="width:18px;display:inline-block;vertical-align:-3px;margin-inline-end:6px" />{l(o.address, locale)}</address>
-            <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}><Icon name="phone" style="width:16px;display:inline-block;vertical-align:-3px;margin-inline-end:4px" />{p}</a>)}</div>
-            <a class="link" href={o.map} target="_blank" rel="noopener">{t('contact.map')} <Icon name="arrow" class="icon-dir" /></a>
-          </div>
-        ))}
+<Base {locale} title={`${t('meta.contactTitle')} | ${brand}`} description={c.body}>
+  <PageHero title={c.title} figure="signal" tag={c.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: c.title }]} />
+
+  <section class="band band--paper" data-tone="lime">
+    <div class="wrap contact-grid">
+      <div class="contact-info">
+        <SecHead no="01" title={c.h2} lead={c.body} />
+        <ul class="contact-list" data-stagger="0.1">
+          <li data-reveal="rise" data-spot>
+            <span class="ci-ic"><Icon name="pin" /></span>
+            <span class="label">{c.office}</span>
+            <a href={office.map} target="_blank" rel="noopener">{l(office.address, locale)}</a>
+          </li>
+          <li data-reveal="rise" data-spot>
+            <span class="ci-ic"><Icon name="phone" /></span>
+            <span class="label">{c.call}</span>
+            <span class="ci-phones">{office.phones.map((p) => <a class="num" href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>)}</span>
+          </li>
+          <li data-reveal="rise" data-spot>
+            <span class="ci-ic"><Icon name="mail" /></span>
+            <span class="label">{c.mail}</span>
+            <a class="latin" href={`mailto:${site.email}`}>{site.email}</a>
+          </li>
+        </ul>
       </div>
-      <div data-reveal="right"><ContactForm {locale} light /></div>
+      <HudFrame class="contact-card" tag="TX · READY">
+        <div class="contact-card-in" data-reveal="blur">
+          <ContactForm {locale} />
+        </div>
+      </HudFrame>
     </div>
   </section>
 </Base>

@@ -1,6 +1,7 @@
 ---
 import Base from '@/layouts/Base.astro';
 import ProductCard from '@/components/ProductCard.astro';
+import PageHero from '@/components/PageHero.astro';
 import { locales, useT, l, localePath, type Locale } from '@/i18n/utils';
 import { allCategories, byCategory } from '@/lib/products';
 
@@ -13,21 +14,12 @@ const t = useT(locale);
 const items = byCategory(c.slug);
 ---
 <Base {locale} title={`${l(c.name, locale)} | ${locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home'}`} description={l(c.blurb, locale)} image={c.image}>
-  <section class="cat-hero" data-dark-hero>
-    <img src={c.image} alt="" width="1600" height="1000" fetchpriority="high" />
-        <div class="wrap" style="position:relative;z-index:2">
-      <ol class="breadcrumb" style="color:var(--on-dark-soft)"><li><a href={localePath(locale)}>{t('nav.home')}</a></li><li><a href={localePath(locale, 'products')}>{t('nav.products')}</a></li><li>{l(c.name, locale)}</li></ol>
-      <h1>{l(c.name, locale)}</h1>
-      <p>{l(c.blurb, locale)}</p>
-    </div>
-  </section>
-  <div class="wrap">
-    <nav class="cat-tabs" aria-label={t('nav.products')}>
-      <a href={localePath(locale, 'products')}>{t('categories.all')}</a>
+  <PageHero title={l(c.name, locale)} figure="devices" tag={l(c.name, locale)} lead={l(c.blurb, locale)} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { href: localePath(locale, 'products'), label: t('nav.products') }, { label: l(c.name, locale) }]}>
+    <nav class="cat-tabs" aria-label={t('nav.products')} data-ph-in style="--d:0.75s">
       {allCategories.map((x) => <a href={localePath(locale, `products/${x.slug}`)} aria-current={x.slug === c.slug ? 'page' : undefined}>{l(x.name, locale)}</a>)}
     </nav>
-  </div>
-  <section class="section section-tight">
-    <div class="wrap"><div class="grid grid-4" data-stagger>{items.map((p, i) => <ProductCard product={p} {locale} eager={i < 4} />)}</div></div>
+  </PageHero>
+  <section class="band band--paper" data-tone="lime">
+    <div class="wrap"><div class="prod-grid" data-stagger="0.08">{items.map((p, i) => <ProductCard product={p} {locale} eager={i < 4} index={i} />)}</div></div>
   </section>
 </Base>

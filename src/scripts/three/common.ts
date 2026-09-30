@@ -14,12 +14,29 @@ export function perfTier(): Tier {
   const nav = navigator as Navigator & { deviceMemory?: number };
   const coarse = window.matchMedia('(pointer: coarse)').matches;
   const weak = (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  return coarse || weak || window.innerWidth < 760 ? 'low' : 'high';
+  if (coarse || weak || window.innerWidth < 760) return 'low';
+  // integrated / software GPUs get the low tier regardless of CPU cores
+  const gpu = gpuName().toLowerCase();
+  if (/swiftshader|llvmpipe|softpipe|microsoft basic|mesa offscreen/.test(gpu)) return 'off';
+  if (/intel|uhd|iris|hd graphics|radeon\(tm\) vega|radeon vega|mali|adreno|powervr|videocore/.test(gpu)) return 'low';
+  return 'high';
+}
+
+/** Unmasked GPU name when the browser exposes it ('' otherwise). */
+export function gpuName(): string {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+    if (!gl) return '';
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : String(gl.getParameter(gl.RENDERER));
+    (gl.getExtension('WEBGL_lose_context') as { loseContext(): void } | null)?.loseContext();
+    return name;
+  } catch { return ''; }
 }
 
 export function createRenderer(canvas: HTMLCanvasElement, tier: Tier, alpha = false) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: tier === 'high', alpha, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, tier === 'high' ? 2 : 1.3));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, tier === 'high' ? 1.5 : 1.25));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;

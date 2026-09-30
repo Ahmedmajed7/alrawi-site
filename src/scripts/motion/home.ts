@@ -1,36 +1,43 @@
-/** Home-page only motion: sticky device storytelling and slow image parallax. */
-const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Home only: the process rail draws with scroll and lights each step as the line reaches it. */
+import { onScroll, reduced, finePointer } from './loop';
 
-export function initStory() {
-  const items = document.querySelectorAll<HTMLElement>('[data-story-item]');
-  const imgs = document.querySelectorAll<HTMLElement>('[data-story-img]');
-  const index = document.querySelector<HTMLElement>('[data-story-index]');
-  if (!items.length) return;
-  const set = (i: number) => {
-    items.forEach((el, k) => el.classList.toggle('is-on', k === i));
-    imgs.forEach((el, k) => el.classList.toggle('is-on', k === i));
-    if (index) index.textContent = String(i + 1).padStart(2, '0');
-  };
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) set(Number((e.target as HTMLElement).dataset.storyItem));
-  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-  items.forEach((el) => io.observe(el));
-}
-
-export function initParallax() {
-  if (reduced()) return;
-  const els = Array.from(document.querySelectorAll<HTMLElement>('[data-parallax]'));
-  if (!els.length) return;
-  let raf = 0;
-  const tick = () => {
-    raf = 0; const vh = window.innerHeight;
-    for (const el of els) {
-      const r = el.parentElement!.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > vh) continue;
-      const p = (r.top + r.height / 2 - vh / 2) / vh; // -1..1
-      el.style.setProperty('--py', `${(-p * 6).toFixed(2)}%`);
+export function initHome() {
+  // the hero after the film: its beams and mark lean with the pointer (--px/--py in -1..1)
+  const hero = document.querySelector<HTMLElement>('[data-hero2]');
+  if (hero && !reduced()) {
+    if (finePointer()) {
+      let raf = 0, x = 0, y = 0, gx = 0, gy = 0;
+      hero.addEventListener('pointermove', (e) => {
+        const r = hero.getBoundingClientRect();
+        gx = e.clientX - r.left; gy = e.clientY - r.top; x = (gx / r.width - 0.5) * 2; y = (gy / r.height - 0.5) * 2;
+        if (!raf) raf = requestAnimationFrame(() => {
+          raf = 0;
+          hero.style.setProperty('--px', x.toFixed(3)); hero.style.setProperty('--py', y.toFixed(3));
+          hero.style.setProperty('--gx', `${gx.toFixed(0)}px`); hero.style.setProperty('--gy', `${gy.toFixed(0)}px`);
+        });
+      }, { passive: true });
+      hero.addEventListener('pointerenter', () => hero.classList.add('is-lit'));
+      hero.addEventListener('pointerleave', () => { hero.classList.remove('is-lit'); hero.style.setProperty('--px', '0'); hero.style.setProperty('--py', '0'); });
     }
-  };
-  const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
-  window.addEventListener('scroll', onScroll, { passive: true }); tick();
+    // leaving: as the hero scrolls up out of view the beams spread, the mark grows and the words lift away (--sx 0 → 1)
+    onScroll((_, vh) => {
+      const r = hero.getBoundingClientRect();
+      if (r.bottom < -100 || r.top > vh) return;
+      hero.style.setProperty('--sx', Math.min(1, Math.max(0, -r.top / (r.height * 0.75))).toFixed(4));
+    });
+  }
+
+  const rail = document.querySelector<HTMLElement>('[data-rail]');
+  if (rail) {
+    const steps = Array.from(rail.querySelectorAll<HTMLElement>('[data-rail-step]'));
+    const n = steps.length;
+    onScroll((_, vh) => {
+      const r = rail.getBoundingClientRect();
+      // 0 when the rail's top reaches 85 % of the view, 1 when its bottom reaches 55 %
+      const p = reduced() ? 1 : Math.min(1, Math.max(0, (vh * 0.85 - r.top) / (r.height + vh * 0.3)));
+      rail.style.setProperty('--draw', p.toFixed(4));
+      steps.forEach((s, i) => s.classList.toggle('is-lit', p >= (i + 0.35) / n - 0.08));
+    });
+  }
+
 }

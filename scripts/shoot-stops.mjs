@@ -8,7 +8,7 @@ const out = 'scripts/_cache/stops'; mkdirSync(out, { recursive: true });
 const n = house.stops.length;
 for (let i = 0; i <= n + 1; i++) {
   const url = `${base}/en/?stop=${i}&tier=high`;
-  const pre = "document.querySelectorAll('.walk-ui,.walk-load,.grain,.wa-fab,.nav').forEach(e=>e.remove())";
-  execFileSync('node', ['scripts/shoot.mjs', `${out}/stop-${i}.png`, url, '1600', '900', '9000', '', pre], { stdio: 'inherit' });
+  const pre = "document.querySelectorAll('.walk-ui,.walk-load,.grain,.wa-fab,.nav,astro-dev-toolbar').forEach(e=>e.remove())";
+  execFileSync('node', ['scripts/shoot.mjs', `${out}/stop-${i}.png`, url, '1600', '900', '16000', '', pre], { stdio: 'inherit' });
 }
-console.log('Now: python3 scripts/make-stops.py  (→ public/img/house/stop-N.webp, intro-poster, og.jpg)');
+console.log('Now: python3 scripts/make-stops.py  (→ public/img/villa/stop-N.webp, villa-poster, og.jpg)');

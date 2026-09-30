@@ -1,0 +1,57 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icons.astro';
+import PageHero from '@/components/PageHero.astro';
+import SecHead from '@/components/SecHead.astro';
+import Fan from '@/components/Fan.astro';
+import Wm from '@/components/Wm.astro';
+import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
+import site from '@/data/site.json';
+import controls from '@/data/controls.json';
+export const getStaticPaths = staticLangPaths;
+const locale = Astro.params.lang as Locale;
+const t = useT(locale);
+const c = strings(locale).control;
+const brand = l(site.name, locale);
+const two = (n: number) => String(n).padStart(2, '0');
+// the live Smart Control page: the headline, each system with its photo and text, then "100+ smart systems";
+// systems the catalogue carries link to their devices
+// a fanned showcase of the live site's own photos, ahead of the full list (Dartz's fan cards, real content only)
+const showcase = ['controller', 'lock', 'lighting'].map((slug) => controls.find((x) => x.slug === slug)!).map((x) => ({ src: x.image!, alt: l(x.name, locale), callout: x.slug.toUpperCase() }));
+---
+<Base {locale} title={`${t('meta.controlTitle')} | ${brand}`} description={c.h2}>
+  <PageHero title={c.title} figure="panel" tag={c.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: c.title }]} />
+
+  <section class="band band--paper" data-tone="lime">
+    <Wm kind="protractor" class="wm-end" />
+    <div class="wrap">
+      <SecHead no="01" title={c.h2} />
+      <div class="fan-showcase" data-reveal="rise"><Fan shots={showcase} /></div>
+      <div class="ledger ledger--ctl">
+        {controls.map((x, i) => (
+          <article class="row row--ctl" data-reveal="rise" data-spot>
+            <span class="row-no num">{two(i + 1)}<i>/{two(controls.length)}</i></span>
+            <div class="row-name"><h3>{l(x.name, locale)}</h3>{x.link && <a class="link" href={localePath(locale, x.link)}>{x.link.split('/').length > 2 ? t('featured.view') : t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>}</div>
+            <p class="row-body">{x.body ? l(x.body, locale) : ''}</p>
+            <div class="row-pic">
+              {x.image
+                ? <img src={x.image} alt={l(x.name, locale)} width="600" height="400" loading="lazy" decoding="async" />
+                : <span class="row-glyph" aria-hidden="true"><i></i><i></i><Icon name={x.icon ?? 'panel'} /></span>}
+              <i class="scan" aria-hidden="true"></i>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--mist closing" data-tone="lime">
+    <canvas class="net" data-net aria-hidden="true"></canvas>
+    <div class="rings" aria-hidden="true"></div>
+    <div class="wrap closing-inner">
+      <p class="closing-n" data-reveal="blur"><b class="num" data-count={c.closing.n} data-suffix={c.closing.suffix}>0</b></p>
+      <h2 class="closing-t caps" data-split>{c.closing.text}</h2>
+      <a class="btn btn-primary" href={localePath(locale, 'products')} data-reveal style="--d:0.4s" data-magnetic><span class="dot"></span>{t('nav.products')} <Icon name="arrow" class="icon-dir" /></a>
+    </div>
+  </section>
+</Base>

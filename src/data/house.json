@@ -1,303 +1,446 @@
 {
-  "model": "/models/house.glb",
-  "modelLite": "/models/house-lite.glb",
-  "hdr": "/hdr/spruit_sunrise_1k.hdr",
+  "model": "/models/villa-dae58f47.glb",
+  "modelLite": "/models/villa-lite-64d05453.glb",
+  "skyYaw": -1.9549,
   "exposure": {
-    "exterior": 1.0,
-    "interior": 1.0
+    "exterior": 1.14,
+    "interior": 0.98
   },
   "sun": {
     "dir": [
-      -6,
-      9,
-      5
+      -8.414,
+      2.371,
+      4.857
     ],
-    "intensity": 3.2,
-    "color": "#fff1dc"
+    "intensity": 3.8,
+    "color": "#ffc58c"
+  },
+  "sky": {
+    "image": "/textures/sky/sky-7b52381c.webp",
+    "intensity": 1.5,
+    "horizon": "#717778",
+    "ground": "#a58a6a",
+    "fog": "#717778",
+    "fogNear": 60,
+    "fogFar": 1400,
+    "sea": "#2a5878",
+    "warm": "#ffe2bf",
+    "fill": "#b6ccff",
+    "bounce": "#a8977c",
+    "ambient": 0.72
+  },
+  "hemi": {
+    "sky": "#a6bcd9",
+    "ground": "#98805f",
+    "intensity": 0.18
+  },
+  "shell": {
+    "detailNormal": "/textures/house/plaster_nor.webp",
+    "roughnessMap": "/textures/interior/plaster_rough.webp",
+    "detailTiles": 2.2,
+    "detailScale": 0.45,
+    "roughness": 0.82,
+    "envMapIntensity": 0.6,
+    "color": "#e6dfd2"
+  },
+  "door": {
+    "pos": [
+      0,
+      0.55,
+      0
+    ],
+    "yaw": 0,
+    "width": 1.1,
+    "height": 2.1,
+    "thickness": 0.06,
+    "hinge": "left",
+    "openAngle": 1.75,
+    "style": "walnut",
+    "steps": 3
+  },
+  "gate": {
+    "pos": [
+      -0.35,
+      0,
+      3.1
+    ],
+    "yaw": 0,
+    "width": 1.8,
+    "height": 1.5,
+    "thickness": 0.04,
+    "hinge": "left",
+    "openAngle": 1.45,
+    "style": "steel",
+    "open": 1
   },
   "exterior": {
     "pos": [
-      17,
-      4.2,
+      -7.5,
+      3.6,
       22
     ],
     "look": [
-      -5,
-      2.6,
-      1
-    ],
-    "breathe": 0.06
-  },
-  "entry": [
-    [
-      8,
-      2.4,
-      15
-    ],
-    [
-      0.8,
-      1.8,
-      12.0
-    ],
-    [
-      -1.0,
       1.6,
-      10.2
+      6.2,
+      -3
+    ],
+    "fov": 50,
+    "breathe": 0.04
+  },
+  "approach": {
+    "via": [
+      [
+        -0.8,
+        1.95,
+        3.4
+      ]
+    ],
+    "pos": [
+      0.17,
+      2,
+      0.45
+    ],
+    "look": [
+      1.51,
+      2,
+      -2.3
+    ]
+  },
+  "hall": [
+    [
+      0.2,
+      2.05,
+      -0.55
     ]
   ],
   "stops": [
-    {
-      "id": "lock",
-      "product": "smart-lock",
-      "device": {
-        "pos": [
-          -1.02,
-          1.05,
-          7.7
-        ],
-        "rot": [
-          0,
-          0,
-          0
-        ],
-        "scale": 0.36,
-        "source": "procedural"
-      },
-      "camera": {
-        "pos": [
-          -1.25,
-          1.42,
-          8.8
-        ],
-        "look": [
-          -1.02,
-          1.05,
-          7.7
-        ]
-      },
-      "via": []
-    },
     {
       "id": "panel",
       "product": "control-panel",
       "device": {
         "pos": [
-          -6.66,
-          1.45,
-          -0.4
+          1.51,
+          2,
+          -2.3
         ],
         "rot": [
           0,
-          1.570795,
+          -1.5708,
           0
         ],
-        "scale": 0.2,
+        "scale": 0.24,
         "source": "procedural"
       },
       "camera": {
         "pos": [
-          -5.45,
-          1.5,
-          -0.15
+          0.852,
+          2,
+          -2.316
         ],
         "look": [
-          -6.66,
-          1.45,
-          -0.4
+          1.499,
+          2,
+          -2.407
         ]
       },
-      "via": [
-        [
-          -1.35,
-          1.6,
-          7.2
-        ],
-        [
-          -2.2,
-          1.6,
-          4.6
-        ],
-        [
-          -4.6,
-          1.55,
-          1.4
-        ]
-      ]
+      "via": [],
+      "side": "left"
     },
     {
       "id": "switch",
       "product": "light-switch",
       "device": {
         "pos": [
-          4.79,
-          1.25,
-          -1.5
+          4.135,
+          1.85,
+          -2.4
         ],
         "rot": [
           0,
-          -1.570795,
+          -1.5708,
           0
         ],
         "scale": 0.086,
-        "source": "procedural"
+        "source": "procedural",
+        "params": {
+          "finish": "graphite"
+        }
       },
       "camera": {
         "pos": [
-          3.75,
-          1.35,
-          -1.25
+          3.854,
+          1.894,
+          -2.325
         ],
         "look": [
-          4.79,
-          1.25,
-          -1.5
+          4.109,
+          1.849,
+          -2.444
         ]
       },
       "via": [
         [
-          -2.0,
-          1.6,
-          0.0
+          1,
+          2.05,
+          -1.25
         ],
         [
-          1.8,
-          1.55,
-          -1.0
+          1.62,
+          2.05,
+          -0.92
         ]
-      ]
+      ],
+      "side": "left"
     },
     {
       "id": "curtain",
       "product": "curtain-motor",
       "device": {
         "pos": [
-          -5.75,
-          3.22,
-          7.45
+          -3.145,
+          2.9,
+          -4.8
         ],
         "rot": [
           0,
-          3.14159,
+          1.5708,
           0
         ],
-        "scale": 2.4,
-        "source": "procedural"
+        "scale": 3.2,
+        "source": "procedural",
+        "params": {
+          "cloth": false
+        }
       },
       "camera": {
         "pos": [
-          -5.0,
-          1.6,
-          4.3
+          1.35,
+          1.85,
+          -5
         ],
         "look": [
-          -5.75,
-          2.9,
-          7.45
+          -2.531,
+          1.717,
+          -4.04
         ]
       },
       "via": [
         [
-          0.5,
-          1.6,
-          2.4
+          2.75,
+          2,
+          -3.2
         ],
         [
-          -3.4,
-          1.6,
-          3.6
+          2.1,
+          2.05,
+          -4.4
         ]
-      ]
+      ],
+      "side": "left"
     },
     {
       "id": "speaker",
       "product": "ceiling-speaker",
       "device": {
         "pos": [
-          -2.0,
-          3.29,
-          1.5
+          -0.9,
+          3.05,
+          -4.6
         ],
         "rot": [
-          1.570795,
+          1.5708,
           0,
           0
         ],
-        "scale": 0.2,
-        "source": "procedural"
+        "scale": 0.24,
+        "source": "procedural",
+        "params": {
+          "can": false
+        }
       },
       "camera": {
         "pos": [
-          -2.2,
-          1.55,
-          3.4
+          -0.286,
+          2.616,
+          -4.531
         ],
         "look": [
-          -2.0,
-          3.25,
-          1.5
+          -0.898,
+          3.046,
+          -4.477
         ]
       },
-      "via": [
-        [
-          -3.6,
-          1.6,
-          3.8
-        ]
-      ]
+      "via": [],
+      "side": "left"
     },
     {
       "id": "sensor",
       "product": "smoke-detector",
       "device": {
         "pos": [
-          5.8,
-          3.29,
-          4.5
+          3,
+          3.05,
+          -3.9
         ],
         "rot": [
-          3.14159,
+          1.5708,
           0,
           0
         ],
-        "scale": 0.12,
-        "source": "procedural"
+        "scale": 0.086,
+        "source": "procedural",
+        "params": {
+          "tilt": false
+        }
       },
       "camera": {
         "pos": [
-          5.1,
-          1.5,
-          6.6
+          2.943,
+          2.7,
+          -3.712
         ],
         "look": [
-          5.8,
-          3.25,
-          4.5
+          2.94,
+          3.02,
+          -3.9
+        ],
+        "aims": [
+          {
+            "at": 0.5,
+            "pitch": 14
+          }
         ]
       },
       "via": [
         [
-          0.6,
-          1.6,
-          3.6
+          1.45,
+          2.5,
+          -4.8
         ],
         [
-          3.6,
-          1.6,
-          4.2
+          2.1,
+          2.5,
+          -4.42
         ]
-      ]
+      ],
+      "side": "left",
+      "clear": 0.105
+    },
+    {
+      "id": "lock",
+      "product": "smart-lock",
+      "device": {
+        "scale": 0.36,
+        "source": "procedural",
+        "mount": "door",
+        "params": {
+          "back": false
+        }
+      },
+      "camera": {
+        "pos": [
+          0.306,
+          1.7,
+          0.76
+        ],
+        "look": [
+          0.306,
+          1.6,
+          0.04
+        ]
+      },
+      "via": [],
+      "side": "left"
     }
   ],
-  "exit": {
+  "exitOut": {
+    "via": [
+      [
+        2.75,
+        2.1,
+        -2.2
+      ],
+      [
+        1.6,
+        2.05,
+        -0.95
+      ],
+      [
+        0.32,
+        2.03,
+        -0.75
+      ]
+    ],
     "pos": [
-      -2.0,
-      1.7,
-      9.6
+      0.18,
+      1.95,
+      0
     ],
     "look": [
-      -2.0,
-      1.5,
-      0.0
+      0.18,
+      1.8,
+      -3
+    ],
+    "aims": [
+      {
+        "at": 0.3,
+        "yaw": 0,
+        "pitch": -2
+      }
     ]
+  },
+  "exit": {
+    "via": [
+      [
+        -0.6,
+        1.95,
+        3.4
+      ]
+    ],
+    "pos": [
+      -7.5,
+      3.6,
+      22
+    ],
+    "look": [
+      1.6,
+      6.2,
+      -3
+    ]
+  },
+  "plants": {
+    "tree": "/models/tree-4cf79800.glb"
+  },
+  "props": {
+    "rooibos": "/models/prop-rooibos-152af06e.glb",
+    "plant2": "/models/prop-plant2-d28c0624.glb",
+    "plant4": "/models/prop-plant4-f8402328.glb",
+    "planter": "/models/prop-planter-8e126c0a.glb",
+    "sofa": "/models/prop-sofa-028bebfd.glb",
+    "armchair": "/models/prop-armchair-9d1ebf04.glb",
+    "coffee": "/models/prop-coffee-ed2101f9.glb",
+    "vase": "/models/prop-vase-6effa76f.glb",
+    "brassvase": "/models/prop-brassvase-b6dd2804.glb",
+    "lamp": "/models/prop-lamp-5ae7e5c0.glb",
+    "shrub2": "/models/prop-shrub2-5cfa1d2d.glb",
+    "shrub4": "/models/prop-shrub4-3f9bd4b7.glb",
+    "boulder2": "/models/prop-boulder2-694bd088.glb",
+    "boulder4": "/models/prop-boulder4-5575b8c8.glb",
+    "boulder6": "/models/prop-boulder6-f67ac741.glb"
+  },
+  "glow": [],
+  "wind": {
+    "dir": [
+      0.6,
+      -0.8
+    ]
+  },
+  "terrain": {
+    "lat": 23.548,
+    "lon": 58.395,
+    "bearing": 150,
+    "exaggerate": 1.35,
+    "model": "/models/terrain-a81861fe.bin",
+    "modelLite": "/models/terrain-lite-bfdba97c.bin"
   }
 }

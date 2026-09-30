@@ -1,18 +1,31 @@
 ---
+/** The live site's enquiry form (first/last name, email, phone, enquiry type, message). Web3Forms when site.json has
+    a key, otherwise a mailto: fallback (scripts/contact-form.ts). Underline fields that light up like a HUD readout. */
 import type { Locale } from '@/i18n/utils';
-import { useT } from '@/i18n/utils';
+import { strings } from '@/i18n/utils';
+import Icon from '@/components/Icons.astro';
 import site from '@/data/site.json';
-interface Props { locale: Locale; light?: boolean }
-const { locale, light = false } = Astro.props;
-const t = useT(locale);
+interface Props { locale: Locale; dark?: boolean }
+const { locale, dark = false } = Astro.props;
+const f = strings(locale).form;
 ---
-<form class:list={['form', { 'on-light': light }]} data-contact-form data-endpoint={site.formEndpoint} data-mail={site.email} novalidate>
+<form class:list={['form', { 'form--dark': dark }]} data-contact-form data-endpoint={site.formEndpoint} data-mail={site.email} novalidate>
   <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
-  <div class="field"><label for="cf-name">{t('contact.form.name')}</label><input id="cf-name" name="name" type="text" required autocomplete="name" /></div>
-  <div class="field"><label for="cf-phone">{t('contact.form.phone')}</label><input id="cf-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr" /></div>
-  <div class="field"><label for="cf-msg">{t('contact.form.message')}</label><textarea id="cf-msg" name="message" required></textarea></div>
-  <button class="btn btn-primary" type="submit" data-send data-label={t('contact.form.send')} data-sending={t('contact.form.sending')}>{t('contact.form.send')}</button>
-  <p class="form-status" role="status" aria-live="polite" data-status data-ok={t('contact.form.ok')} data-fail={t('contact.form.fail')} data-mailto={t('contact.form.mailto')}></p>
+  <div class="form-row">
+    <div class="field"><input id="cf-first" name="first" type="text" required autocomplete="given-name" placeholder=" " /><label for="cf-first">{f.first}</label><i></i></div>
+    <div class="field"><input id="cf-last" name="last" type="text" required autocomplete="family-name" placeholder=" " /><label for="cf-last">{f.last}</label><i></i></div>
+  </div>
+  <div class="form-row">
+    <div class="field"><input id="cf-email" name="email" type="email" required autocomplete="email" dir="ltr" placeholder=" " /><label for="cf-email">{f.email}</label><i></i></div>
+    <div class="field"><input id="cf-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr" placeholder=" " /><label for="cf-phone">{f.phone}</label><i></i></div>
+  </div>
+  <fieldset class="field-types">
+    <legend class="label">{f.type}</legend>
+    <div class="types">{f.types.map((x, i) => <label class="type"><input type="radio" name="type" value={x} checked={i === 0} /><span>{x}</span></label>)}</div>
+  </fieldset>
+  <div class="field"><textarea id="cf-msg" name="message" required rows="4" placeholder=" "></textarea><label for="cf-msg">{f.message}</label><i></i></div>
+  <button class="btn btn-primary form-send" type="submit" data-send data-magnetic data-label={f.send} data-sending={f.sending}><span data-send-label>{f.send}</span><Icon name="arrow" class="icon-dir" /></button>
+  <p class="form-status" role="status" aria-live="polite" data-status data-ok={f.ok} data-fail={f.fail} data-mailto={f.mailto}></p>
 </form>
 <script>
   import { initContactForm } from '@/scripts/contact-form';

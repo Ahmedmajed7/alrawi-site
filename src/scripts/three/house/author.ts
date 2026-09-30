@@ -1,11 +1,16 @@
 /**
  * Author mode (?author): fly around the house, place devices, log camera poses, copy house.json.
  * Keys: WASDQE move · 1-6 select stop · P log pose · click place device on surface · V add waypoint
- *       X set exterior pose · N set exit pose · J copy JSON · H toggle help
+ *       X set exterior pose · N set exit pose · G set approach pose · O set exit-out pose · J copy JSON
+ *       K add an aim (what the lens sees half-way through the move to the selected stop) · L clear the stop's waypoints and aims
+ * The rig (camera-rig.ts) plans each move through the waypoints with generous bends: two or three per move are plenty, 0.5 m
+ * from anything. `approach` is the pose in front of the door (its look is the first thing the lens turns to on the way in),
+ * `exitOut` the pose on the threshold on the way out.
  */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { HouseConfig, V3 } from './types';
+import type { Aim } from './camera-rig';
 
 export function mountAuthor(opts: { canvas: HTMLCanvasElement; camera: THREE.PerspectiveCamera; house: THREE.Object3D; devices: Map<string, THREE.Object3D>; cfg: HouseConfig; ui: HTMLElement }) {
   const { canvas, camera, house, devices, cfg, ui } = opts;
@@ -13,7 +18,7 @@ export function mountAuthor(opts: { canvas: HTMLCanvasElement; camera: THREE.Per
   controls.target.set(...cfg.exterior.look); camera.position.set(...cfg.exterior.pos); controls.update();
   let stop = 0; const keys = new Set<string>();
   const r3 = (v: THREE.Vector3): V3 => [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)];
-  const help = () => { ui.textContent = `AUTHOR MODE  stop ${stop + 1}/${cfg.stops.length} (${cfg.stops[stop].id})\nWASDQE move · 1-6 stop · P log camera · click place device\nV add waypoint · X exterior · N exit · J copy JSON\ncam ${r3(camera.position).join(', ')}  look ${r3(controls.target).join(', ')}`; };
+  const help = () => { ui.textContent = `AUTHOR MODE  stop ${stop + 1}/${cfg.stops.length} (${cfg.stops[stop].id})\nWASDQE move · 1-6 stop · P log camera · click place device\nV add waypoint · K add aim · L clear both · X exterior · G approach · O exit-out · N exit · J copy JSON\ncam ${r3(camera.position).join(', ')}  look ${r3(controls.target).join(', ')}`; };
   const ray = new THREE.Raycaster();
   canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -32,8 +37,16 @@ export function mountAuthor(opts: { canvas: HTMLCanvasElement; camera: THREE.Per
     if (/^[1-6]$/.test(k)) { stop = Math.min(+k - 1, cfg.stops.length - 1); }
     if (k === 'p') { cfg.stops[stop].camera.pos = r3(camera.position); cfg.stops[stop].camera.look = r3(controls.target); console.log('[author] camera', JSON.stringify(cfg.stops[stop].camera)); }
     if (k === 'v') { cfg.stops[stop].via.push(r3(camera.position)); console.log('[author] via', JSON.stringify(cfg.stops[stop].via)); }
+    if (k === 'k' || k === 'l') { // aims live beside the pose (house.json stops[].camera.aims), in degrees: yaw 0 looks down −Z, positive turns left
+      const cam = cfg.stops[stop].camera as HouseConfig['stops'][number]['camera'] & { aims?: Aim[] };
+      if (k === 'l') { cfg.stops[stop].via = []; delete cam.aims; }
+      else { const d = camera.getWorldDirection(new THREE.Vector3()); (cam.aims ??= []).push({ at: 0.5, yaw: Math.round(THREE.MathUtils.radToDeg(Math.atan2(-d.x, -d.z))), pitch: Math.round(THREE.MathUtils.radToDeg(Math.asin(d.y))) }); }
+      console.log('[author] aims', JSON.stringify(cam.aims ?? []), 'via', JSON.stringify(cfg.stops[stop].via));
+    }
     if (k === 'x') { cfg.exterior.pos = r3(camera.position); cfg.exterior.look = r3(controls.target); console.log('[author] exterior', JSON.stringify(cfg.exterior)); }
     if (k === 'n') { cfg.exit.pos = r3(camera.position); cfg.exit.look = r3(controls.target); }
+    if (k === 'g') { cfg.approach.pos = r3(camera.position); cfg.approach.look = r3(controls.target); console.log('[author] approach', JSON.stringify(cfg.approach)); }
+    if (k === 'o') { cfg.exitOut.pos = r3(camera.position); cfg.exitOut.look = r3(controls.target); console.log('[author] exitOut', JSON.stringify(cfg.exitOut)); }
     if (k === 'j') { navigator.clipboard?.writeText(JSON.stringify(cfg, null, 2)); console.log(JSON.stringify(cfg, null, 2)); ui.textContent += '\n(copied)'; }
     help();
   });

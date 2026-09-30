@@ -1,32 +1,29 @@
 ---
 import Base from '@/layouts/Base.astro';
 import ProductCard from '@/components/ProductCard.astro';
+import PageHero from '@/components/PageHero.astro';
+import SecHead from '@/components/SecHead.astro';
 import Icon from '@/components/Icons.astro';
 import { staticLangPaths, useT, l, localePath, type Locale } from '@/i18n/utils';
 import { allCategories, byCategory } from '@/lib/products';
 export const getStaticPaths = staticLangPaths;
 const locale = Astro.params.lang as Locale;
 const t = useT(locale);
+const brand = locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home';
 ---
-<Base {locale} title={`${t('meta.productsTitle')} | ${locale === 'ar' ? 'الراوي للمنازل الذكية' : 'Al Rawi Smart Home'}`} description={t('meta.productsDescription')} lightNav>
-  <div class="wrap page-head">
-    <span class="eyebrow">{t('categories.eyebrow')}</span>
-    <h1>{t('categories.all')}</h1>
-    <p>{t('meta.productsDescription')}</p>
-    <nav class="cat-tabs" aria-label={t('nav.products')}>
-      <a href={localePath(locale, 'products')} aria-current="page">{t('categories.all')}</a>
-      {allCategories.map((c) => <a href={localePath(locale, `products/${c.slug}`)}>{l(c.name, locale)}</a>)}
+<Base {locale} title={`${t('meta.productsTitle')} | ${brand}`} description={t('meta.productsDescription')}>
+  <PageHero title={t('nav.products')} figure="devices" tag={t('nav.products')} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: t('nav.products') }]}>
+    <nav class="cat-tabs" aria-label={t('nav.products')} data-ph-in style="--d:0.7s">
+      {allCategories.map((c) => <a href={`#${c.slug}`}>{l(c.name, locale)}</a>)}
     </nav>
-  </div>
-  {allCategories.map((c) => (
-    <section class="section-tight section">
+  </PageHero>
+  {allCategories.map((c, i) => (
+    <section class:list={['band', i % 2 ? 'band--mist' : 'band--paper', 'cat-band']} id={c.slug} data-tone="lime">
       <div class="wrap">
-        <div class="section-head" data-reveal>
-          <span class="eyebrow">{l(c.name, locale)}</span>
-          <h2>{l(c.blurb, locale)}</h2>
-          <a class="link" href={localePath(locale, `products/${c.slug}`)}>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
-        </div>
-        <div class="grid grid-4" data-stagger>{byCategory(c.slug).map((p) => <ProductCard product={p} {locale} />)}</div>
+        <SecHead no={String(i + 1).padStart(2, '0')} label={l(c.name, locale)} title={l(c.name, locale)} lead={l(c.blurb, locale)}>
+          <a class="link" href={localePath(locale, `products/${c.slug}`)} data-reveal>{t('categories.view')} <Icon name="arrow" class="icon-dir" /></a>
+        </SecHead>
+        <div class="prod-grid" data-stagger="0.08">{byCategory(c.slug).map((p, k) => <ProductCard product={p} {locale} index={k} />)}</div>
       </div>
     </section>
   ))}

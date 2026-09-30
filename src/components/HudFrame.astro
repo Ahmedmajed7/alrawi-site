@@ -1,0 +1,10 @@
+---
+/** Four HUD corner brackets around the slot (the film's reticle brackets); they snap in when the frame is revealed. */
+interface Props { class?: string; tag?: string; as?: string }
+const { class: cls = '', tag, as: El = 'div' } = Astro.props;
+---
+<El class:list={['hf', cls]} data-reveal="hf">
+  <slot />
+  <i class="hf-c hf-c0" aria-hidden="true"></i><i class="hf-c hf-c1" aria-hidden="true"></i><i class="hf-c hf-c2" aria-hidden="true"></i><i class="hf-c hf-c3" aria-hidden="true"></i>
+  {tag && <b class="hf-tag" aria-hidden="true" dir="ltr">{tag}</b>}
+</El>

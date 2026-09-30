@@ -9,3 +9,6 @@ dist/
 scripts/_cache/
 assets/house/*
 !assets/house/.gitkeep
+public/models/villa-dev.glb
+assets/polyhaven/
+assets/film/source/*.mp4

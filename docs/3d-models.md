@@ -12,4 +12,4 @@ Every product ships with a procedural 3D model built in code. To replace one wit
 4. Save as `public/models/<slug>.glb` (slug from `src/data/products.json`).
 5. Set `"model": true` on that product and rebuild. If the file fails to load the viewer falls back to the procedural model automatically and logs a warning.
 
-Orientation: +Y up, model centred near the origin, real-world scale is not required (the viewer fits the camera to the bounding box).
+Orientation: +Y up, model centred near the origin, real-world scale is not required (the viewer fits the camera to the bounding box). In the walkthrough the model's −Z extreme is the mounting face (`house.json` `device.scale` sets its largest dimension in metres). Optionally add an empty node named `hotspot` where the film's caption leader should land (the screen centre, the keypad); without it the leader points at the model's origin.

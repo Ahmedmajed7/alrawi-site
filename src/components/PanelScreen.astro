@@ -1,0 +1,56 @@
+---
+/**
+ * The control panel's screen as real HTML/CSS: the same layout the 3D model paints into its screen texture
+ * (src/data/panel-ui.ts), so when the film pauses on the panel this sits exactly over the baked pixels, then wakes
+ * up — the clock runs, scenes retarget every tile, the light pills drag, the temperature steps. Positioned onto the
+ * glass by scripts/film/device-live.ts (a projective matrix3d from the four corners recorded with the film).
+ */
+import type { Locale } from '@/i18n/utils';
+import { strings } from '@/i18n/utils';
+import { LAYOUT, sceneRect, PW, PH, ICONS, PANEL_DEFAULT, FULL, PILL_HEAD } from '@/data/panel-ui';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const s = strings(locale).walk.panel;
+const L = LAYOUT;
+const box = (r: readonly number[]) => `left:${r[0]}px;top:${r[1]}px;width:${r[2]}px;height:${r[3]}px`;
+const st = PANEL_DEFAULT;
+---
+<div class="pscreen" data-panel-screen lang={locale} style={`width:${PW}px;height:${PH}px`} aria-label={strings(locale).walk.live.screen} role="group" hidden>
+  <div class="ps-time" style={box(L.time)} data-ps-time>{st.time}</div>
+  <div class="ps-date" style={box(L.date)} data-ps-date>{s.date}</div>
+  <div class="ps-weather" style={box(L.weather)}>{s.weather}</div>
+  <div class="ps-room" style={box(L.room)}>{s.room}</div>
+  {s.scenes.map((name, i) => (
+    <button class:list={['ps-scene', { 'is-on': i === st.scene }]} type="button" style={box(sceneRect(i))} data-ps-scene={i} aria-pressed={i === st.scene ? 'true' : 'false'}>
+      <i><svg viewBox="0 0 24 24" aria-hidden="true"><path d={ICONS[i]} /></svg></i><span>{name}</span>
+    </button>
+  ))}
+  <div class="ps-card ps-climate" style={box(L.climate)}>
+    <span class="ps-label">{s.climate}</span>
+    <span class="ps-temp"><b data-ps-temp>{st.temp}</b>°</span>
+    <span class="ps-sub">{s.climateSub}</span>
+    <button class="ps-round" type="button" data-ps-temp-step="-1" aria-label={s.cooler}>−</button>
+    <button class="ps-round" type="button" data-ps-temp-step="1" aria-label={s.warmer}>+</button>
+  </div>
+  <div class="ps-card ps-curtains" style={box(L.curtains)}>
+    <span class="ps-label">{s.curtains}</span>
+    <div class="ps-seg">
+      {[s.open, s.pause, s.close].map((lab, i) => <button class:list={['ps-pill', { 'is-on': i === st.curtain }]} type="button" data-ps-curtain={i} aria-pressed={i === st.curtain ? 'true' : 'false'}>{lab}</button>)}
+    </div>
+  </div>
+  {([['main', s.main, s.mainSub, st.main], ['vanity', s.vanity, s.vanitySub, st.vanity]] as const).map(([key, label, sub, v]) => (
+    <div class:list={['ps-slider', { 'is-full': v >= FULL }]} style={box(L[key])} data-ps-slider={key} role="slider" tabindex="0" aria-label={label} aria-valuemin="0" aria-valuemax="100" aria-valuenow={v}>
+      <i class="ps-fill" style={`height:calc((100% - ${PILL_HEAD}px) * ${v / 100})`}></i>
+      <b class="ps-val"><span>{v}</span>%</b>
+      <span class="ps-label">{label}</span>
+      <span class="ps-sub">{sub}</span>
+    </div>
+  ))}
+  <div class="ps-card ps-music" style={box(L.music)} data-ps-music>
+    <button class="ps-play is-playing" type="button" data-ps-play aria-label={s.play} aria-pressed="true"><i></i></button>
+    <span class="ps-track">{s.track}</span>
+    <span class="ps-sub">{s.music}</span>
+    <span class="ps-eq" aria-hidden="true">{Array.from({ length: 18 }, (_, i) => <i style={`--i:${i}`}></i>)}</span>
+  </div>
+  <i class="ps-sheen" aria-hidden="true"></i>
+</div>

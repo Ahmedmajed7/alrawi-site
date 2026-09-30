@@ -13,7 +13,7 @@ SRC = ROOT / "scripts/_cache/pdf-images"
 PUB = ROOT / "public/img"
 
 PRODUCTS = {  # slug: [main, ...gallery]
-    "control-panel": ["p05-2", "p02-5", "p06-3", "p04-3"],
+    "control-panel": ["p05-2", "p04-3"],
     "audio-panel": ["p07-2"],
     "ceiling-speaker": ["p08-2"],
     "smart-lock": ["p10-2"],

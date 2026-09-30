@@ -1,24 +1,28 @@
+/** Nav: solid plate after the first scroll, hides on the way down and returns on the way up, a brass progress hairline,
+    and its tone follows whatever band sits under it (night glass → light type, limestone → ink). */
+import { onScroll } from './motion/loop';
+
 export function initNav() {
   const nav = document.querySelector<HTMLElement>('[data-nav]');
   const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
   const drawer = document.querySelector<HTMLElement>('[data-drawer]');
   if (!nav) return;
-
   let last = 0;
-  const onScroll = () => {
-    const y = window.scrollY;
+  const tones = () => Array.from(document.querySelectorAll<HTMLElement>('[data-tone], [data-dark-hero]'));
+  let bands = tones();
+  window.addEventListener('load', () => { bands = tones(); });
+  onScroll((y) => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    nav.style.setProperty('--sp', h > 0 ? (y / h).toFixed(4) : '0');
     nav.classList.toggle('is-scrolled', y > 24);
-    // hide on scroll down, show on scroll up (desktop only, not while drawer open)
-    if (window.innerWidth > 960 && !nav.classList.contains('is-open')) {
-      nav.classList.toggle('is-hidden', y > last && y > 320);
-    } else nav.classList.remove('is-hidden');
+    if (!nav.classList.contains('is-open')) nav.classList.toggle('is-hidden', y > last && y > 420);
     last = y;
-    // nav sits in light-on-dark mode while over a dark hero (walkthrough or category hero)
-    const dark = document.querySelector<HTMLElement>('[data-dark-hero]');
-    if (dark && nav.dataset.light === '0') nav.classList.toggle('on-night', y < dark.offsetHeight - 80);
-  };
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
+    // dark band under the nav's midline?
+    const mid = 40;
+    let dark = false;
+    for (const b of bands) { const r = b.getBoundingClientRect(); if (r.top <= mid && r.bottom >= mid) { dark = b.dataset.tone ? b.dataset.tone === 'dusk' : true; break; } }
+    nav.classList.toggle('on-night', dark);
+  });
 
   if (burger && drawer) {
     const set = (open: boolean) => {

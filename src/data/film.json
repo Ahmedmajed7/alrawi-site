@@ -1,0 +1,435 @@
+{
+  "updated": "2026-09-30T02:02:10.022Z",
+  "clips": [
+    {
+      "id": "hero",
+      "loop": true,
+      "ends": null,
+      "duration": 12.566,
+      "source": "placeholder",
+      "src": "/film/hero-116d3ae8.mp4",
+      "srcMobile": "/film/hero-m-e613d4d4.mp4",
+      "srcHevc": "/film/hero-hevc-85fb83a9.mp4",
+      "srcHevcMobile": "/film/hero-hevc-m-089574f9.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/hero-m-e613d4d4.mp4",
+          "hevc": "/film/hero-hevc-m-089574f9.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/hero-116d3ae8.mp4",
+          "hevc": "/film/hero-hevc-85fb83a9.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/hero-q-ca4ecebe.mp4",
+          "hevc": "/film/hero-hevc-q-da73cfe7.mp4"
+        }
+      ],
+      "poster": "/film/hero-first-2c88f3b7.webp",
+      "last": "/film/hero-last-1005bfeb.webp",
+      "hotspot": null,
+      "features": null,
+      "fps": 30,
+      "track": null
+    },
+    {
+      "id": "panel",
+      "loop": false,
+      "ends": "panel",
+      "duration": 5.95,
+      "source": "placeholder",
+      "src": "/film/panel-2eae15e0.mp4",
+      "srcMobile": "/film/panel-m-b74e0637.mp4",
+      "srcHevc": "/film/panel-hevc-593c75b1.mp4",
+      "srcHevcMobile": "/film/panel-hevc-m-e84a9cc8.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/panel-m-b74e0637.mp4",
+          "hevc": "/film/panel-hevc-m-e84a9cc8.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/panel-2eae15e0.mp4",
+          "hevc": "/film/panel-hevc-593c75b1.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/panel-q-0ca202a5.mp4",
+          "hevc": "/film/panel-hevc-q-4df8049f.mp4"
+        }
+      ],
+      "poster": "/film/panel-first-4c5ee8d2.webp",
+      "last": "/film/panel-last-4becddd1.webp",
+      "hotspot": [
+        0.7046,
+        0.4175
+      ],
+      "features": {
+        "quads": {
+          "screen": [
+            [
+              0.49643,
+              0.39703
+            ],
+            [
+              0.68321,
+              0.39254
+            ],
+            [
+              0.68321,
+              0.61173
+            ],
+            [
+              0.49643,
+              0.60707
+            ]
+          ]
+        },
+        "points": {}
+      },
+      "fps": 60,
+      "track": "/film/track-panel-26f37440.json"
+    },
+    {
+      "id": "switch",
+      "loop": false,
+      "ends": "switch",
+      "duration": 2.75,
+      "source": "placeholder",
+      "src": "/film/switch-ef1b572b.mp4",
+      "srcMobile": "/film/switch-m-dc5813a1.mp4",
+      "srcHevc": "/film/switch-hevc-86fd77e0.mp4",
+      "srcHevcMobile": "/film/switch-hevc-m-2dc5d90b.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/switch-m-dc5813a1.mp4",
+          "hevc": "/film/switch-hevc-m-2dc5d90b.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/switch-ef1b572b.mp4",
+          "hevc": "/film/switch-hevc-86fd77e0.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/switch-q-2ecbcbf1.mp4",
+          "hevc": "/film/switch-hevc-q-a019dae4.mp4"
+        }
+      ],
+      "poster": "/film/switch-first-779cbd89.webp",
+      "last": "/film/switch-last-9b2488c5.webp",
+      "hotspot": [
+        0.5998,
+        0.499
+      ],
+      "features": {
+        "quads": {},
+        "points": {
+          "led_0": [
+            0.54145,
+            0.59665
+          ],
+          "led_1": [
+            0.59847,
+            0.60797
+          ],
+          "led_2": [
+            0.66053,
+            0.62029
+          ]
+        }
+      },
+      "fps": 60,
+      "track": null
+    },
+    {
+      "id": "curtain",
+      "loop": false,
+      "ends": "curtain",
+      "duration": 3.617,
+      "source": "placeholder",
+      "src": "/film/curtain-232452d8.mp4",
+      "srcMobile": "/film/curtain-m-52dfcbf3.mp4",
+      "srcHevc": "/film/curtain-hevc-1cf04f63.mp4",
+      "srcHevcMobile": "/film/curtain-hevc-m-70f87013.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/curtain-m-52dfcbf3.mp4",
+          "hevc": "/film/curtain-hevc-m-70f87013.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/curtain-232452d8.mp4",
+          "hevc": "/film/curtain-hevc-1cf04f63.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/curtain-q-c21c24b5.mp4",
+          "hevc": "/film/curtain-hevc-q-f110154b.mp4"
+        }
+      ],
+      "poster": "/film/curtain-first-604b9f71.webp",
+      "last": "/film/curtain-last-5ea6d509.webp",
+      "hotspot": [
+        0.411,
+        0.2466
+      ],
+      "features": {
+        "quads": {},
+        "points": {
+          "led_0": [
+            0.41101,
+            0.27113
+          ]
+        }
+      },
+      "fps": 60,
+      "track": null
+    },
+    {
+      "id": "speaker",
+      "loop": false,
+      "ends": "speaker",
+      "duration": 1.917,
+      "source": "placeholder",
+      "src": "/film/speaker-df59b031.mp4",
+      "srcMobile": "/film/speaker-m-3da5d218.mp4",
+      "srcHevc": "/film/speaker-hevc-f85f85c3.mp4",
+      "srcHevcMobile": "/film/speaker-hevc-m-0e8ee275.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/speaker-m-3da5d218.mp4",
+          "hevc": "/film/speaker-hevc-m-0e8ee275.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/speaker-df59b031.mp4",
+          "hevc": "/film/speaker-hevc-f85f85c3.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/speaker-q-41246d91.mp4",
+          "hevc": "/film/speaker-hevc-q-4fab8d18.mp4"
+        }
+      ],
+      "poster": "/film/speaker-first-935a955c.webp",
+      "last": "/film/speaker-last-4403c0cc.webp",
+      "hotspot": [
+        0.6001,
+        0.4991
+      ],
+      "features": {
+        "quads": {
+          "grille": [
+            [
+              0.52155,
+              0.58025
+            ],
+            [
+              0.51062,
+              0.41153
+            ],
+            [
+              0.7004,
+              0.39248
+            ],
+            [
+              0.67267,
+              0.56814
+            ]
+          ]
+        },
+        "points": {
+          "led_0": [
+            0.69181,
+            0.48959
+          ]
+        }
+      },
+      "fps": 60,
+      "track": null
+    },
+    {
+      "id": "sensor",
+      "loop": false,
+      "ends": "sensor",
+      "duration": 3.25,
+      "source": "placeholder",
+      "src": "/film/sensor-4b339498.mp4",
+      "srcMobile": "/film/sensor-m-542c716e.mp4",
+      "srcHevc": "/film/sensor-hevc-b804f70e.mp4",
+      "srcHevcMobile": "/film/sensor-hevc-m-735deb63.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/sensor-m-542c716e.mp4",
+          "hevc": "/film/sensor-hevc-m-735deb63.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/sensor-4b339498.mp4",
+          "hevc": "/film/sensor-hevc-b804f70e.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/sensor-q-fe6b8187.mp4",
+          "hevc": "/film/sensor-hevc-q-1232a6c5.mp4"
+        }
+      ],
+      "poster": "/film/sensor-first-a140bde7.webp",
+      "last": "/film/sensor-last-aff4c03f.webp",
+      "hotspot": [
+        0.5988,
+        0.5055
+      ],
+      "features": {
+        "quads": {},
+        "points": {
+          "btn_test": [
+            0.59563,
+            0.57007
+          ],
+          "led_0": [
+            0.59598,
+            0.56526
+          ]
+        }
+      },
+      "fps": 60,
+      "track": null
+    },
+    {
+      "id": "lock",
+      "loop": false,
+      "ends": "lock",
+      "duration": 5.333,
+      "source": "placeholder",
+      "src": "/film/lock-4341c370.mp4",
+      "srcMobile": "/film/lock-m-8b3ab3b8.mp4",
+      "srcHevc": "/film/lock-hevc-c40c1691.mp4",
+      "srcHevcMobile": "/film/lock-hevc-m-0b89d6b3.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/lock-m-8b3ab3b8.mp4",
+          "hevc": "/film/lock-hevc-m-0b89d6b3.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/lock-4341c370.mp4",
+          "hevc": "/film/lock-hevc-c40c1691.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/lock-q-b4dcd557.mp4",
+          "hevc": "/film/lock-hevc-q-0e788042.mp4"
+        }
+      ],
+      "poster": "/film/lock-first-4f10baac.webp",
+      "last": "/film/lock-last-0eb8c20b.webp",
+      "hotspot": [
+        0.6006,
+        0.2883
+      ],
+      "features": {
+        "quads": {
+          "keypad": [
+            [
+              0.58132,
+              0.3268
+            ],
+            [
+              0.61872,
+              0.3268
+            ],
+            [
+              0.61676,
+              0.45666
+            ],
+            [
+              0.57998,
+              0.45666
+            ]
+          ]
+        },
+        "points": {
+          "led_0": [
+            0.6085,
+            0.24206
+          ],
+          "btn_finger": [
+            0.57348,
+            0.53339
+          ]
+        }
+      },
+      "fps": 60,
+      "track": "/film/track-lock-661ccfaf.json"
+    },
+    {
+      "id": "outro",
+      "loop": false,
+      "ends": null,
+      "duration": 5.083,
+      "source": "placeholder",
+      "src": "/film/outro-434b27c5.mp4",
+      "srcMobile": "/film/outro-m-1454cf26.mp4",
+      "srcHevc": "/film/outro-hevc-0a8fc987.mp4",
+      "srcHevcMobile": "/film/outro-hevc-m-c5601eb1.mp4",
+      "rungs": [
+        {
+          "h": 720,
+          "w": 1280,
+          "avc": "/film/outro-m-1454cf26.mp4",
+          "hevc": "/film/outro-hevc-m-c5601eb1.mp4"
+        },
+        {
+          "h": 1080,
+          "w": 1920,
+          "avc": "/film/outro-434b27c5.mp4",
+          "hevc": "/film/outro-hevc-0a8fc987.mp4"
+        },
+        {
+          "h": 1440,
+          "w": 2560,
+          "avc": "/film/outro-q-90250d01.mp4",
+          "hevc": "/film/outro-hevc-q-65381cb7.mp4"
+        }
+      ],
+      "poster": "/film/outro-first-9a50eca0.webp",
+      "last": "/film/outro-last-d0e55a6e.webp",
+      "hotspot": null,
+      "features": null,
+      "fps": 60,
+      "track": null
+    }
+  ]
+}

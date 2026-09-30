@@ -4,7 +4,9 @@ import type { Localized } from '@/i18n/utils';
 
 export interface Product {
   slug: string; category: string; order: number; featured: boolean;
-  name: Localized; tagline: Localized; description: Localized;
+  name: Localized; tagline: Localized; blurb?: Localized; description: Localized;
+  /** the film's HUD rows (label, value): catalogue facts only; units and standards in Latin script in both languages */
+  specs?: { k: Localized; v: Localized }[];
   features: Localized[]; tags: string[];
   image: string; gallery: string[]; sourceImages: string[];
   shape: string; shapeParams: Record<string, unknown>;

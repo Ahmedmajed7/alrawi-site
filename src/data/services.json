@@ -1,14 +1,98 @@
 [
-  { "slug": "cctv", "icon": "camera",
-    "name": { "ar": "كاميرات المراقبة", "en": "CCTV" },
-    "blurb": { "ar": "تصميم وتركيب أنظمة مراقبة عالية الدقة مع إمكانية المتابعة من هاتفك في أي وقت.", "en": "Design and installation of high-definition surveillance systems you can monitor from your phone at any time." } },
-  { "slug": "intercom", "icon": "intercom",
-    "name": { "ar": "نظام الانتركوم", "en": "Intercom" },
-    "blurb": { "ar": "انتركوم فيديو للفلل والمباني يتيح لك رؤية الزائر والتحدث معه وفتح الباب عن بُعد.", "en": "Video intercom for villas and buildings so you can see visitors, talk to them and open the door remotely." } },
-  { "slug": "wifi", "icon": "wifi",
-    "name": { "ar": "توزيع الإنترنت", "en": "Wi-Fi Coverage" },
-    "blurb": { "ar": "شبكة واي فاي مستقرة تغطي كل زوايا المنزل لضمان عمل جميع الأجهزة الذكية بسلاسة.", "en": "Stable Wi-Fi that reaches every corner of the home so every smart device works without interruption." } },
-  { "slug": "rack", "icon": "rack",
-    "name": { "ar": "تركيب وتنظيم الراك", "en": "Rack Management" },
-    "blurb": { "ar": "تركيب وترتيب خزائن الشبكة والأجهزة بشكل منظم يسهّل الصيانة والتوسع مستقبلاً.", "en": "Installation and tidy organisation of network racks that makes maintenance and future expansion easy." } }
+  {
+    "slug": "energy",
+    "icon": "bolt",
+    "name": {
+      "en": "Energy Management",
+      "ar": "إدارة الطاقة"
+    },
+    "sub": {
+      "en": "Effortless Efficiency at Home",
+      "ar": "كفاءة بلا عناء في منزلك"
+    },
+    "body": {
+      "en": "Reduce your energy consumption and save on utility bills with our energy management solutions. Monitor and control your home’s energy usage, optimize heating and cooling systems, and implement smart lighting to maximize efficiency.",
+      "ar": "قلّل استهلاكك للطاقة ووفّر في فواتير الخدمات مع حلول إدارة الطاقة لدينا. راقب استهلاك منزلك للطاقة وتحكّم فيه، وحسّن أنظمة التدفئة والتبريد، واعتمد الإضاءة الذكية لتحقيق أعلى كفاءة."
+    }
+  },
+  {
+    "slug": "automation",
+    "icon": "home",
+    "name": {
+      "en": "Home Automation",
+      "ar": "أتمتة المنزل"
+    },
+    "sub": {
+      "en": "Personalized Luxury at Your Fingertips",
+      "ar": "فخامة مخصصة بين يديك"
+    },
+    "body": {
+      "en": "Our home automation solutions allow you to manage lighting, HVAC, security, and more from anywhere using your smartphone or voice commands. From automated lighting and climate control to immersive entertainment and state-of-the-art security, we seamlessly integrate technology to match your refined taste and style.",
+      "ar": "تتيح لك حلول أتمتة المنزل لدينا إدارة الإضاءة والتكييف والأمان وغيرها من أي مكان باستخدام هاتفك الذكي أو الأوامر الصوتية. من الإضاءة المؤتمتة والتحكم في المناخ إلى الترفيه الغامر وأحدث أنظمة الأمان، ندمج التقنية بسلاسة لتلائم ذوقك الرفيع وأسلوبك."
+    }
+  },
+  {
+    "slug": "environment",
+    "icon": "thermo",
+    "name": {
+      "en": "Environmental Controls",
+      "ar": "التحكم البيئي"
+    },
+    "sub": {
+      "en": "Creating your own heaven",
+      "ar": "اصنع جنّتك الخاصة"
+    },
+    "body": {
+      "en": "Achieve optimum comfort with our environmental control systems. Adjust your air-conditioning thermostat remotely with ease. Create personalized settings and enjoy a comfortable living environment every day. Indulge in the luxury of effortless control.",
+      "ar": "حقّق أقصى درجات الراحة مع أنظمة التحكم البيئي لدينا. اضبط منظّم حرارة المكيّف عن بُعد بكل سهولة. أنشئ إعدادات مخصصة واستمتع ببيئة معيشية مريحة كل يوم، وانعم بفخامة التحكم دون عناء."
+    }
+  },
+  {
+    "slug": "security",
+    "icon": "shield",
+    "name": {
+      "en": "Security and Safety Systems",
+      "ar": "أنظمة الأمن والسلامة"
+    },
+    "sub": {
+      "en": "Unparalleled Security, Uncompromised Privacy",
+      "ar": "أمان لا مثيل له وخصوصية لا تُمس"
+    },
+    "body": {
+      "en": "Our advanced security systems utilize cutting-edge technologies, ensuring comprehensive protection for your residence. The smart security and safety solutions include surveillance cameras, motion sensors, smart locks, smoke and gas detectors, and remote monitoring, giving you peace of mind wherever you are.",
+      "ar": "تعتمد أنظمتنا الأمنية المتقدمة على أحدث التقنيات لضمان حماية شاملة لمسكنك. تشمل حلول الأمن والسلامة الذكية كاميرات المراقبة وحساسات الحركة والأقفال الذكية وكواشف الدخان والغاز والمراقبة عن بُعد، لتمنحك راحة البال أينما كنت."
+    }
+  },
+  {
+    "slug": "lighting",
+    "icon": "bulb",
+    "name": {
+      "en": "Smart Lighting",
+      "ar": "الإضاءة الذكية"
+    },
+    "sub": {
+      "en": "Exquisite Convenience",
+      "ar": "راحة راقية"
+    },
+    "body": {
+      "en": "Transform the ambiance of your home with smart lighting solutions. Set the mood, save energy, and automate lighting schedules to suit your lifestyle. Control your lights remotely or use voice commands for effortless control. Discover the ultimate convenience that enhances your lifestyle and elevates your everyday experience.",
+      "ar": "غيّر أجواء منزلك مع حلول الإضاءة الذكية. اضبط المزاج ووفّر الطاقة وجدوِل الإضاءة تلقائياً بما يناسب أسلوب حياتك. تحكّم في الإضاءة عن بُعد أو بالأوامر الصوتية دون أي عناء. اكتشف راحة لا مثيل لها ترتقي بأسلوب حياتك وتجربتك اليومية."
+    }
+  },
+  {
+    "slug": "entertainment",
+    "icon": "audio",
+    "name": {
+      "en": "Entertainment Systems",
+      "ar": "أنظمة الترفيه"
+    },
+    "sub": {
+      "en": "Luxurious Living Redefined",
+      "ar": "حياة فاخرة بمفهوم جديد"
+    },
+    "body": {
+      "en": "Experience the ultimate in-home entertainment with our cutting-edge audio and video systems. From immersive home theaters to multi-room audio setups, we’ll create an entertainment space that delivers an unparalleled audiovisual experience. With our intuitive interfaces, managing your home becomes a breeze.",
+      "ar": "استمتع بأرقى تجارب الترفيه المنزلي مع أنظمتنا المتطورة للصوت والصورة. من المسارح المنزلية الغامرة إلى أنظمة الصوت متعددة الغرف، سننشئ لك مساحة ترفيه تقدّم تجربة سمعية وبصرية لا مثيل لها. ومع واجهاتنا سهلة الاستخدام، تصبح إدارة منزلك في غاية السهولة."
+    }
+  }
 ]

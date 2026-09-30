@@ -1,0 +1,195 @@
+[
+  {
+    "slug": "controller",
+    "image": "/img/control/controller-966e9b22.webp",
+    "icon": "panel",
+    "link": "products/main-controllers",
+    "name": {
+      "en": "Smart Controller",
+      "ar": "وحدة التحكم الذكية"
+    },
+    "body": {
+      "en": "A smart home controller, smart home hub, or home automation controller is the brain behind your smart home. It is the device that controls all your smart appliances and devices. These can range anywhere from lightbulbs to music systems, electronic blinds, TVs, doorbells, thermostats, security systems and so much more.",
+      "ar": "وحدة التحكم في المنزل الذكي، أو المحور الذكي، أو وحدة التحكم في أتمتة المنزل، هي العقل المدبّر لمنزلك الذكي؛ فهي الجهاز الذي يتحكم في جميع أجهزتك الذكية، من المصابيح إلى أنظمة الموسيقى والستائر الإلكترونية وأجهزة التلفاز وأجراس الأبواب ومنظمات الحرارة وأنظمة الأمان وغير ذلك الكثير."
+    }
+  },
+  {
+    "slug": "lighting",
+    "image": "/img/control/lighting-9bbaa113.webp",
+    "icon": "bulb",
+    "link": "products/switches",
+    "name": {
+      "en": "Smart lighting control",
+      "ar": "التحكم الذكي في الإضاءة"
+    },
+    "body": {
+      "en": "Adjust your lighting based on your scenes and be able to control all the lights in your home manually and automatically.",
+      "ar": "اضبط إضاءتك وفق المشاهد التي تختارها، وتحكّم في جميع أضواء منزلك يدوياً وتلقائياً."
+    }
+  },
+  {
+    "slug": "ac",
+    "image": "/img/control/ac-dd2de4fa.webp",
+    "icon": "thermo",
+    "link": "products/control-devices/ir-controller",
+    "name": {
+      "en": "Smart AC control",
+      "ar": "التحكم الذكي في التكييف"
+    },
+    "body": {
+      "en": "Keep your home cool while being able to save energy through controlling your AC the smart way.",
+      "ar": "حافظ على برودة منزلك مع توفير الطاقة من خلال التحكم في المكيّف بالطريقة الذكية."
+    }
+  },
+  {
+    "slug": "curtain",
+    "image": "/img/control/curtain-874435fa.webp",
+    "icon": "remote",
+    "link": "products/control-devices/curtain-motor",
+    "name": {
+      "en": "Smart Curtain Control",
+      "ar": "التحكم الذكي في الستائر"
+    },
+    "body": {
+      "en": "Smart Curtain comes with 6 features: Remote Control, Voice Command, Schedule Open/Close, Smart Home Automation, Pull Motion & Mobile Control.",
+      "ar": "تأتي الستائر الذكية بست مزايا: التحكم عن بُعد، والأوامر الصوتية، وجدولة الفتح والإغلاق، وأتمتة المنزل الذكي، والتشغيل بالسحب، والتحكم من الهاتف."
+    }
+  },
+  {
+    "slug": "smoke",
+    "image": "/img/control/smoke-47982c01.webp",
+    "icon": "alarm",
+    "link": "products/security/smoke-detector",
+    "name": {
+      "en": "Smoke detectors",
+      "ar": "كواشف الدخان"
+    },
+    "body": {
+      "en": "Fires typically take less than 4 minutes to spread when it starts. The alarm will trigger to allow the residents to get out in time.",
+      "ar": "عادةً ما يستغرق انتشار الحريق أقل من 4 دقائق من بدايته، وينطلق الإنذار ليتيح للسكان الخروج في الوقت المناسب."
+    }
+  },
+  {
+    "slug": "motion",
+    "image": "/img/control/motion-dbcf9ae9.webp",
+    "icon": "motion",
+    "link": "products/security/motion-sensor",
+    "name": {
+      "en": "Motion detector control",
+      "ar": "التحكم بكواشف الحركة"
+    },
+    "body": {
+      "en": "Lower your electricity bill by using motion detectors in your home while also using them for security at the same time.",
+      "ar": "خفّض فاتورة الكهرباء باستخدام كواشف الحركة في منزلك، واستفد منها في الوقت نفسه لأغراض الأمان."
+    }
+  },
+  {
+    "slug": "gas",
+    "image": "/img/control/gas-c51414f7.webp",
+    "icon": "flame",
+    "link": "products/security/gas-sensor",
+    "name": {
+      "en": "Gas Leak Detector",
+      "ar": "كاشف تسرّب الغاز"
+    },
+    "body": {
+      "en": "Gas Detector offers Voice Notification and a digital readout of the gas concentration. Reduce the risk of gas explosion and protect your family's life and property safety.",
+      "ar": "يوفّر كاشف الغاز تنبيهاً صوتياً وقراءة رقمية لتركيز الغاز، ليقلّل خطر الانفجار ويحمي حياة أسرتك وسلامة ممتلكاتك."
+    }
+  },
+  {
+    "slug": "siren",
+    "image": "/img/control/siren-6480f525.webp",
+    "icon": "siren",
+    "link": "products/security/siren",
+    "name": {
+      "en": "Smart Siren",
+      "ar": "صفارة الإنذار الذكية"
+    },
+    "body": {
+      "en": "Siren alarm systems work by generating a loud, piercing siren sound when they're triggered by intruders in and around your home.",
+      "ar": "تعمل أنظمة صفارات الإنذار على إطلاق صوت عالٍ وحادّ عند رصد متسللين داخل منزلك أو حوله."
+    }
+  },
+  {
+    "slug": "sound",
+    "image": "/img/control/sound-70c48184.webp",
+    "icon": "audio",
+    "link": "products/audio",
+    "name": {
+      "en": "Smart Sound system Control",
+      "ar": "التحكم الذكي في نظام الصوت"
+    },
+    "body": {
+      "en": "Play and automate the sounds in your home and be able to set timers and specify the speakers to play.",
+      "ar": "شغّل الصوت في منزلك وأتمِته، واضبط المؤقتات وحدّد السماعات التي تعمل."
+    }
+  },
+  {
+    "slug": "lock",
+    "image": "/img/control/lock-d1ae299f.webp",
+    "icon": "lock",
+    "link": "products/security/smart-lock",
+    "name": {
+      "en": "Smart Door lock Control",
+      "ar": "التحكم الذكي في أقفال الأبواب"
+    },
+    "body": {
+      "en": "Eliminate the need to keep multiple keys for your home and enjoy the smart lock which enables you to unlock through fingerprint, password, card, mechanical key and mobile phone.",
+      "ar": "استغنِ عن حمل مفاتيح متعددة لمنزلك واستمتع بالقفل الذكي الذي يتيح لك الفتح بالبصمة أو كلمة المرور أو البطاقة أو المفتاح الميكانيكي أو الهاتف المحمول."
+    }
+  },
+  {
+    "slug": "gate",
+    "image": "/img/control/gate-aed6c4de.webp",
+    "icon": "gate",
+    "link": "products/control-devices/garage-module",
+    "name": {
+      "en": "Gate motor control",
+      "ar": "التحكم في محرّك البوابة"
+    },
+    "body": {
+      "en": "Open and park your car without having to leave it with the smart gate motor control.",
+      "ar": "افتح البوابة وأوقف سيارتك دون الحاجة إلى مغادرتها مع التحكم الذكي في محرّك البوابة."
+    }
+  },
+  {
+    "slug": "cctv",
+    "image": null,
+    "icon": "camera",
+    "link": null,
+    "name": {
+      "en": "Smart CCTV control",
+      "ar": "التحكم الذكي في كاميرات المراقبة"
+    },
+    "body": {
+      "en": "Monitor your cameras from anywhere in the world and secure your home by being able to check at anytime, anywhere exactly what is happening around your house.",
+      "ar": "راقب كاميراتك من أي مكان في العالم، وأمّن منزلك بمعرفة ما يحدث حوله بالضبط في أي وقت ومن أي مكان."
+    }
+  },
+  {
+    "slug": "intercom",
+    "image": "/img/control/intercom-2edf5086.webp",
+    "icon": "intercom",
+    "link": null,
+    "name": {
+      "en": "Smart intercom system",
+      "ar": "نظام الإنتركوم الذكي"
+    },
+    "body": {
+      "en": "An intercom system is a must have system these days at any house. It gives you the ability to speak to whoever rang the bell through an indoor monitor and unlock the door for them.",
+      "ar": "أصبح نظام الإنتركوم ضرورة في أي منزل اليوم؛ إذ يتيح لك التحدث إلى من يقرع الجرس عبر شاشة داخلية وفتح الباب له."
+    }
+  },
+  {
+    "slug": "wifi",
+    "image": "/img/control/wifi-73884d54.webp",
+    "icon": "wifi",
+    "link": null,
+    "name": {
+      "en": "Indoor and Outdoor Wifi Setup",
+      "ar": "تجهيز شبكة الواي فاي الداخلية والخارجية"
+    },
+    "body": null
+  }
+]

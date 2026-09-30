@@ -1,0 +1,155 @@
+/* ======================= HUD KIT: the film's instrument language on the pages ======================= */
+
+/* --- HUD frame: four corner brackets that snap onto their content (components/HudFrame.astro) --- */
+.hf { position: relative; }
+.hf-c { position: absolute; width: 18px; height: 18px; border: 0 solid var(--brass); pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.2s linear, translate 0.55s var(--ease-snap); }
+.band--dusk .hf-c { border-color: var(--holo); filter: drop-shadow(0 0 4px rgba(111, 227, 255, 0.5)); }
+.hf-c0 { top: -10px; left: -10px; border-top-width: 1.5px; border-left-width: 1.5px; translate: -22px -22px; }
+.hf-c1 { top: -10px; right: -10px; border-top-width: 1.5px; border-right-width: 1.5px; translate: 22px -22px; }
+.hf-c2 { bottom: -10px; right: -10px; border-bottom-width: 1.5px; border-right-width: 1.5px; translate: 22px 22px; }
+.hf-c3 { bottom: -10px; left: -10px; border-bottom-width: 1.5px; border-left-width: 1.5px; translate: -22px 22px; }
+.hf.is-in .hf-c { opacity: 1; translate: 0 0; }
+.hf.is-in .hf-c1 { transition-delay: 0.06s; } .hf.is-in .hf-c2 { transition-delay: 0.12s; } .hf.is-in .hf-c3 { transition-delay: 0.18s; }
+.hf-tag { position: absolute; top: -34px; inset-inline-end: 0; font: 500 0.62rem/1 var(--f-num); letter-spacing: 0.22em; color: var(--brass-deep); opacity: 0; transition: opacity 0.4s 0.5s; white-space: nowrap; }
+.band--dusk .hf-tag { color: var(--holo); }
+.hf.is-in .hf-tag { opacity: 1; }
+
+/* --- reticle (components/Reticle.astro), a quieter twin of the film's (11-hud.css) --- */
+.ret { --rs: clamp(90px, 9vw, 130px); position: absolute; width: 0; height: 0; z-index: 2; pointer-events: none; }
+.ret > svg, .ret-tag { position: absolute; }
+.ret > svg { max-width: none; }
+.ret-ring { left: calc(var(--rs) * -0.5); top: calc(var(--rs) * -0.5); width: var(--rs); height: var(--rs); overflow: visible; fill: none; stroke: #fff; stroke-width: 1.2; opacity: 0; scale: 1.7; transition: opacity 0.3s linear, scale 0.9s var(--ease-snap); filter: drop-shadow(0 0 2px rgba(2, 8, 18, 0.8)) drop-shadow(0 0 6px rgba(111, 227, 255, 0.7)); }
+.ret-ring * { vector-effect: non-scaling-stroke; }
+.ret-a { stroke-dasharray: 1.4 3.94; stroke-width: 2.2; }
+.ret-c .is-fine { opacity: 0.45; }
+.ret-x .is-dot { fill: #fff; stroke: none; }
+.ret.is-on .ret-ring { opacity: 1; scale: 1; }
+.ret.is-on .ret-a { animation: ret-spin 50s linear infinite; }
+.ret.is-on .ret-b { animation: ret-spin 24s linear infinite reverse; }
+.ret.is-on .ret-b, .ret.is-on .ret-c { transition-delay: 0.08s; }
+@keyframes ret-spin { to { rotate: 360deg; } }
+.ret-br { width: calc(var(--rs) * 0.15); height: calc(var(--rs) * 0.15); overflow: visible; fill: none; stroke: #fff; stroke-width: 1.5; opacity: 0; translate: var(--fx) var(--fy); rotate: var(--rot); filter: drop-shadow(0 0 4px var(--holo)); transition: opacity 0.2s linear, translate 0.5s var(--ease-snap); }
+.ret-br * { vector-effect: non-scaling-stroke; }
+.ret-br-0 { left: calc(var(--rs) * -0.5); top: calc(var(--rs) * -0.5); --fx: -40px; --fy: -40px; --rot: 0deg; }
+.ret-br-1 { left: calc(var(--rs) * 0.35); top: calc(var(--rs) * -0.5); --fx: 40px; --fy: -40px; --rot: 90deg; }
+.ret-br-2 { left: calc(var(--rs) * 0.35); top: calc(var(--rs) * 0.35); --fx: 40px; --fy: 40px; --rot: 180deg; }
+.ret-br-3 { left: calc(var(--rs) * -0.5); top: calc(var(--rs) * 0.35); --fx: -40px; --fy: 40px; --rot: 270deg; }
+.ret.is-on .ret-br { opacity: 1; translate: 0 0; transition-delay: 0.25s; }
+.ret-tag { left: calc(var(--rs) * 0.42); bottom: calc(var(--rs) / 2 + 8px); display: grid; gap: 5px; font: 500 0.64rem/1 var(--f-num); letter-spacing: 0.22em; white-space: nowrap; color: #fff; text-transform: uppercase; text-shadow: 0 0 3px rgba(2, 8, 18, 0.9), 0 0 10px rgba(2, 8, 18, 0.8); opacity: 0; transition: opacity 0.4s 0.6s; }
+.ret-tag i { font-style: normal; color: var(--holo); font-size: 0.58rem; }
+.ret.is-on .ret-tag { opacity: 1; }
+.ret.is-flip .ret-tag { left: auto; right: calc(var(--rs) * 0.42); justify-items: end; }
+
+/* --- the page route (scripts/motion/route.ts) --- */
+main { position: relative; }
+.route { position: absolute; top: 0; left: 0; width: 100%; pointer-events: none; z-index: 6; }
+.route svg { position: absolute; inset: 0; overflow: visible; }
+.route-ghost { fill: none; stroke: var(--brass); stroke-width: 1; opacity: 0.16; stroke-dasharray: 2 6; }
+.route-line { fill: none; stroke: var(--brass); stroke-width: 1.2; opacity: 0.8; }
+.route-tip { position: absolute; top: 0; left: 0; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px rgba(217, 168, 92, 0.18), 0 0 18px 4px rgba(217, 168, 92, 0.55); opacity: 0; transition: opacity 0.4s; will-change: transform; }
+.route-tip.is-on { opacity: 1; }
+.route-node { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+.route-node i { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--brass); background: var(--limestone); transition: background 0.4s, box-shadow 0.5s, scale 0.5s var(--ease-snap); scale: 0.7; }
+.route-node.is-hit i { background: var(--sun); box-shadow: 0 0 0 5px rgba(217, 168, 92, 0.18); scale: 1; }
+.route-node b { position: absolute; top: 22px; left: -6px; writing-mode: vertical-rl; font: 500 0.58rem/1 var(--f-num); letter-spacing: 0.24em; color: var(--brass-deep); opacity: 0.35; white-space: nowrap; transition: opacity 0.5s, color 0.5s; }
+.route-node b em { font-style: normal; font-family: var(--f-sans); text-transform: uppercase; }
+html[lang='ar'] .route-node b em { font-family: var(--f-sans-ar); letter-spacing: 0; text-transform: none; font-size: 0.72rem; }
+.route-node.is-hit b { opacity: 0.9; color: var(--sun); }
+
+/* --- the HUD cursor (scripts/motion/cursor.ts) --- */
+.cur { position: fixed; inset: 0; pointer-events: none; z-index: 9990; opacity: 0; transition: opacity 0.3s; --c: var(--brass-deep); }
+.cur.is-on { opacity: 1; }
+.cur.is-hide { opacity: 0; }
+.cur.is-dark { --c: var(--sun); }
+.cur > i { position: absolute; top: 0; left: 0; will-change: transform; }
+.cur-ring { width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; border: 1px solid var(--c); opacity: 0.55; transition: opacity 0.3s, width 0.35s var(--ease-out), height 0.35s var(--ease-out), margin 0.35s var(--ease-out), border-color 0.3s; }
+.cur-dot { width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: var(--c); }
+.cur-br { width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border: 0 solid var(--c); opacity: 0; transition: opacity 0.25s, border-color 0.3s; }
+.cur-br0 { border-top-width: 1.5px; border-left-width: 1.5px; margin: 0; }
+.cur-br1 { border-top-width: 1.5px; border-right-width: 1.5px; margin: 0 0 0 -9px; }
+.cur-br2 { border-bottom-width: 1.5px; border-right-width: 1.5px; margin: -9px 0 0 -9px; }
+.cur-br3 { border-bottom-width: 1.5px; border-left-width: 1.5px; margin: -9px 0 0 0; }
+.cur.is-lock .cur-ring { opacity: 0; width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+.cur.is-lock .cur-br { opacity: 1; }
+.cur.is-press .cur-ring { width: 22px; height: 22px; margin: -11px 0 0 -11px; }
+
+/* --- split titles (scripts/motion/split.ts): letters (Latin) or words (Arabic) rise out of a baseline mask --- */
+.split { display: inline; }
+.sw { display: inline-block; white-space: nowrap; }
+.sc { display: inline-block; }
+[data-split] .sc, html[lang='ar'] [data-split] .sw { transform: translateY(0.55em); opacity: 0; filter: blur(6px); transition: transform 0.9s var(--ease-out), opacity 0.7s var(--ease-out), filter 0.8s var(--ease-out); transition-delay: calc(var(--i) * 18ms + var(--sd, 0s)); }
+html[lang='ar'] [data-split] .sw { transition-delay: calc(var(--i) * 70ms + var(--sd, 0s)); }
+.is-in [data-split] .sc, [data-split].is-in .sc, html[lang='ar'] .is-in [data-split] .sw, html[lang='ar'] [data-split].is-in .sw { transform: none; opacity: 1; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-split] .sc, html[lang='ar'] [data-split] .sw { transform: none; opacity: 1; filter: none; }
+  .ret-ring, .ret-br { transition: none; }
+}
+
+/* the landing's own brand row and skip link duplicate the nav whenever the nav is showing (a returning visitor, or once
+   the tour is done): the film keeps its row only while the nav is off */
+.nav:not(.is-off) ~ main .walk-top { opacity: 0; pointer-events: none; }
+
+/* --- reticle on paper (over the blueprints): ink rings with a brass lock --- */
+.ret--ink .ret-ring, .ret--ink .ret-br { stroke: var(--navy); filter: none; }
+.ret--ink .ret-x .is-dot { fill: var(--brass); }
+.ret--ink .ret-br { stroke: var(--brass); }
+.ret--ink .ret-tag { color: var(--navy); text-shadow: none; }
+.ret--ink .ret-tag i { color: var(--brass-deep); }
+
+/* --- blueprint figures (components/Figure.astro): the line-work draws itself in order (--k) --- */
+.fig { position: relative; width: min(100%, 460px); aspect-ratio: 1; margin: 0; }
+.fig > svg { width: 100%; height: 100%; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fig .cl { stroke: var(--line-strong); stroke-width: 0.6; stroke-dasharray: 10 4 2 4; opacity: 0.6; }
+.fig .reg { stroke: var(--brass); stroke-width: 1; opacity: 0.7; }
+.fig text { font: 500 9px var(--f-num); letter-spacing: 0.2em; fill: var(--ink-mute); stroke: none; }
+.fig .dr { stroke: var(--navy); stroke-width: 1.3; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s var(--ease-io); transition-delay: calc(0.25s + var(--k) * 0.09s); }
+.fig .dr.dash { stroke: var(--line-strong); stroke-width: 1; }
+.fig .dim { stroke: var(--brass); stroke-width: 0.9; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.3s var(--ease-io); transition-delay: calc(0.4s + var(--k) * 0.09s); }
+.fig.is-in .dr, .fig.is-in .dim { stroke-dashoffset: 0; }
+.fig-grid { opacity: 0; transition: opacity 1s; }
+.fig.is-in .fig-grid { opacity: 1; }
+.fig .ret { --rs: clamp(84px, 8vw, 112px); }
+
+/* --- service drawings (components/ServiceArt.astro) --- */
+.art { width: 100%; height: auto; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.art-base { stroke: var(--line-strong); stroke-width: 0.8; stroke-dasharray: 3 4; }
+.art .dr { stroke: var(--navy); stroke-width: 1.4; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s var(--ease-io); transition-delay: calc(0.3s + var(--k) * 0.12s); }
+.art .dr.hot { stroke: var(--brass); }
+.is-in .art .dr { stroke-dashoffset: 0; }
+.art .bar { transform-box: fill-box; transform-origin: 50% 100%; transition: stroke-dashoffset 1s var(--ease-io), transform 0.6s var(--ease-snap); transition-delay: calc(0.3s + var(--k) * 0.12s), 0s; }
+[data-spot]:hover .art .bar { transform: scaleY(1.12); }
+[data-spot]:hover .art .hot { animation: art-pulse 1.2s var(--ease-io); }
+@keyframes art-pulse { 50% { opacity: 0.35; } }
+
+/* --- drafting watermarks (components/Wm.astro) --- */
+.wm { position: absolute; width: clamp(260px, 34vw, 520px); height: auto; fill: none; stroke: var(--navy); stroke-width: 0.7; opacity: 0.07; pointer-events: none; z-index: -1; }
+.wm-end { top: 8%; inset-inline-end: -6%; }
+.wm-start { bottom: 4%; inset-inline-start: -8%; }
+[dir='rtl'] .wm { transform: scaleX(-1) translateY(var(--dy, 0)); }
+
+/* --- instrument dials (components/Dial.astro) --- */
+.dial { position: relative; display: grid; justify-items: center; gap: 8px; text-align: center; }
+.dial svg { width: clamp(96px, 10vw, 132px); height: auto; fill: none; }
+.dial-ticks { stroke: var(--line-strong); stroke-width: 1; }
+.dial-track { stroke: var(--line); stroke-width: 3; }
+.dial-fill { stroke: var(--brass); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2s var(--ease-out) 0.3s; }
+.dial.is-in .dial-fill { stroke-dashoffset: calc(1 - var(--f)); }
+.dial b { position: absolute; top: calc(clamp(96px, 10vw, 132px) / 2); translate: 0 -50%; font-family: var(--f-head); font-weight: 300; font-size: clamp(1.5rem, 2.4vw, 2.1rem); line-height: 1; color: var(--ink); }
+.dial span { font-size: 0.8rem; color: var(--ink-soft); max-width: 14ch; line-height: 1.4; }
+.dial--big svg { width: clamp(180px, 22vw, 260px); }
+.dial--big b { top: calc(clamp(180px, 22vw, 260px) / 2); font-size: clamp(3.6rem, 7vw, 5.6rem); }
+.dial--big span { font-size: 0.95rem; }
+
+/* --- target rings + constellation (the Dartz hero field) --- */
+.net { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.rings { position: absolute; z-index: -1; pointer-events: none; width: 1100px; height: 1100px; top: 50%; inset-inline-end: -330px; translate: 0 -50%; border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 53px, rgba(24, 37, 79, 0.08) 53px 54px), radial-gradient(circle, transparent 0 163px, rgba(169, 138, 91, 0.35) 163px 164px, transparent 164px);
+  -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 68%); mask-image: radial-gradient(circle, #000 30%, transparent 68%); animation: rings-breathe 22s var(--ease-io) infinite; }
+@keyframes rings-breathe { 50% { transform: scale(1.04); opacity: 0.8; } }
+
+/* --- pointer spotlight on surfaces (Dartz): a lit 1px ring and a soft wash follow the pointer --- */
+[data-spot] { position: relative; isolation: isolate; }
+[data-spot]::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.4s; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(169, 138, 91, 0.1), transparent 60%); }
+[data-spot]::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.4s; padding: 1px; background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(169, 138, 91, 0.9), transparent 60%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+[data-spot]:hover::before, [data-spot]:hover::after { opacity: 1; }

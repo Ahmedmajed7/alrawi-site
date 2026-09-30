@@ -1,0 +1,258 @@
+{
+  "source": "assets/house/villa-tripo.glb",
+  "transform": {
+    "scale": 13,
+    "origin": [
+      -0.1,
+      0.3038,
+      0.15
+    ],
+    "yawDeg": 0
+  },
+  "plan": {
+    "x0": -3.15,
+    "x1": 4.15,
+    "z0": -6.95,
+    "z1": -1.6,
+    "wing": {
+      "x0": -0.25,
+      "x1": 3.75,
+      "z0": -1.6,
+      "z1": -0.3
+    },
+    "floorY": 0.55,
+    "ceilY": 3.1,
+    "slabY": 3.45,
+    "gardenY": 0.0,
+    "wallTopY": 1.6,
+    "gateZ": 3.1
+  },
+  "cuts": [
+    {
+      "id": "below-ground",
+      "min": [
+        -99,
+        -99,
+        -99
+      ],
+      "max": [
+        99,
+        -0.03,
+        99
+      ]
+    },
+    {
+      "id": "gf-interior",
+      "min": [
+        -3.3,
+        0.3,
+        -7.1
+      ],
+      "max": [
+        4.3,
+        3.4,
+        -1.6
+      ]
+    },
+    {
+      "id": "gf-wing",
+      "min": [
+        -0.4,
+        0.3,
+        -1.6
+      ],
+      "max": [
+        3.9,
+        3.4,
+        -0.28
+      ]
+    },
+    {
+      "id": "portal",
+      "min": [
+        -1.75,
+        0.3,
+        -0.35
+      ],
+      "max": [
+        4.02,
+        3.4,
+        2.7
+      ],
+      "note": "the AI vestibule: two beams hanging from 1.6 m with nothing below; replaced by our door, piers and slat soffit"
+    },
+    {
+      "id": "gate-leaf",
+      "min": [
+        -1.25,
+        0.02,
+        2.7
+      ],
+      "max": [
+        0.55,
+        2.2,
+        3.4
+      ],
+      "note": "the AI garden gate: its leaf and the beam over the opening (it hung at 1.6 m, right through the camera path); our gate replaces it"
+    },
+    {
+      "id": "court-left",
+      "min": [
+        -3.52,
+        -0.03,
+        2.62
+      ],
+      "max": [
+        -1.2,
+        1.8,
+        4.0
+      ],
+      "note": "the front of the west planter mass, its gate pier and the niche (melted, smeared); court.ts rebuilds them, its coping laps the torn edge of the mass's top"
+    },
+    {
+      "id": "court-left-blobs",
+      "min": [
+        -4.3,
+        -0.03,
+        2.9
+      ],
+      "max": [
+        -3.52,
+        1.3,
+        4.2
+      ],
+      "note": "baked bush blobs at the foot of the west wall; court.ts plants the bed there"
+    },
+    {
+      "id": "court-gate",
+      "min": [
+        -1.3,
+        -0.1,
+        2.6
+      ],
+      "max": [
+        0.6,
+        0.4,
+        3.9
+      ],
+      "note": "the black shards across the gate opening: the foot of the AI gate leaf under the gate-leaf cut; court.ts lays a stone sill"
+    },
+    {
+      "id": "court-right",
+      "min": [
+        0.5,
+        -0.03,
+        2.6
+      ],
+      "max": [
+        4.2,
+        1.8,
+        4.0
+      ],
+      "note": "the east garden wall, the intercom blob and the planter recess, and the corner of the east wing's front; court.ts rebuilds the wall, its piers and the beds"
+    },
+    {
+      "id": "court-fin",
+      "min": [
+        0.5,
+        1.8,
+        2.55
+      ],
+      "max": [
+        1.0,
+        3.4,
+        2.95
+      ],
+      "note": "the facade fin behind the east gate pier up to the porch canopy: a 16 cm sliver with torn edges after the portal cut; court.ts rebuilds it whole"
+    },
+    {
+      "id": "court-west-planter",
+      "min": [
+        -3.3,
+        1.615,
+        -0.2
+      ],
+      "max": [
+        -2.1,
+        2.2,
+        0.8
+      ],
+      "note": "the golden bush blob round the foot of the column on the west planter mass (seen past the west porch pier all the way in); court.ts sets a planter and a real shrub there"
+    },
+    {
+      "id": "porch-west-gap",
+      "min": [
+        -1.8,
+        0.3,
+        -1.6
+      ],
+      "max": [
+        -0.4,
+        3.4,
+        -0.35
+      ],
+      "note": "the AI shell's torn stub between the living room's front wall (gf-interior ends at z -1.6), the wing (gf-wing) and the portal cut: a jagged zig-zag slab 0.2-0.5 m outside the living room's front window (seen through it from the curtain and speaker stops); from the street interior.ts's porch wall (z -0.36…-0.14) hides the space"
+    },
+    {
+      "id": "porch-junk",
+      "min": [
+        0.4,
+        0.005,
+        -0.36
+      ],
+      "max": [
+        4.02,
+        0.3,
+        1.4
+      ],
+      "note": "what the portal cut left under 0.3 m east of the steps: the AI porch's raised slab, a dark wedge and a post stub, standing through interior.ts's porch paving (y 0.012)"
+    }
+  ],
+  "windows": [
+    {
+      "id": "living-front",
+      "face": "+z",
+      "at": -1.6,
+      "a0": -2.9,
+      "a1": -0.55,
+      "y0": 0.7,
+      "y1": 3.05,
+      "mullions": 2
+    },
+    {
+      "id": "living-west",
+      "face": "-x",
+      "at": -3.15,
+      "a0": -6.4,
+      "a1": -3.2,
+      "y0": 0.7,
+      "y1": 2.72,
+      "mullions": 3
+    },
+    {
+      "id": "kitchen-east",
+      "face": "+x",
+      "at": 4.15,
+      "a0": -6.5,
+      "a1": -4.6,
+      "y0": 1.6,
+      "y1": 2.9,
+      "mullions": 1
+    }
+  ],
+  "lods": {
+    "high": {
+      "ratio": 0.25,
+      "error": 0.0015
+    },
+    "lite": {
+      "ratio": 0.1,
+      "error": 0.004
+    }
+  },
+  "draco": {
+    "quantizePosition": 14,
+    "quantizeNormal": 8,
+    "quantizeTexcoord": 12
+  }
+}

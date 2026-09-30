@@ -1,34 +1,123 @@
 {
-  "name": { "ar": "الراوي للمنازل الذكية", "en": "Al Rawi Smart Home" },
+  "name": {
+    "ar": "الراوي للمنازل الذكية",
+    "en": "Al Rawi Smart Home"
+  },
   "shortName": "Al Rawi",
   "domain": "https://alrawioman.com",
-  "email": "info@alrawioman.com",
+  "email": "alaaeldin@alrawioman.com",
   "whatsapp": "96877103161",
   "founded": 2021,
   "offices": [
     {
       "id": "oman",
-      "country": { "ar": "سلطنة عُمان", "en": "Sultanate of Oman" },
-      "city": { "ar": "مسقط", "en": "Muscat" },
-      "address": {
-        "ar": "العذيبة، شارع 18 نوفمبر، مبنى المشرق، الطابق الرابع، مكتب 43",
-        "en": "Azaiba, 18 November St, Al Mashriq Building, 4th floor, office 43"
+      "country": {
+        "ar": "عُمان",
+        "en": "Oman"
       },
-      "phones": ["+968 77103161", "+968 78022126"],
+      "city": {
+        "ar": "مسقط",
+        "en": "Muscat"
+      },
+      "address": {
+        "ar": "مبنى المشرق، العذيبة (الطابق الرابع)، شارع 18 نوفمبر، مسقط، عُمان",
+        "en": "Al Mashriq Building, Azaiba (4th Floor), 18th November St, Muscat, Oman"
+      },
+      "phones": [
+        "+968 77103161",
+        "+968 78022126"
+      ],
       "map": "https://www.google.com/maps/search/?api=1&query=Al+Mashriq+Building+Azaiba+Muscat"
     },
     {
       "id": "ksa",
-      "country": { "ar": "المملكة العربية السعودية", "en": "Kingdom of Saudi Arabia" },
-      "city": { "ar": "الرياض", "en": "Riyadh" },
-      "address": {
-        "ar": "3141 طريق أنس بن مالك، حي الملقا، الرياض",
-        "en": "3141 Anas Ibn Malik Rd, Al Malqa, Riyadh"
+      "country": {
+        "ar": "المملكة العربية السعودية",
+        "en": "Saudi Arabia"
       },
-      "phones": ["+966 538305817", "+966 536575631"],
-      "map": "https://www.google.com/maps/search/?api=1&query=3141+Anas+Ibn+Malik+Rd+Al+Malqa+Riyadh"
+      "city": {
+        "ar": "الرياض",
+        "en": "Riyadh"
+      },
+      "address": {
+        "ar": "الرياض، أبراج الخالدية، الطابق 21، مكتب 107",
+        "en": "Riyadh, Khaldyah Towers, 21st floor, office 107"
+      },
+      "phones": [
+        "+966 536575631"
+      ],
+      "map": "https://www.google.com/maps/search/?api=1&query=Khaldiyah+Towers+Riyadh"
     }
   ],
-  "platforms": ["Tuya Smart", "Amazon Alexa", "Zigbee", "Wi-Fi", "Bluetooth"],
-  "formEndpoint": ""
+  "platforms": [
+    "Tuya Smart",
+    "Amazon Alexa",
+    "Zigbee",
+    "Wi-Fi",
+    "Bluetooth"
+  ],
+  "formEndpoint": "",
+  "instagram": "https://www.instagram.com/alrawi_smarthome.oman/",
+  "brands": [
+    {
+      "name": "Samsung",
+      "logo": "/img/brands/samsung-548c195f.webp",
+      "w": 269,
+      "h": 45
+    },
+    {
+      "name": "Cisco",
+      "logo": "/img/brands/cisco-0ea1ef15.webp",
+      "w": 144,
+      "h": 45
+    },
+    {
+      "name": "Euronet",
+      "logo": "/img/brands/euronet-747450d9.webp",
+      "w": 81,
+      "h": 39
+    },
+    {
+      "name": "Grandstream",
+      "logo": "/img/brands/grandstream-f1277f5e.webp",
+      "w": 169,
+      "h": 66
+    },
+    {
+      "name": "Avaya",
+      "logo": "/img/brands/avaya-a98a5903.webp",
+      "w": 211,
+      "h": 35
+    },
+    {
+      "name": "Hikvision",
+      "logo": "/img/brands/hikvision-bc1c90dd.webp",
+      "w": 170,
+      "h": 39
+    },
+    {
+      "name": "Dahua",
+      "logo": "/img/brands/dahua-ea1f07f2.webp",
+      "w": 105,
+      "h": 55
+    },
+    {
+      "name": "Tuya",
+      "logo": "/img/brands/tuya-869f616f.webp",
+      "w": 106,
+      "h": 68
+    },
+    {
+      "name": "TP-Link",
+      "logo": "/img/brands/tp-link-a85a2da5.webp",
+      "w": 121,
+      "h": 66
+    },
+    {
+      "name": "Panasonic",
+      "logo": "/img/brands/panasonic-9188602b.webp",
+      "w": 166,
+      "h": 47
+    }
+  ]
 }

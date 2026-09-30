@@ -10,26 +10,39 @@
   --brass: #a98a5b;
   --brass-deep: #7f6740;
   --brass-soft: rgba(169, 138, 91, 0.14);
+  --brass-light: #d8c092;
+  --ivory: #f4efe6;
+  --slate: #38415a; /* cool dark slate: the hero headline on the pale sky (the key visual's "SMART LIVING") */
+  --slate-soft: rgba(56, 65, 90, 0.72);
   --night: #0e0d0c;
   --on-night: #f1ede6;
-  --on-night-soft: rgba(241, 237, 230, 0.62);
+  --on-night-soft: rgba(241, 237, 230, 0.78);
   --line: rgba(22, 21, 20, 0.12);
   --line-strong: rgba(22, 21, 20, 0.35);
   --line-night: rgba(241, 237, 230, 0.16);
+  --callout-scrim: rgba(247, 245, 240, 0.88); /* device callouts on the film */
+  --leader: var(--paper);
+  --leader-halo: rgba(0, 0, 0, 0.35);
   --success: #3c7a4a;
   --danger: #a7402f;
   --wa: #25d366;
 
-  --f-serif-en: 'Cormorant Garamond', 'Times New Roman', serif;
-  --f-serif-ar: 'Amiri', 'Cormorant Garamond', serif;
-  --f-sans: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, sans-serif;
-  --f-display: var(--f-serif-en);
-  --f-body: var(--f-sans);
+  /* type: Marcellus (Roman capitals) + Jost for Latin, El Messiri + Cairo for Arabic */
+  --f-display-en: 'Marcellus', 'Cormorant Garamond', 'Times New Roman', serif;
+  --f-display-ar: 'El Messiri', 'Marcellus', serif;
+  --f-sans-en: 'Jost', 'Cairo', system-ui, sans-serif;
+  --f-sans-ar: 'Cairo', 'Jost', system-ui, sans-serif;
+  --f-display: var(--f-display-en);
+  --f-body: var(--f-sans-en);
+  --f-sans: var(--f-body);
+  --f-serif-en: var(--f-display-en); /* aliases kept for the older rules */
+  --f-serif-ar: var(--f-display-ar);
+  --f-num: var(--f-sans-en); /* figures: Marcellus draws 1/0 like I/O, Jost's lining figures read as numbers */
 
-  --fs-hero: clamp(3rem, 8vw, 7.5rem);
-  --fs-h1: clamp(2.6rem, 5.6vw, 5rem);
-  --fs-h2: clamp(2rem, 4.5vw, 3.6rem);
-  --fs-h3: clamp(1.35rem, 2vw, 1.8rem);
+  --fs-hero: clamp(2.6rem, 6.4vw, 6rem);
+  --fs-h1: clamp(2.3rem, 4.9vw, 4.4rem);
+  --fs-h2: clamp(1.75rem, 3.9vw, 3.15rem);
+  --fs-h3: clamp(1.25rem, 1.8vw, 1.6rem);
   --fs-body: 1.05rem;
   --fs-small: 0.84rem;
   --lh-body: 1.7;
@@ -50,9 +63,48 @@
   color-scheme: light;
 }
 html[lang='ar'] {
-  --f-display: var(--f-serif-ar);
-  --lh-body: 1.9;
-  --fs-hero: clamp(2.6rem, 7vw, 6.4rem);
-  --fs-h1: clamp(2.3rem, 5vw, 4.4rem);
-  --fs-h2: clamp(1.8rem, 4vw, 3.2rem);
+  --f-display: var(--f-display-ar);
+  --f-body: var(--f-sans-ar);
+  --fs-body: 0.98rem;
+  --lh-body: 1.85;
+  --fs-hero: clamp(2.4rem, 6.2vw, 5.6rem);
+  --fs-h1: clamp(2.1rem, 4.6vw, 4rem);
+  --fs-h2: clamp(1.65rem, 3.6vw, 2.9rem);
 }
+
+/* ===================== PAGES (29 Sep 2026): the film's world carried into the site =====================
+   Light bands are the villa's sunlit limestone, dark bands the HUD's night glass (the logo's navy family),
+   brass is the golden-hour lamp light, cyan the hologram — used in hairlines and readouts only. */
+:root {
+  --limestone: #f5f0e8;
+  --sand: #ebe2d4;
+  --sand-deep: #dccfbb;
+  --dusk: #0a0f1c;
+  --dusk-2: #10172a;
+  --dusk-3: #182238;
+  --on-dusk: #eef1f6;
+  --on-dusk-soft: rgba(226, 232, 242, 0.74);
+  --on-dusk-mute: rgba(226, 232, 242, 0.46);
+  --line-dusk: rgba(160, 200, 255, 0.12);
+  --line-dusk-strong: rgba(160, 200, 255, 0.26);
+  --holo: #6fe3ff;
+  --holo-soft: rgba(111, 227, 255, 0.14);
+  --sun: #d9a85c;
+  --sun-soft: rgba(217, 168, 92, 0.18);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.3, 1.5, 0.5, 1);
+  --caps: 0.34em; /* the film's spaced caps ("SMART LIVING") */
+  --fs-caps-xl: clamp(1.9rem, 4.6vw, 4.2rem);
+  --fs-display: clamp(2.4rem, 6.6vw, 6.4rem);
+  --route-x: max(18px, calc((100vw - var(--maxw)) / 2 + var(--pad) * 0.35));
+}
+
+/* ===================== PAGES v2 (30 Sep 2026): Dartz's drafting paper, in brass and the logo's navy ===================== */
+:root {
+  --page: #fbfaf8;
+  --mist: #f3f1ec;
+  --navy: #18254f;
+  --navy-soft: rgba(24, 37, 79, 0.08);
+  --f-head: 'Jost', 'Cairo', system-ui, sans-serif; /* page headings: geometric, light — elegant and technical */
+}
+html[lang='ar'] { --f-head: 'Cairo', 'Jost', system-ui, sans-serif; }

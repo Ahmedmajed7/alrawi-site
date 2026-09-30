@@ -1,51 +1,80 @@
 ---
 import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icons.astro';
+import PageHero from '@/components/PageHero.astro';
+import SecHead from '@/components/SecHead.astro';
+import HudFrame from '@/components/HudFrame.astro';
+import Dial from '@/components/Dial.astro';
+import Wm from '@/components/Wm.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
+import services from '@/data/services.json';
 export const getStaticPaths = staticLangPaths;
 const locale = Astro.params.lang as Locale;
 const t = useT(locale);
-const s = strings(locale);
+const a = strings(locale).aboutPage;
 const brand = l(site.name, locale);
+const two = (n: number) => String(n).padStart(2, '0');
+// the live About page, in its order: the company, years of experience, vision and mission, services, range of products
 ---
-<Base {locale} title={`${t('meta.aboutTitle')} | ${brand}`} description={t('about.body')} lightNav>
-  <div class="wrap page-head">
-    <span class="eyebrow">{t('about.eyebrow')}</span>
-    <h1>{t('about.title')}</h1>
-    <p>{t('about.body')}</p>
-  </div>
-  <section class="section section-tight">
-    <div class="wrap split">
-      <div class="about-visual" data-reveal="left"><img src="/img/brand/logo-wall.webp" alt={brand} width="1200" height="1600" loading="eager" /></div>
-      <div data-reveal="right">
-        <div class="about-stats" style="margin-top:0">
-          <div><b class="num">2021</b><span>{t('proof.founded')}</span></div>
-          <div><b class="num">10+</b><span>{t('proof.experience')}</span></div>
-          <div><b class="num">2</b><span>{t('about.offices')}</span></div>
+<Base {locale} title={`${t('meta.aboutTitle')} | ${brand}`} description={a.p1.slice(0, 160)}>
+  <PageHero title={a.title} figure="villa" tag={brand} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: a.title }]} />
+
+  <section class="band band--paper" data-tone="lime">
+    <Wm kind="rings" class="wm-end" />
+    <div class="wrap about-co">
+      <div class="about-co-text">
+        <SecHead no="01" title={a.h2} />
+        <p class="about-co-lead" data-reveal>{a.p1}</p>
+        <p data-reveal style="--d:0.12s">{a.p2}</p>
+      </div>
+      <HudFrame class="panel panel--solo" tag="A · 01">
+        <div class="panel-in" data-reveal="blur">
+          <Dial n={a.years.n} label={a.years.label} fill={0.5} big />
+          <div class="panel-foot" aria-hidden="true">{Array.from({ length: 32 }, (_, i) => <i style={`--i:${i}`}></i>)}</div>
         </div>
-        <div class="section-head" style="margin-top:36px;margin-bottom:0">
-          <span class="eyebrow">{t('how.eyebrow')}</span>
-          <h2>{t('how.title')}</h2>
-        </div>
-        <ul class="what-list">{s.how.steps.map((st) => <li><Icon name="check" /><span><strong>{st.title}.</strong> {st.body}</span></li>)}</ul>
+      </HudFrame>
+    </div>
+  </section>
+
+  <section class="band band--mist" data-tone="lime">
+    <div class="wrap vm">
+      {[a.vision, a.mission].map((x, i) => (
+        <article class="vm-card" data-reveal="rise" data-spot style={`--d:${i * 0.12}s`}>
+          <span class="sh-coord"><span class="num">§0{i + 2}</span></span>
+          <span class="vm-ring" aria-hidden="true"><Icon name={i ? 'bolt' : 'sun'} /></span>
+          <h2 class="vm-title" data-split>{x.title}</h2>
+          <p>{x.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="band band--paper" id="services" data-tone="lime">
+    <Wm kind="arc" class="wm-start" />
+    <div class="wrap">
+      <SecHead no="04" label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
+      <div class="cells" data-stagger="0.07">
+        {services.map((x, i) => (
+          <article class="cell" data-reveal="rise" data-spot>
+            <span class="cell-no num">{two(i + 1)}</span>
+            <span class="cell-ic"><Icon name={x.icon} /></span>
+            <h3>{l(x.name, locale)}</h3>
+            <p>{l(x.sub, locale)}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
-  <section class="section section-alt">
+
+  <section class="band band--mist" data-tone="lime">
     <div class="wrap">
-      <div class="section-head" data-reveal><span class="eyebrow">{t('about.offices')}</span><h2>{t('contact.intro')}</h2></div>
-      <div class="offices" data-stagger>
-        {site.offices.map((o) => (
-          <div class="office" data-reveal>
-            <h3>{l(o.city, locale)} <span>{l(o.country, locale)}</span></h3>
-            <address>{l(o.address, locale)}</address>
-            <div class="office-phones">{o.phones.map((p) => <a href={`tel:${p.replace(/\s/g, '')}`}>{p}</a>)}</div>
-            <a class="link" href={o.map} target="_blank" rel="noopener"><Icon name="pin" /> {t('contact.map')}</a>
-          </div>
+      <SecHead no="05" title={a.range} />
+      <ul class="brands" data-stagger="0.05">
+        {site.brands.map((b, i) => (
+          <li data-reveal="rise" data-spot><span class="brand-no num" aria-hidden="true">{two(i + 1)}</span><img src={b.logo} alt={b.name} width={b.w} height={b.h} loading="lazy" decoding="async" /></li>
         ))}
-      </div>
-      <p style="margin-top:32px"><a class="btn btn-primary" href={localePath(locale, 'contact')}>{t('nav.contact')} <Icon name="arrow" class="icon-dir" /></a></p>
+      </ul>
     </div>
   </section>
 </Base>
