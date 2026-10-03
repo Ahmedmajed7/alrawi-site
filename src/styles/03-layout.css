@@ -4,7 +4,7 @@
 .section { padding-block: var(--sec); position: relative; overflow: clip; }
 .section-tight { padding-block: calc(var(--sec) * 0.55); }
 
-/* bands (v3): warm ivory and stone with a very fine static paper grain; data-tone drives the nav */
+/* bands (v4): all white (`--page` = `--mist`), told apart by space and a brass hairline; data-tone drives the nav */
 .band { position: relative; padding-block: var(--sec); isolation: isolate; }
 .band--paper { background: var(--grain), var(--page); color: var(--ink); }
 .band--mist { background: var(--grain), var(--mist); color: var(--ink); }
@@ -65,15 +65,15 @@ html[lang='ar'] .btn { text-transform: none; letter-spacing: 0; font-size: 0.95r
 .btn svg { width: 1.15em; height: 1.15em; flex: none; }
 .btn .dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--brass); flex: none; }
 .btn .dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: rgba(169, 138, 91, 0.6); animation: tap 2.2s var(--ease-io) infinite; }
-.btn-primary { background: var(--ink); color: var(--limestone); border-color: var(--ink); }
+.btn-primary { background: var(--espresso); color: var(--limestone); border-color: var(--espresso); }
 .btn-primary::before { background: var(--brass-deep); }
 .btn-primary:hover { border-color: var(--brass-deep); color: #fff; }
 .btn-sun { background: var(--brass-light); border-color: var(--brass-light); color: var(--espresso); }
 .btn-sun::before { background: var(--limestone); }
 .btn-sun:hover { color: var(--espresso); border-color: var(--limestone); }
-.on-night .btn:not(.btn-sun), .nav-drawer .btn:not(.btn-sun) { color: var(--on-esp); border-color: var(--line-esp-strong); }
-.on-night .btn:not(.btn-sun)::before, .nav-drawer .btn:not(.btn-sun)::before { background: var(--on-esp); }
-.on-night .btn:not(.btn-sun):hover, .nav-drawer .btn:not(.btn-sun):hover { color: var(--espresso); border-color: var(--on-esp); }
+.on-night .btn:not(.btn-sun), .nav .btn:not(.btn-sun), .nav-drawer .btn:not(.btn-sun) { color: var(--on-esp); border-color: var(--line-esp-strong); }
+.on-night .btn:not(.btn-sun)::before, .nav .btn:not(.btn-sun)::before, .nav-drawer .btn:not(.btn-sun)::before { background: var(--on-esp); }
+.on-night .btn:not(.btn-sun):hover, .nav .btn:not(.btn-sun):hover, .nav-drawer .btn:not(.btn-sun):hover { color: var(--espresso); border-color: var(--on-esp); }
 .btn-wa { border-color: transparent; background: var(--wa); color: #fff; }
 .btn-wa::before { background: #1a9e4c; }
 .btn-wa:hover { color: #fff; border-color: transparent; }

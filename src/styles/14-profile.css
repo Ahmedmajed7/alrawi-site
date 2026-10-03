@@ -1,0 +1,187 @@
+/* ===================== FROM THE COMPANY PROFILE: projects map, CEO message, ways to control ===================== */
+
+/* ============================ PROJECTS MAP (components/ProjectsMap.astro) ============================ */
+/* the one night band of the pages: Oman as a lit plate lying in perspective, a column of light per region */
+.band.pm { --tilt: 52deg; --s: 0.94; background: linear-gradient(180deg, #070b19 0%, #0b1331 48%, #070b19 100%); color: var(--on-esp); padding-block: clamp(88px, 9vw, 136px); overflow: clip; }
+.pm-sky { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.pm-glow { position: absolute; border-radius: 50%; opacity: 0; transition: opacity 2.6s var(--ease-out); }
+.pm-glow-a { width: 78vmax; height: 78vmax; inset-inline-end: -22vmax; top: -18vmax; background: radial-gradient(circle, rgba(59, 153, 212, 0.26), transparent 62%); }
+.pm-glow-b { width: 60vmax; height: 60vmax; inset-inline-start: -20vmax; bottom: -30vmax; background: radial-gradient(circle, rgba(96, 188, 80, 0.13), transparent 62%); }
+.pm.is-in .pm-glow { opacity: 1; }
+.pm-grid { display: grid; gap: clamp(36px, 5vw, 84px); align-items: center; }
+@media (min-width: 1000px) { .pm-grid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } }
+
+/* the sentence from the profile, its number set as the figure */
+.pm-text { display: grid; gap: clamp(22px, 2.4vw, 32px); }
+.pm .kicker { color: var(--brass-light); }
+.pm .kicker::before { background: var(--brass-light); }
+.pm-kicker, .pm-title { opacity: 0; transform: translateY(22px); transition: opacity 1s var(--ease-out), transform 1.2s var(--ease-out); }
+.pm-title { transition-delay: 0.12s; }
+.pm.is-told .pm-kicker, .pm.is-told .pm-title, html.no-js .pm-kicker, html.no-js .pm-title { opacity: 1; transform: none; }
+.pm-title { display: grid; justify-items: start; gap: 0.12em; }
+.pm-pre, .pm-post { font-size: clamp(1.3rem, 2.3vw, 2rem); line-height: 1.3; color: var(--on-esp); max-width: 20ch; }
+.pm-total { font-weight: 300; font-size: clamp(5.6rem, 11vw, 9.6rem); line-height: 0.94; letter-spacing: -0.035em; padding-inline-end: 0.04em; background: linear-gradient(100deg, #ffffff 8%, #9fd2f2 46%, #86dc70 92%); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0; transition: opacity 0.9s ease; }
+.pm-total.is-counting, html.no-js .pm-total { opacity: 1; }
+
+/* the ledger: region, a bar of its share, the count; a row lights with its region */
+.pm-list { display: grid; border-top: 1px solid var(--line-esp); }
+.pm-row { display: grid; grid-template-columns: minmax(6.6em, auto) 1fr 2.4em; align-items: center; gap: clamp(12px, 1.6vw, 22px); padding: 7px 8px; border-bottom: 1px solid var(--line-esp); outline: none; opacity: 0; transform: translateY(14px); transition: opacity 0.9s var(--ease-out) calc(0.5s + var(--i) * 0.07s), transform 1s var(--ease-out) calc(0.5s + var(--i) * 0.07s), background-color 0.4s; }
+.pm.is-in .pm-row, html.no-js .pm-row { opacity: 1; transform: none; }
+.pm.is-live .pm-row { transition-delay: 0s; transition-duration: 0.4s; }
+.pm-name { font-size: 0.98rem; color: var(--on-esp-soft); transition: color 0.4s; }
+.pm-bar { position: relative; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.08); }
+.pm-bar i { position: absolute; inset-block: 0; inset-inline-start: 0; width: max(5px, calc(var(--w) * 100%)); border-radius: 2px; background: var(--c); box-shadow: 0 0 12px var(--c); transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.5s var(--ease-out) calc(0.8s + var(--i) * 0.09s); }
+[dir='rtl'] .pm-bar i { transform-origin: 100% 50%; }
+.pm-bar i::after { content: ''; position: absolute; inset-inline-end: -3px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px 2px var(--c); }
+.pm.is-in .pm-bar i, html.no-js .pm-bar i { transform: scaleX(1); }
+.pm-count { font-weight: 300; font-size: 1.22rem; line-height: 1; color: #fff; text-align: end; }
+.pm-row.is-on { background-color: rgba(255, 255, 255, 0.055); }
+.pm-row.is-on .pm-name { color: #fff; }
+.pm.is-held .pm-row:not(.is-on) { opacity: 0.4; }
+
+/* the stage: perspective scales with the stage's width, so the plate lies the same way on a phone */
+/* (no wider than the screen is tall, so the whole map is in view at once) */
+.pm-stage { container-type: inline-size; width: 100%; max-width: min(800px, 70svh); margin-inline: auto; }
+.pm-scene { position: relative; aspect-ratio: 1 / 1.1; perspective: 2200px; perspective: 300cqw; perspective-origin: 50% 0%; opacity: 0; transition: opacity 1.4s ease; }
+.pm.is-in .pm-scene, html.no-js .pm-scene { opacity: 1; }
+/* the plate fades in through the scene: an opacity animation on the plate itself would flatten everything standing on it */
+.pm-plate { position: absolute; inset-inline: 0; top: 51%; aspect-ratio: 757 / 1000; margin-top: -66.05%; transform-style: preserve-3d; transform: rotateX(34deg) rotateZ(0deg) scale(0.7); }
+.pm.is-in .pm-plate { animation: pm-settle 2.2s var(--ease-out) both, pm-float 20s ease-in-out 2.2s infinite alternate; }
+html.no-js .pm-plate { transform: rotateX(var(--tilt)) rotateZ(-3deg) scale(var(--s)); }
+@keyframes pm-settle { from { transform: rotateX(34deg) rotateZ(0deg) scale(0.7); } to { transform: rotateX(var(--tilt)) rotateZ(-3deg) scale(var(--s)); } }
+@keyframes pm-float { from { transform: rotateX(var(--tilt)) rotateZ(-3deg) scale(var(--s)); } to { transform: rotateX(var(--tilt)) rotateZ(4deg) scale(var(--s)); } }
+.pm-plate svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* under the map: a blue glow on the floor and three slabs that give the plate its thickness */
+.pm-under { pointer-events: none; }
+.pm-halo { transform: translateZ(-34px); transform: translateZ(-5cqw); fill: #2c7fd6; filter: blur(22px); opacity: 0; transition: opacity 2.4s ease 0.7s; }
+.pm.is-in .pm-halo, html.no-js .pm-halo { opacity: 0.6; }
+.pm-slab { transform: translateZ(calc(var(--z) * -5px)); transform: translateZ(calc(var(--z) * -0.75cqw)); fill: #0a1433; stroke: rgba(122, 176, 232, 0.26); stroke-width: 1.4; }
+
+/* the map: a dark base, the regions filling in their colour, the coast drawing itself in brass */
+.pm-base { fill: #0f1b45; }
+.pm-region { fill: var(--c); fill-opacity: 0; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.1; stroke-linejoin: round; cursor: pointer; outline: none; transition: fill-opacity 1.2s var(--ease-out) calc(0.9s + var(--i) * 0.14s), stroke 0.4s; }
+.pm.is-in .pm-region, html.no-js .pm-region { fill-opacity: var(--o); }
+.pm.is-live .pm-region { transition-delay: 0s; transition-duration: 0.45s; }
+.pm-region.is-on { fill-opacity: 0.96; stroke: #fff; }
+.pm.is-held .pm-region:not(.is-on) { fill-opacity: calc(var(--o) * 0.4); }
+.pm-coast { fill: none; stroke: var(--brass-light); stroke-width: 1.8; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; pointer-events: none; transition: stroke-dashoffset 2.6s var(--ease-io) 0.15s; }
+.pm.is-in .pm-coast, html.no-js .pm-coast { stroke-dashoffset: 0; }
+
+/* light from Muscat to the others: a faint line drawn once, then a pulse that keeps running along it */
+.pm-arcs { pointer-events: none; }
+.pm-arc, .pm-run { fill: none; stroke-linecap: round; }
+.pm-arc { stroke: var(--c); stroke-opacity: 0.6; stroke-width: 1.3; stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.2s var(--ease-io) calc(1.3s + var(--i) * 0.26s); }
+.pm.is-in .pm-arc, html.no-js .pm-arc { stroke-dashoffset: 0; }
+.pm-run { stroke: #fff; stroke-width: 2.4; stroke-dasharray: 0.09 2; stroke-dashoffset: 0.09; opacity: 0; }
+.pm.is-live .pm-run { animation: pm-run 4.6s var(--ease-io) calc(var(--i) * 0.45s) infinite; }
+@keyframes pm-run { 0% { stroke-dashoffset: 0.09; opacity: 0; } 8% { opacity: 0.95; } 52% { opacity: 0.95; } 60%, 100% { stroke-dashoffset: -1; opacity: 0; } }
+
+/* where each column stands: a soft pool of the region's colour, breathing */
+.pm-node { pointer-events: none; opacity: 0; transition: opacity 0.9s ease calc(1.3s + var(--i) * 0.26s); }
+.pm.is-in .pm-node, html.no-js .pm-node { opacity: 1; }
+.pm-ring { fill: var(--c); fill-opacity: 0.2; stroke: var(--c); stroke-opacity: 0.8; stroke-width: 1; transform-box: fill-box; transform-origin: center; }
+.pm.is-live .pm-ring { animation: pm-breathe 3.8s ease-in-out calc(var(--i) * 0.3s) infinite; }
+@keyframes pm-breathe { 0%, 100% { transform: scale(1); fill-opacity: 0.2; stroke-opacity: 0.8; } 50% { transform: scale(1.4); fill-opacity: 0.05; stroke-opacity: 0.2; } }
+.pm-dot { fill: #fff; }
+
+/* the columns stand on the plate (rotateX −90° from it); their height is the region's share of the largest count.
+   (One transform list each: the build's minifier drops a separate `translate` next to a 3D `transform`.) */
+.pm-cols { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
+.pm-col { position: absolute; left: var(--x); top: var(--y); width: max(6px, 1.7cqw); height: 0; transform-origin: 50% 100%; transform: translate(-50%, -100%) rotateX(-90deg); transform-style: preserve-3d; pointer-events: auto; cursor: pointer; transition: height 1.3s var(--ease-out) calc(1.5s + var(--i) * 0.26s); }
+.pm.is-in .pm-col, html.no-js .pm-col { height: calc(var(--h) * 31%); }
+/* the light itself is a leaf, so it can dim: opacity on the column would flatten the figure standing on it */
+.pm-beam { position: absolute; inset: 0; border-radius: 4px 4px 0 0; background: linear-gradient(to top, color-mix(in srgb, var(--c) 20%, transparent), var(--c) 58%, #fff); box-shadow: 0 0 22px color-mix(in srgb, var(--c) 75%, transparent); transition: box-shadow 0.4s, opacity 0.4s; }
+.pm-col.is-on .pm-beam { box-shadow: 0 0 34px 4px var(--c); }
+.pm.is-held .pm-col:not(.is-on) .pm-beam { opacity: 0.3; }
+.pm.is-held .pm-col:not(.is-on) .pm-tip b { opacity: 0.4; }
+/* the figure rides the top of its column and always faces the reader (the plate's rotation undone) */
+.pm-tip { position: absolute; left: 50%; bottom: 100%; display: grid; justify-items: center; gap: 4px; padding-bottom: 6px; white-space: nowrap; transform-origin: 0 100%; transform: rotateX(90deg) rotateZ(3deg) rotateX(calc(-1 * var(--tilt))) translateX(-50%); opacity: 0; transition: opacity 0.7s ease calc(1.6s + var(--i) * 0.26s); }
+.pm.is-in .pm-tip { opacity: 1; animation: pm-face 20s ease-in-out 2.2s infinite alternate; }
+html.no-js .pm-tip { opacity: 1; }
+@keyframes pm-face { from { transform: rotateX(90deg) rotateZ(3deg) rotateX(calc(-1 * var(--tilt))) translateX(-50%); } to { transform: rotateX(90deg) rotateZ(-4deg) rotateX(calc(-1 * var(--tilt))) translateX(-50%); } }
+.pm-tip b { font-weight: 300; font-size: clamp(15px, 3.5cqw, 28px); line-height: 1; color: #fff; transition: opacity 0.4s; text-shadow: 0 0 16px var(--c), 0 1px 3px rgba(4, 8, 20, 0.9); }
+.pm-tag { font-style: normal; font-family: var(--f-body); font-size: clamp(10.5px, 1.75cqw, 13.5px); line-height: 1.5; padding: 2px 10px; border-radius: 99px; background: rgba(6, 10, 24, 0.78); border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); color: #fff; opacity: 0; transform: translateY(6px); transition: opacity 0.4s, transform 0.5s var(--ease-out); }
+.pm-col.is-on .pm-tag { opacity: 1; transform: none; }
+.pm-col.is-on { z-index: 2; }
+
+/* nothing runs while the map is off screen */
+.pm.is-away .pm-plate, .pm.is-away .pm-tip, .pm.is-away .pm-run, .pm.is-away .pm-ring { animation-play-state: paused; }
+/* stacked: the sentence, then the map, then the ledger */
+@media (max-width: 999px) {
+  .pm-grid { gap: clamp(26px, 5vw, 44px); }
+  .pm-text { display: contents; }
+  .pm-stage { max-width: min(560px, 70svh); order: 1; }
+  .pm-list { order: 2; }
+  .pm-pre, .pm-post { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm-plate { transform: rotateX(var(--tilt)) rotateZ(-3deg) scale(var(--s)); animation: none !important; }
+  .pm-tip { animation: none !important; }
+  .pm-run { display: none; }
+  .pm-ring { animation: none !important; }
+}
+
+/* ============================ CEO MESSAGE (components/CeoMessage.astro) ============================ */
+/* an editorial spread: a tall photograph in a brass hairline frame, the message beside it */
+.ceo-grid { display: grid; gap: clamp(44px, 6vw, 72px); align-items: center; }
+@media (min-width: 960px) { .ceo-grid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: clamp(64px, 8vw, 140px); } }
+.ceo-photo { position: relative; width: 100%; max-width: 520px; justify-self: center; isolation: isolate; }
+/* the frame: a brass hairline set off behind the photograph, drawn in as the photograph arrives */
+.ceo-frame { position: absolute; inset-block: 22px -22px; inset-inline: 22px -22px; z-index: -1; border: 1px solid var(--brass); border-radius: 20px; opacity: 0; transform: translate(-14px, -14px); transition: opacity 1.2s var(--ease-out) 0.5s, transform 1.4s var(--ease-out) 0.5s; }
+[dir='rtl'] .ceo-frame { transform: translate(14px, -14px); }
+.ceo-photo.is-in .ceo-frame, html.no-js .ceo-frame { opacity: 0.7; transform: none; }
+.ceo-pic { display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 20px; box-shadow: var(--shadow-lift); background: var(--espresso); }
+/* the photograph is a little taller than its window and drifts in it with the scroll (--par from scripts/motion/read.ts) */
+.ceo-pic img { width: 100%; height: 112%; object-fit: cover; transform: translateY(calc(-5.4% + var(--par, 0) * -5.4%)); will-change: transform; }
+.ceo-body { display: grid; gap: clamp(20px, 2.2vw, 30px); justify-items: start; }
+/* the opening mark, large and pale: the only ornament */
+.ceo-mark { display: block; height: 0.42em; font-family: var(--f-display-en); font-size: clamp(6.5rem, 9vw, 9.5rem); line-height: 0.82; color: var(--brass-light); }
+.ceo-mark::before { content: '\201C'; }
+[dir='rtl'] .ceo-mark::before { content: '\201D'; }
+.ceo-quote { display: grid; gap: 1.1em; }
+.ceo-quote p { max-width: 58ch; font-size: clamp(1.06rem, 1.3vw, 1.2rem); line-height: 1.75; }
+/* the first sentence is the statement */
+.ceo-quote .ceo-lead { max-width: none; font-family: var(--f-head); font-size: clamp(1.5rem, 2.55vw, 2.3rem); line-height: 1.36; letter-spacing: 0.002em; margin-bottom: 0.15em; }
+html[lang='ar'] .ceo-quote p { line-height: 2; font-size: clamp(1.04rem, 1.25vw, 1.16rem); }
+html[lang='ar'] .ceo-quote .ceo-lead { line-height: 1.75; font-size: clamp(1.42rem, 2.35vw, 2.1rem); letter-spacing: 0; }
+/* words wait in a pale ink and take their colour as they are read */
+.rw { color: rgba(16, 26, 61, 0.2); transition: color 0.7s var(--ease-out); }
+.rw.is-lit, html.no-js .rw { color: var(--ink-soft); }
+.ceo-lead .rw.is-lit, html.no-js .ceo-lead .rw { color: var(--ink); }
+.ceo-sign { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 18px; row-gap: clamp(20px, 2.2vw, 28px); width: 100%; margin-top: clamp(6px, 1vw, 14px); }
+.ceo-rule { grid-column: 1 / -1; display: block; width: 100%; height: 1px; background: linear-gradient(to right, var(--brass), rgba(169, 138, 91, 0)); transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.6s var(--ease-out) 0.3s; }
+[dir='rtl'] .ceo-rule { transform-origin: 100% 50%; background: linear-gradient(to left, var(--brass), rgba(169, 138, 91, 0)); }
+.ceo-sign.is-in .ceo-rule, html.no-js .ceo-rule { transform: scaleX(1); }
+.ceo-ring { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; border: 1px solid var(--hair); }
+.ceo-ring .logo { width: 30px; height: auto; }
+.ceo-who { display: grid; gap: 6px; }
+.ceo-name { font-family: var(--f-head); font-weight: 400; font-size: clamp(1.3rem, 1.8vw, 1.6rem); line-height: 1.2; }
+.ceo-who .label { color: var(--brass-deep); }
+@media (max-width: 959px) { .ceo-photo { max-width: 440px; justify-self: start; } .ceo-frame { inset-block: 14px -14px; inset-inline: 14px -14px; } .ceo-pic { aspect-ratio: 4 / 4.2; } }
+@media (prefers-reduced-motion: reduce) { .ceo-pic img { transform: translateY(-5.4%); } }
+
+/* ============================ WAYS TO CONTROL (components/ControlWays.astro) ============================ */
+/* the profile's layout: four tall photographs in a row, the caption on the foot of each. The cards keep their size:
+   under the pointer the photograph eases in a little and the card lifts, nothing else moves */
+.ways-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 22px); height: clamp(420px, min(42vw, 66svh), 600px); }
+.way { position: relative; min-width: 0; overflow: hidden; isolation: isolate; border-radius: 18px; background: var(--espresso); box-shadow: var(--shadow-soft); transition: opacity 1s var(--ease-out) var(--d, 0s), transform 1.2s var(--ease-out) var(--d, 0s), box-shadow 0.8s var(--ease-out); }
+.way img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transition: transform 2.2s var(--ease-out) var(--d, 0s); will-change: transform; backface-visibility: hidden; }
+.way.is-in img, html.no-js .way img { transform: scale(1); }
+.way::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(8, 12, 28, 0.86) 0%, rgba(8, 12, 28, 0.48) 24%, rgba(8, 12, 28, 0) 56%); pointer-events: none; }
+.way-cap { position: absolute; inset-inline: 0; bottom: 0; z-index: 1; display: grid; justify-items: center; gap: 14px; padding: clamp(18px, 2.2vw, 32px) clamp(14px, 1.6vw, 24px); text-align: center; color: #fff; transition: transform 0.8s var(--ease-out); }
+.way-rule { display: block; width: 28px; height: 1px; background: var(--brass-light); opacity: 0.85; transition: width 0.8s var(--ease-out); }
+.band .way-cap h3 { font-size: clamp(1.05rem, 1.55vw, 1.4rem); line-height: 1.3; max-width: 14em; text-wrap: balance; }
+html[lang='ar'] .band .way-cap h3 { line-height: 1.6; }
+.way-sub { display: block; direction: ltr; unicode-bidi: isolate; white-space: nowrap; font-family: var(--f-sans-en); font-size: 0.8em; letter-spacing: 0.02em; opacity: 0.86; margin-top: 0.25em; }
+@media (hover: hover) and (pointer: fine) {
+  .way.is-in { transition: opacity 1s var(--ease-out), transform 0.8s var(--ease-out), box-shadow 0.8s var(--ease-out); }
+  .way.is-in:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
+  .way.is-in:hover img { transform: scale(1.035); transition: transform 1.8s var(--ease-out); }
+  .way:hover .way-rule { width: 52px; }
+  .way:hover .way-cap { transform: translateY(-4px); }
+}
+@media (max-width: 860px) {
+  .ways-row { grid-template-columns: 1fr 1fr; height: auto; gap: 12px; }
+  .way { aspect-ratio: 3 / 5; border-radius: 14px; }
+}

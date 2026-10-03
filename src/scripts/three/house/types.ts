@@ -1,8 +1,15 @@
 import type * as THREE from 'three';
 export type V3 = [number, number, number];
 export interface StopConfig {
-  id: string; product: string;
-  device: { pos?: V3; rot?: V3; scale: number; source: 'procedural' | 'glb'; mount?: 'door'; params?: Record<string, unknown> };
+  id: string;
+  /** a device stop names its product and where the device is mounted; the `app` stop (the phone in the living room) has neither */
+  product?: string;
+  device?: { pos?: V3; rot?: V3; scale: number; source: 'procedural' | 'glb'; mount?: 'door'; params?: Record<string, unknown> };
+  kind?: 'app';
+  /** the app stop: points in the room its markers are pinned to (recorded as film.json `marks`) */
+  marks?: Record<string, V3>;
+  /** the app stop: the room is recorded in every state of its drapes (this many frames from parted to drawn), lights on and off */
+  scene?: { frames: number };
   camera: { pos: V3; look: V3 };
   via: V3[];
   /** which side of the device the callout card goes (default: the roomier side) */
@@ -11,6 +18,8 @@ export interface StopConfig {
 export interface DoorConfig {
   pos: V3; yaw: number; width: number; height: number; thickness: number;
   hinge: 'left' | 'right'; openAngle: number; style: 'walnut' | 'steel'; open?: number; steps?: number;
+  /** the front door: a leaf hinged beside a fixed panel, or (the default) one wide pivot leaf; see door.ts */
+  type?: 'pivot' | 'hinged';
 }
 export interface Pose { pos: V3; look: V3 }
 export interface HouseConfig {

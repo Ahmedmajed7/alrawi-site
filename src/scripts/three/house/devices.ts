@@ -88,9 +88,10 @@ function outdoorProbe(holder: THREE.Object3D, near = 3) {
  */
 export async function mountDevices(stops: StopConfig[], anchors: Map<string, THREE.Object3D>, parent: THREE.Object3D, mounts: Map<string, THREE.Object3D> = new Map(), roomEnv?: THREE.Texture) {
   const out = new Map<string, THREE.Object3D>();
-  for (const stop of stops) {
-    const product = (products as { slug: string; shape: string; shapeParams: Record<string, unknown>; accent: string; model: boolean }[]).find((p) => p.slug === stop.product);
-    if (!product) continue;
+  for (const s of stops) {
+    const product = (products as { slug: string; shape: string; shapeParams: Record<string, unknown>; accent: string; model: boolean }[]).find((p) => p.slug === s.product);
+    if (!product || !s.device) continue; // the app stop is a view of the room, with no device of its own
+    const stop = { ...s, device: s.device };
     let obj: THREE.Object3D | null = null;
     if (stop.device.source === 'glb' || product.model) {
       try { const l = new GLTFLoader(); const d = new DRACOLoader(); d.setDecoderPath('/draco/'); l.setDRACOLoader(d); obj = (await l.loadAsync(`/models/${product.slug}.glb`)).scene; } catch { obj = null; }

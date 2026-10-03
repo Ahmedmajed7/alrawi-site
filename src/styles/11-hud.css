@@ -250,29 +250,36 @@ html[lang='ar'] .w-radar .w-read b.is-ok { font-size: 0.9rem; letter-spacing: 0;
 .walk-callouts.is-on .walk-callout:not([hidden]) .w-radar { animation: w-air 10s step-end 2s infinite; }
 @keyframes w-air { 0% { --hud-n: 1; } 35% { --hud-n: 0; } 70% { --hud-n: 2; } }
 
-/* smart lock: the fingerprint is read, access is granted */
-.w-print { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 18px; align-items: center; --hud-f: 100; }
-.w-pad { position: relative; width: 58px; height: 66px; }
-.w-pad svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: rgba(111, 227, 255, 0.3); stroke-width: 1.7; stroke-linecap: round; }
-.w-pad svg.is-lit { stroke: var(--hud-1); filter: drop-shadow(0 0 2px var(--hud-2)); clip-path: inset(0 0 calc(100% - var(--hud-f) * 1%) 0); }
-.w-beam { position: absolute; left: -5px; right: -5px; top: 0; height: 2px; background: #fff; box-shadow: 0 0 10px 2px var(--hud-1); translate: 0 calc(var(--hud-f) * 0.66px); opacity: 0; }
-.w-state { display: grid; gap: 9px; align-items: center; }
-.w-state > span { grid-area: 1 / 1; }
-.w-scanning { opacity: 0; }
-.w-granted { display: inline-flex; align-items: center; gap: 8px; color: var(--hud-ok); font-size: 0.7rem; }
+/* smart lock: the four ways in, one after another. device-live.ts (lockLive) steps the widget in time with the lock itself:
+   [data-m] names the way being shown, .is-scan while it is read, .is-ok once it is granted */
+.w-print { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 16px; align-items: center; }
+.w-pad { position: relative; width: 58px; height: 66px; overflow: hidden; }
+.w-pad svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--hud-1); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 2px var(--hud-2)); opacity: 0; transition: opacity 0.35s var(--hud-e); }
+.w-pad svg circle { fill: var(--hud-1); stroke: none; }
+.w-print[data-m='card'] .w-m[data-m='card'], .w-print[data-m='finger'] .w-m[data-m='finger'], .w-print[data-m='face'] .w-m[data-m='face'], .w-print[data-m='password'] .w-m[data-m='password'] { opacity: 1; }
+.w-print.is-ok .w-pad svg { stroke: var(--hud-ok); filter: drop-shadow(0 0 3px rgba(114, 230, 160, 0.7)); } .w-print.is-ok .w-pad svg circle { fill: var(--hud-ok); }
+.w-beam { position: absolute; left: -5px; right: -5px; top: 0; height: 2px; background: #fff; box-shadow: 0 0 10px 2px var(--hud-1); opacity: 0; }
+.w-print.is-scan .w-beam { opacity: 1; animation: w-beam 1.25s linear; }
+@keyframes w-beam { from { translate: 0 2px; } to { translate: 0 64px; } }
+.w-state { display: grid; gap: 8px; align-items: center; min-width: 0; }
+.w-methods { display: flex; flex-wrap: wrap; gap: 4px 5px; margin: 0; padding: 0; list-style: none; }
+.w-methods li { padding: 3px 7px 4px; border: 1px solid var(--hud-line); font: 500 0.6rem/1.2 var(--f-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--hud-dim); white-space: nowrap; transition: color 0.3s, border-color 0.3s, background 0.3s, box-shadow 0.3s; }
+html[lang='ar'] .w-methods li { font-size: 0.78rem; letter-spacing: 0; text-transform: none; }
+.w-methods li.is-on { color: var(--hud-ink); border-color: var(--hud-1); background: var(--hud-faint); box-shadow: 0 0 10px rgba(61, 155, 255, 0.35); }
+.w-print.is-ok .w-methods li.is-on { border-color: var(--hud-ok); box-shadow: 0 0 10px rgba(114, 230, 160, 0.35); }
+.w-says { display: grid; min-height: 1.3em; }
+.w-says > span { grid-area: 1 / 1; opacity: 0; transition: opacity 0.25s linear, translate 0.3s var(--hud-e); }
+.w-scanning { font: 500 0.68rem/1.3 var(--f-sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--hud-label); }
+html[lang='ar'] .w-scanning { font-size: 0.84rem; letter-spacing: 0; text-transform: none; }
+.w-granted { display: inline-flex; align-items: center; gap: 8px; color: var(--hud-ok); font-size: 0.7rem; translate: 0 4px; }
 html[lang='ar'] .w-granted { font-size: 0.86rem; }
 .w-granted svg { width: 17px; height: 17px; padding: 2px; border: 1px solid currentColor; border-radius: 50%; box-shadow: 0 0 8px rgba(114, 230, 160, 0.6); stroke-width: 2.6; }
-.w-prog { grid-area: 2 / 1; position: relative; height: 3px; overflow: hidden; background: rgba(111, 227, 255, 0.16); }
-.w-prog i { position: absolute; inset: 0; background: var(--hud-1); transform-origin: 0 50%; transform: scaleX(calc(var(--hud-f) / 100)); }
+.w-print.is-scan .w-scanning { opacity: 1; } .w-print.is-ok .w-granted { opacity: 1; translate: 0 0; }
+.w-prog { position: relative; height: 3px; overflow: hidden; background: rgba(111, 227, 255, 0.16); }
+.w-prog i { position: absolute; inset: 0; background: var(--hud-1); transform-origin: 0 50%; transform: scaleX(0); }
 [dir='rtl'] .w-prog i { transform-origin: 100% 50%; }
-.walk-callouts.is-on .walk-callout:not([hidden]) .w-print { animation: w-scan 7s linear 1.2s infinite backwards; }
-.walk-callouts.is-on .walk-callout:not([hidden]) .w-beam { animation: w-beam 7s linear 1.2s infinite; }
-.walk-callouts.is-on .walk-callout:not([hidden]) .w-scanning { animation: w-scanning 7s linear 1.2s infinite backwards; }
-.walk-callouts.is-on .walk-callout:not([hidden]) .w-granted { animation: w-granted 7s linear 1.2s infinite backwards; }
-@keyframes w-scan { 0% { --hud-f: 0; } 32%, 93% { --hud-f: 100; } 100% { --hud-f: 0; } }
-@keyframes w-beam { 0%, 31% { opacity: 1; } 34%, 100% { opacity: 0; } }
-@keyframes w-scanning { 0%, 33% { opacity: 1; } 37%, 95% { opacity: 0; } 100% { opacity: 1; } }
-@keyframes w-granted { 0%, 35% { opacity: 0; translate: 0 4px; } 40%, 93% { opacity: 1; translate: 0 0; } 97%, 100% { opacity: 0; translate: 0 0; } }
+.w-print.is-scan .w-prog i { transform: scaleX(1); transition: transform 1.25s linear; }
+.w-print.is-ok .w-prog i { transform: scaleX(1); background: var(--hud-ok); }
 
 /* ---------------- short windows: the panel tightens before it would run under the chrome ---------------- */
 .walk-callout.is-tight .hud-body { gap: 9px; padding-block: 14px 16px; }

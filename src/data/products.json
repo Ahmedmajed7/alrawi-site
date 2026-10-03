@@ -39,16 +39,6 @@
       },
       {
         "k": {
-          "ar": "التطبيق",
-          "en": "App"
-        },
-        "v": {
-          "ar": "Tuya Smart",
-          "en": "Tuya Smart"
-        }
-      },
-      {
-        "k": {
           "ar": "الصوت",
           "en": "Voice"
         },
@@ -318,8 +308,8 @@
       "en": "Secure entry without a key"
     },
     "blurb": {
-      "ar": "دخول بلا مفتاح بالبصمة أو الوجه أو الرقم السري أو البطاقة أو التطبيق، مع سجل دخول.",
-      "en": "Keyless entry by PIN, face recognition, fingerprint, card or phone, with a full access log."
+      "ar": "دخول بلا مفتاح بالبطاقة أو البصمة أو التعرّف على الوجه أو كلمة المرور، مع سجل دخول.",
+      "en": "Keyless entry by card, fingerprint, face recognition or password, with a full access log."
     },
     "specs": [
       {
@@ -328,18 +318,8 @@
           "en": "Unlock"
         },
         "v": {
-          "ar": "بصمة · وجه · رقم سري",
-          "en": "Fingerprint · Face · PIN"
-        }
-      },
-      {
-        "k": {
-          "ar": "البطاقة والتطبيق",
-          "en": "Card & app"
-        },
-        "v": {
-          "ar": "بطاقة RFID · الهاتف",
-          "en": "RFID card · Phone"
+          "ar": "بطاقة · بصمة · التعرّف على الوجه · كلمة مرور",
+          "en": "Card · Fingerprint · Face recognition · Password"
         }
       },
       {
@@ -483,16 +463,6 @@
         "v": {
           "ar": "لاسلكي · Zigbee",
           "en": "Wireless · Zigbee"
-        }
-      },
-      {
-        "k": {
-          "ar": "التطبيق",
-          "en": "App"
-        },
-        "v": {
-          "ar": "Tuya Smart",
-          "en": "Tuya Smart"
         }
       },
       {
@@ -936,8 +906,8 @@
           "en": "Works with"
         },
         "v": {
-          "ar": "Tuya Smart · Alexa",
-          "en": "Tuya Smart · Alexa"
+          "ar": "Amazon Alexa",
+          "en": "Amazon Alexa"
         }
       },
       {
@@ -1232,8 +1202,8 @@
       "en": "Curtains that open with the sunrise"
     },
     "blurb": {
-      "ar": "ستائر تُفتح وتُغلق تلقائياً عبر التطبيق أو الصوت، بحركة سلسة وهادئة.",
-      "en": "Curtains that open and close by app, voice or schedule, smoothly and quietly."
+      "ar": "ستائر تُفتح وتُغلق تلقائياً بالريموت أو الصوت أو الجدولة، بحركة سلسة وهادئة.",
+      "en": "Curtains that open and close by remote, voice or schedule, smoothly and quietly."
     },
     "specs": [
       {
@@ -1242,8 +1212,8 @@
           "en": "Control"
         },
         "v": {
-          "ar": "ريموت · تطبيق · صوت",
-          "en": "Remote · App · Voice"
+          "ar": "ريموت · صوت",
+          "en": "Remote · Voice"
         }
       },
       {

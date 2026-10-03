@@ -7,12 +7,25 @@
 .walk-live [data-live] { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0; transition: opacity 0.5s var(--ease); }
 .walk-live [data-live].is-on { opacity: 1; }
 .walk-live button { pointer-events: auto; cursor: pointer; }
+/* the tour moves on: every layer is off the picture before the film moves under it (device-live.ts `hide`) */
+.walk-live.is-leaving [data-live], .walk-live.is-leaving .pscreen { transition: opacity 0.15s linear !important; }
 
 /* ---------- the control panel's screen: the painted layout (data/panel-ui.ts) in real HTML ---------- */
-.pscreen { position: absolute; left: 0; top: 0; transform-origin: 0 0; direction: ltr; overflow: hidden; color: #eef3ff; font-family: 'Jost', 'Cairo', system-ui, sans-serif; line-height: 1; background: radial-gradient(circle at 86% 6%, rgba(47, 128, 255, 0.3), rgba(47, 128, 255, 0) 40%), linear-gradient(135deg, #0d1526, #070b16); -webkit-font-smoothing: antialiased; user-select: none; pointer-events: auto; opacity: 0; transition: opacity 0.5s var(--ease), filter 1.2s var(--ease); filter: brightness(0.86) saturate(0.92); }
+.pscreen { position: absolute; left: 0; top: 0; transform-origin: 0 0; direction: ltr; overflow: hidden; color: #eef3ff; font-family: 'Jost', 'Cairo', system-ui, sans-serif; line-height: 1; background: radial-gradient(circle at 86% 6%, rgba(47, 128, 255, 0.3), rgba(47, 128, 255, 0) 40%), linear-gradient(135deg, #0d1526, #070b16); -webkit-font-smoothing: antialiased; user-select: none; pointer-events: auto; opacity: 0;
+  /* the hand-over (device-live.ts): it comes up over the filmed screen looking as the film shows it (behind its cover glass and
+     through the grade the filmed screen is hazed and muted: lifted blacks, less blue), and clears to its own contrast as it
+     arrives: one wake, no second step */
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), filter 1.4s cubic-bezier(0.4, 0, 0.2, 1); filter: saturate(0.7); }
 .pscreen.is-on { opacity: 1; }
-.pscreen.is-tracking { transition: opacity 0.18s linear, filter 1.2s var(--ease); } /* following the moving film: it appears and goes with the view, quickly */
-.pscreen.is-awake { filter: brightness(0.95) saturate(1); } /* the screen "wakes" a moment after the handoff */
+.pscreen.is-awake { filter: saturate(0.94); }
+/* the cover glass: a veil of the room's light over the whole screen, heavy while it still matches the film, a trace once awake.
+   Fitted to the published frame (2 Oct 2026: the filmed screen is the live one at 0.7 of its colour, 0.785 of its contrast and
+   lifted by about 31 levels; measured on its background, a light pill and the accent button, each within 10 levels after the
+   fit). A new grade or a change to the panel's glass wants the same three patches measured again */
+.pscreen::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: rgb(150, 140, 125); opacity: 0.215; transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.pscreen.is-awake::after { opacity: 0.06; }
+.ps-time, .ps-date { transition: opacity 0.34s linear; }
+.pscreen.is-turning .ps-time, .pscreen.is-turning .ps-date { opacity: 0; }
 .pscreen[lang='ar'] { font-family: 'Cairo', 'Jost', system-ui, sans-serif; }
 .pscreen > * { position: absolute; }
 .pscreen button { font: inherit; color: inherit; border: 0; padding: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -79,9 +92,25 @@
 .live-keypad { width: 256px; height: 512px; color: #fff; font-family: 'Jost', system-ui, sans-serif; }
 .live-keypad button { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; font: 300 44px/64px 'Jost', system-ui, sans-serif; color: rgba(255, 255, 255, 0); text-shadow: none; transition: color 0.25s, text-shadow 0.25s; }
 .live-keypad button.is-lit { color: #fff; text-shadow: 0 0 10px rgba(140, 200, 255, 0.9), 0 0 22px rgba(90, 160, 255, 0.6); }
-.live-keypad .live-ok { position: absolute; left: 50%; top: 90%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 3px solid #46d17a; box-shadow: 0 0 16px rgba(70, 209, 122, 0.7); opacity: 0; transform: scale(0.6); transition: opacity 0.4s, transform 0.4s var(--ease); }
-.live-keypad .live-ok::after { content: ''; position: absolute; left: 11px; top: 6px; width: 10px; height: 18px; border: solid #46d17a; border-width: 0 3px 3px 0; transform: rotate(45deg); }
-.live-keypad.is-open .live-ok { opacity: 1; transform: none; }
+/* … and the other three ways in, each where it happens on the lock (--u = the keypad's width on screen, 51 mm of the lock) */
+.live-lock { --u: 60px; pointer-events: none; }
+.live-lock > i { position: absolute; opacity: 0; transition: opacity 0.3s var(--ease); }
+.live-lock > i.is-on, .live-lock > i.is-ok { opacity: 1; }
+/* a card held to the reader: its field, ring after ring */
+.live-card { width: calc(var(--u) * 0.7); height: calc(var(--u) * 0.7); margin: calc(var(--u) * -0.35) 0 0 calc(var(--u) * -0.35); border-radius: 50%; }
+.live-card::before, .live-card::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid #bfe0ff; box-shadow: 0 0 10px rgba(120, 190, 255, 0.7); opacity: 0; }
+.live-card.is-on::before { animation: live-ring-in 1s ease-in infinite; } .live-card.is-on::after { animation: live-ring-in 1s ease-in 0.5s infinite; }
+@keyframes live-ring-in { from { opacity: 0; transform: scale(1.7); } 60% { opacity: 0.95; } to { opacity: 0; transform: scale(0.35); } }
+/* a finger on the reader: its guide light floods */
+.live-finger { width: calc(var(--u) * 0.3); height: calc(var(--u) * 0.36); margin: calc(var(--u) * -0.18) 0 0 calc(var(--u) * -0.15); border-radius: 40%; background: radial-gradient(closest-side, rgba(190, 225, 255, 0.95), rgba(90, 160, 255, 0.5) 55%, transparent); box-shadow: 0 0 calc(var(--u) * 0.3) calc(var(--u) * 0.06) rgba(90, 160, 255, 0.55); }
+.live-finger.is-on { animation: live-finger 0.7s ease-in-out infinite alternate; }
+@keyframes live-finger { from { transform: scale(0.8); filter: brightness(0.8); } to { transform: scale(1.12); filter: brightness(1.25); } }
+/* a face before the lenses: a line of light crosses the window */
+.live-face { width: calc(var(--u) * 1.04); height: calc(var(--u) * 0.46); margin: calc(var(--u) * -0.23) 0 0 calc(var(--u) * -0.52); border-radius: calc(var(--u) * 0.1); overflow: hidden; }
+.live-face::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: #dff3ff; box-shadow: 0 0 10px 3px rgba(111, 227, 255, 0.85), 0 0 26px 8px rgba(61, 155, 255, 0.4); }
+.live-face.is-on::before { animation: live-face 0.6s ease-in-out infinite alternate; }
+@keyframes live-face { from { left: 6%; } to { left: calc(94% - 2px); } }
+.live-lockled { width: max(5px, calc(var(--u) * 0.07)); height: max(5px, calc(var(--u) * 0.07)); margin: calc(max(5px, var(--u) * 0.07) / -2) 0 0 calc(max(5px, var(--u) * 0.07) / -2); border-radius: 50%; background: #5fe38f; box-shadow: 0 0 8px 3px rgba(70, 209, 122, 0.9), 0 0 22px 7px rgba(70, 209, 122, 0.4); }
 /* smoke detector: a green heartbeat; "Test" pulses it red with a ring */
 .live-led { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: #46d17a; box-shadow: 0 0 8px 2px rgba(70, 209, 122, 0.8); animation: live-beat 3s ease-in-out infinite; }
 .live-led::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid currentColor; color: #ff5040; opacity: 0; }
@@ -103,4 +132,4 @@ html[lang='ar'] .live-test { letter-spacing: 0; font-size: 0.8rem; transform: tr
 /* curtain motor: the status LED blinks as it runs */
 .live-blink { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #35e0ff; box-shadow: 0 0 8px 2px rgba(53, 224, 255, 0.8); animation: live-blink 1.2s steps(2) infinite; }
 @keyframes live-blink { to { opacity: 0.2; } }
-@media (prefers-reduced-motion: reduce) { .ps-music.is-playing .ps-eq i, .live-grille.is-playing i, .live-led, .live-blink { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ps-music.is-playing .ps-eq i, .live-grille.is-playing i, .live-led, .live-blink, .live-card::before, .live-card::after, .live-finger, .live-face::before { animation: none !important; } }

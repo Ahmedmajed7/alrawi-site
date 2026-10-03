@@ -1,0 +1,198 @@
+/* ============================ THE PHONE IN THE LIVING ROOM ============================
+   The film's app stop (components/PhoneScreen.astro, scripts/film/phone.ts + scene.ts): a phone held up at the side of the
+   frame whose app runs the room behind it. Everything inside the device is sized in em off its width (--pw), so the one
+   drawing serves a 4K wall and a laptop; on an upright phone the device's frame falls away and the app is the lower half of
+   the visitor's own screen (.is-sheet). Colours: graphite glass with the site's brass for what is on. */
+
+/* the room's picture while the phone runs it: a canvas over the paused clip, covering it exactly as the clip does */
+.walk-scene { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: calc(50% + var(--hud-pan)) calc(50% + var(--hud-pan-y)); z-index: 3; opacity: 0; transition: opacity 0.4s linear; pointer-events: none; }
+.walk-scene.is-on { opacity: 1; }
+.walk-scene-src { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
+/* the stage can give up the lower part of the screen (upright phones): it is as tall as --app-h says */
+.walk-film, .walk-slides { bottom: auto; height: 100%; }
+.walk-film { transition: transform 1.6s var(--ease-io), height 0.9s cubic-bezier(0.19, 1, 0.22, 1); }
+.walk-slides { transition: height 0.9s cubic-bezier(0.19, 1, 0.22, 1); }
+
+.walk-app { position: absolute; inset: 0; z-index: 3; pointer-events: none; --lights: 1; --curtain: 1; --app-brass: #d9bd8a; --app-brass-2: #b8935c; }
+.walk-app[hidden] { display: none; }
+
+/* ---------------- the device ---------------- */
+/* (its place is set with a margin, not `translate`: the build's minifier drops a separate translate beside a transform) */
+.phone-wrap { position: absolute; right: clamp(22px, 6vw, 120px); top: 50%; --pw: clamp(232px, min(21vw, 38.5vh), 336px); width: var(--pw); margin-top: calc(var(--pw) * -1.14); font-size: calc(var(--pw) / 20); perspective: 1700px;
+  /* the entrance: it comes up from under the frame on one long ease-out, started while the lens is still settling on the room
+     (.is-rising, film/phone.ts `rise`), so phone and camera come to rest together. Only transform and opacity move, on a layer
+     of their own (a drop-shadow filter here was redrawn on every frame of the rise) */
+  opacity: 0; transform: translate3d(0, 62%, 0) rotate(5deg) scale(0.96); transition: transform 1.3s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.5s linear; will-change: transform, opacity; }
+.walk-app:is(.is-rising, .is-on) .phone-wrap { opacity: 1; transform: none; }
+.walk-app:not(.is-rising):not(.is-on) .phone-wrap { transition: transform 0.55s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.4s linear 0.12s; } /* … and goes down quicker than it came */
+.phone { position: relative; aspect-ratio: 9 / 19.25; border-radius: 3.15em; padding: 0.4em; pointer-events: auto; cursor: default; user-select: none; -webkit-user-select: none; touch-action: none;
+  transform: rotateY(-13deg) rotateX(2deg) rotateZ(2.2deg); transform-origin: 60% 50%;
+  /* the band: brushed titanium, lit warm from the room on its left and cool from the screen side */
+  background: linear-gradient(100deg, #8e887f 0%, #e3dccf 7%, #77726a 20%, #b4ada1 46%, #5f5b54 72%, #d2cabd 91%, #8a857d 100%);
+  box-shadow: inset 0 0 0 0.06em rgba(255, 255, 255, 0.28), inset 0 0 0.22em rgba(0, 0, 0, 0.55), 0.3em 0.05em 0 -0.03em #56524b, 0.34em 0.07em 0.12em rgba(0, 0, 0, 0.5), -0.05em 0 0.5em rgba(255, 198, 140, calc(0.1 + 0.16 * var(--lights))), 0.4em 2.4em 3.6em -0.5em rgba(8, 6, 4, 0.6), 0.1em 0.5em 0.9em rgba(8, 6, 4, 0.3); }
+/* held in a hand, not pinned to the glass: once up it drifts a hair (and holds still under the pointer) */
+.walk-app.is-on .phone { animation: phone-float 6.5s ease-in-out 1.4s infinite alternate; }
+.walk-app.is-on .phone:is(:hover, :active, :focus-within) { animation-play-state: paused; }
+@keyframes phone-float { from { transform: rotateY(-13deg) rotateX(2deg) rotateZ(2.2deg) translate3d(0, 0, 0); } to { transform: rotateY(-12.2deg) rotateX(2.5deg) rotateZ(1.85deg) translate3d(0, -0.38em, 0); } }
+.phone-keys { position: absolute; inset: 0; pointer-events: none; }
+.phone-keys::before, .phone-keys::after { content: ''; position: absolute; width: 0.18em; border-radius: 0.1em; background: linear-gradient(90deg, #6e6a63, #bdb6aa); }
+.phone-keys::before { left: -0.14em; top: 22%; height: 9%; box-shadow: 0 -4.6em 0 0 #9f998e; }
+.phone-keys::after { right: -0.5em; top: 27%; height: 12%; background: linear-gradient(90deg, #4b4741, #8f8980); }
+.phone-glass { position: relative; height: 100%; border-radius: 2.78em; padding: 0.32em; background: #040405; overflow: hidden; }
+.phone-island { position: absolute; z-index: 3; top: 1.02em; left: 50%; width: 5.5em; height: 1.5em; margin-left: -2.75em; border-radius: 1em; background: #000; box-shadow: inset 0 0 0.3em rgba(255, 255, 255, 0.06); }
+.phone-island::after { content: ''; position: absolute; right: 0.5em; top: 50%; width: 0.5em; height: 0.5em; margin-top: -0.25em; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #26304a, #06070c 70%); }
+.phone-sheen { position: absolute; inset: 0; z-index: 4; border-radius: inherit; pointer-events: none; background: linear-gradient(116deg, rgba(255, 255, 255, 0.17) 0%, rgba(255, 255, 255, 0.05) 21%, transparent 36%, transparent 72%, rgba(255, 214, 160, 0.08) 100%); }
+
+/* ---------------- the app ---------------- */
+.phone-screen { position: relative; height: 100%; border-radius: 2.46em; overflow: hidden; display: flex; flex-direction: column; padding: 0 0.9em 0.55em; color: #f4f0e9; font-family: 'Jost', 'Cairo', system-ui, sans-serif; line-height: 1.2; -webkit-font-smoothing: antialiased;
+  background: radial-gradient(130% 55% at 85% -5%, rgba(214, 178, 120, calc(0.08 + 0.16 * var(--lights))), transparent 62%), linear-gradient(180deg, #191a1e, #0e0f12 55%, #0a0a0c); }
+.phone[lang='ar'] .phone-screen { font-family: 'Cairo', 'Jost', system-ui, sans-serif; }
+.phone-screen svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.phone-screen button { font: inherit; color: inherit; border: 0; padding: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.phone-screen :is(button, [role='slider']):focus-visible { outline: 0.1em solid var(--app-brass); outline-offset: 0.16em; }
+.app-status { display: flex; justify-content: space-between; align-items: center; height: 3.25em; padding: 0.95em 1.1em 0; font-size: 0.86em; font-weight: 500; flex: none; }
+.app-status span { display: flex; align-items: center; gap: 0.38em; }
+.app-status svg { height: 0.82em; width: auto; fill: currentColor; stroke: none; }
+.app-status .app-batt rect:first-child { fill: none; stroke: currentColor; stroke-width: 1; opacity: 0.45; }
+.app-head { display: grid; grid-template-columns: 1.8em 1fr 1.8em; align-items: center; margin-top: 0.4em; flex: none; }
+.app-head h2 { margin: 0; text-align: center; font: inherit; font-size: 1.12em; font-weight: 500; letter-spacing: 0.01em; color: inherit; }
+.app-nav { display: grid; place-items: center; width: 1.8em; height: 1.8em; }
+.app-nav svg { width: 1.35em; height: 1.35em; }
+[dir='rtl'] .app-nav svg { scale: -1 1; }
+.app-more { grid-auto-flow: column; gap: 0.2em; justify-content: center; }
+.app-more b { width: 0.24em; height: 0.24em; border-radius: 50%; background: currentColor; }
+.app-view { margin-top: 0.6em; border-radius: 1.05em; overflow: hidden; flex: none; box-shadow: inset 0 0 0 0.06em rgba(255, 255, 255, 0.08); background: #111; }
+.app-view canvas { display: block; width: 100%; height: auto; }
+
+.app-scenes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4em; margin-top: 0.6em; flex: none; }
+.app-scene { display: grid; justify-items: center; gap: 0.3em; padding: 0.55em 0.15em 0.5em !important; border-radius: 0.95em; background: rgba(255, 255, 255, 0.06) !important; color: rgba(244, 240, 233, 0.72) !important; transition: background 0.35s var(--ease), color 0.35s, transform 0.18s; }
+.app-scene svg { width: 1.3em; height: 1.3em; }
+.app-scene span { font-size: 0.58em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.app-scene.is-on { background: linear-gradient(160deg, #e6cb98, #b8935c) !important; color: #2a1d0a !important; }
+.app-scene:active { transform: scale(0.95); }
+
+.app-card { margin-top: 0.5em; padding: 0.72em 0.8em 0.8em; border-radius: 1.15em; background: rgba(255, 255, 255, 0.055); box-shadow: inset 0 0 0 0.06em rgba(255, 255, 255, 0.07); flex: none; transition: box-shadow 0.4s, background 0.4s; }
+.app-card.is-live { background: rgba(255, 255, 255, 0.075); box-shadow: inset 0 0 0 0.06em rgba(217, 189, 138, 0.42); }
+.app-card header { display: flex; align-items: center; gap: 0.62em; }
+.app-card header > div { flex: 1; min-width: 0; }
+.app-card h3 { margin: 0; font: inherit; font-size: 0.98em; font-weight: 500; color: inherit; }
+.app-card p { margin: 0.12em 0 0; font-size: 0.7em; color: rgba(244, 240, 233, 0.58); }
+.app-card p b { font-weight: 400; font-variant-numeric: tabular-nums; }
+.app-ico { display: grid; place-items: center; width: 2.2em; height: 2.2em; border-radius: 50%; flex: none; background: rgba(255, 255, 255, 0.08); color: var(--app-brass); }
+.app-ico svg { width: 1.22em; height: 1.22em; }
+/* the drapes in the icon part with the real ones; the bulb is as bright as the room */
+.app-ico-curtain .l { transform-origin: 5px 4px; transform: scaleX(calc(1.9 - 0.9 * var(--curtain))); }
+.app-ico-curtain .r { transform-origin: 19px 4px; transform: scaleX(calc(1.9 - 0.9 * var(--curtain))); }
+.app-ico-bulb { color: color-mix(in srgb, var(--app-brass) calc(var(--lights) * 100%), rgba(244, 240, 233, 0.4)); background: rgba(255, 214, 150, calc(0.07 + 0.2 * var(--lights))); box-shadow: 0 0 calc(0.9em * var(--lights)) rgba(255, 204, 130, calc(0.5 * var(--lights))); }
+
+.app-slider { position: relative; height: 1.7em; margin-top: 0.55em; cursor: pointer; touch-action: none; outline: none; }
+.app-slider > * { pointer-events: none; }
+.app-track { position: absolute; inset-inline: 0.85em; top: 50%; height: 0.26em; margin-top: -0.13em; border-radius: 1em; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.app-track i { position: absolute; inset-block: 0; inset-inline-start: 0; width: calc(var(--v) * 100%); background: linear-gradient(90deg, var(--app-brass-2), #e9cf9f); }
+[dir='rtl'] .app-track i { background: linear-gradient(270deg, var(--app-brass-2), #e9cf9f); }
+.app-thumb-knob { position: absolute; top: 50%; inset-inline-start: calc(var(--v) * (100% - 1.7em)); width: 1.7em; height: 1.7em; margin-top: -0.85em; display: grid; place-items: center; }
+.app-thumb-knob::before { content: ''; width: 1.22em; height: 1.22em; border-radius: 50%; background: #fff; box-shadow: 0 0.12em 0.4em rgba(0, 0, 0, 0.5), 0 0 0 0.05em rgba(0, 0, 0, 0.08); transition: transform 0.2s var(--ease); }
+.app-slider.is-drag .app-thumb-knob::before { transform: scale(1.14); }
+/* an invitation, until the first touch: a ring breathing round the curtain's knob */
+.app-thumb-knob::after { content: ''; position: absolute; width: 1.22em; height: 1.22em; border-radius: 50%; box-shadow: 0 0 0 0.1em rgba(233, 207, 159, 0.9); opacity: 0; }
+.walk-app.is-on:not(.is-touched) [data-app-slider='curtain'] .app-thumb-knob::after { animation: app-invite 2.4s var(--ease-io) 1.6s infinite; }
+@keyframes app-invite { 0% { opacity: 0.9; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(2.3); } }
+
+.app-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4em; margin-top: 0.45em; }
+.app-seg button { display: grid; justify-items: center; gap: 0.28em; font-size: 0.64em !important; font-weight: 500 !important; color: rgba(244, 240, 233, 0.78) !important; }
+.app-seg i { display: grid; place-items: center; width: 3.7em; height: 3.7em; border-radius: 50%; background: rgba(255, 255, 255, 0.08); transition: background 0.25s, transform 0.15s; }
+.app-seg svg { width: 1.9em; height: 1.9em; }
+.app-seg button:active i { transform: scale(0.93); background: rgba(217, 189, 138, 0.4); }
+
+.app-switch { position: relative; width: 2.85em; height: 1.66em; border-radius: 1em; flex: none; background: rgba(255, 255, 255, 0.16) !important; transition: background 0.3s var(--ease); }
+.app-switch.is-on { background: linear-gradient(160deg, #e6cb98, #b8935c) !important; }
+.app-switch i { position: absolute; top: 0.15em; inset-inline-start: 0.15em; width: 1.36em; height: 1.36em; border-radius: 50%; background: #fff; box-shadow: 0 0.1em 0.3em rgba(0, 0, 0, 0.4); transition: inset-inline-start 0.3s var(--ease); }
+.app-switch.is-on i { inset-inline-start: calc(100% - 1.51em); }
+.app-dim { display: flex; align-items: center; gap: 0.3em; margin-top: 0.45em; }
+.app-dim .app-slider { flex: 1; margin-top: 0; }
+.app-sun { display: grid; place-items: center; width: 1.5em; height: 1.5em; color: var(--app-brass); opacity: calc(0.45 + 0.55 * var(--lights)); }
+.app-sun svg { width: 1.2em; height: 1.2em; }
+
+.app-tabs { display: flex; justify-content: space-around; margin-top: auto; padding-top: 0.5em; flex: none; }
+.app-tabs span { display: grid; justify-items: center; gap: 0.22em; font-size: 0.58em; font-weight: 500; color: rgba(244, 240, 233, 0.5); }
+.app-tabs svg { width: 2.2em; height: 2.2em; }
+.app-tabs .is-on { color: var(--app-brass); }
+
+/* the app wakes with the phone: its parts settle in one after another */
+.phone-screen > * { opacity: 0; transform: translateY(0.5em); transition: opacity 0.5s var(--ease), transform 0.6s var(--ease); }
+.walk-app:is(.is-rising, .is-on) .phone-screen > * { opacity: 1; transform: none; }
+.walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(1) { transition-delay: 0.5s; } .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(2) { transition-delay: 0.57s; }
+.walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(3) { transition-delay: 0.64s; } .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(4) { transition-delay: 0.73s; }
+.walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(5) { transition-delay: 0.82s; } .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(6) { transition-delay: 0.91s; }
+.walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(7) { transition-delay: 1s; }
+
+.app-hint { position: absolute; inset-inline: -4em; top: calc(100% + 1.5em); margin: 0; text-align: center; font: 500 0.62rem/1.4 var(--f-sans); letter-spacing: 0.2em; text-transform: uppercase; color: var(--on-night); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.6s var(--ease); pointer-events: none; }
+html[lang='ar'] .app-hint { letter-spacing: 0; text-transform: none; font-size: 0.84rem; }
+.walk-app.is-on:not(.is-touched) .app-hint { opacity: 1; transition-delay: 1.3s; }
+
+/* ---------------- the markers in the room ---------------- */
+.app-mark { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28); opacity: 0; transform: scale(0.6); transition: opacity 0.5s var(--ease), transform 0.6s var(--ease-snap); }
+.app-mark svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+.walk-app.is-on .app-mark { opacity: 1; transform: none; transition-delay: 1.05s; }
+.app-mark.is-off, .walk-app.is-on .app-mark.is-off { opacity: 0; }
+.app-mark[data-app-mark='lights'] { color: color-mix(in srgb, #ffe2b0 calc(var(--lights) * 100%), #fff); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28), 0 0 calc(26px * var(--lights)) rgba(255, 208, 140, calc(0.55 * var(--lights))); }
+.app-mark::after { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.8); opacity: 0; }
+.app-mark.is-live::after { animation: app-ring 1.1s ease-out infinite; }
+@keyframes app-ring { from { opacity: 0.8; transform: scale(1); } to { opacity: 0; transform: scale(1.7); } }
+.app-links { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.app-links path { fill: none; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.2; stroke-dasharray: 5 6; stroke-linecap: round; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45)); opacity: 0; transition: opacity 0.5s var(--ease); }
+.walk-app.is-on .app-links path { opacity: 0.9; transition-delay: 1.25s; }
+.app-links path.is-off, .walk-app.is-on .app-links path.is-off { opacity: 0; }
+.app-links path.is-live { animation: app-dash 0.7s linear infinite; stroke: #ffe6bd; }
+@keyframes app-dash { to { stroke-dashoffset: -22; } }
+
+/* while the phone is up, the film's hint gives way to the app's, and the bottom row keeps clear of the phone whatever the
+   language: the next button on the left, the steps on the right under the phone (in Arabic the row's own order would put the
+   button under the phone's foot) */
+.walk.is-app .walk-hint { opacity: 0; }
+[dir='rtl'] .walk.is-app:not(.is-sheet) :is(.walk-bottom, .walk-card) { direction: ltr; }
+[dir='rtl'] .walk.is-app:not(.is-sheet) :is(.walk-steps, .walk-card > *) { direction: rtl; }
+
+/* ---------------- an upright phone: the room above, the app below ---------------- */
+.walk.is-sheet .walk-film, .walk.is-sheet .walk-slides { height: var(--app-h, 100%); }
+@media (max-width: 700px) and (orientation: portrait) {
+  .phone-wrap { right: 0; left: 0; top: auto; bottom: 0; width: auto; height: calc(100% - var(--app-h, 46%) + 20px); margin-top: 0; perspective: none; font-size: clamp(13.5px, 4.1vw, 17px); transform: translate3d(0, 102%, 0); transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s linear; }
+  .phone, .walk-app.is-on .phone { height: 100%; aspect-ratio: auto; padding: 0; border-radius: 1.5em 1.5em 0 0; transform: none; animation: none; background: none; box-shadow: 0 -1em 2.6em rgba(0, 0, 0, 0.5); touch-action: pan-y; }
+  .phone-glass { padding: 0; border-radius: inherit; background: none; }
+  .phone-screen { border-radius: inherit; padding: 1.5em 1.1em calc(84px + env(safe-area-inset-bottom, 0px)); box-shadow: inset 0 0.06em 0 rgba(255, 255, 255, 0.12); justify-content: flex-start; overflow: hidden; }
+  .phone-screen::before { content: ''; position: absolute; top: 0.55em; left: 50%; width: 2.6em; height: 0.26em; margin-left: -1.3em; border-radius: 1em; background: rgba(255, 255, 255, 0.24); opacity: 1 !important; transform: none !important; }
+  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav, .app-hint { display: none; }
+  .app-head { grid-template-columns: 1fr; margin-top: 0; }
+  .app-head h2 { text-align: start; font-size: 1.2em; }
+  .app-scenes { margin-top: 0.7em; }
+  .app-card { margin-top: 0.6em; }
+  .app-mark { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+  .app-mark svg { width: 20px; height: 20px; }
+  /* the row with the next button stands on the app's own dark foot: one line, the button at the start and the steps at the end */
+  .walk.is-sheet .walk-bottom { grid-template-columns: auto 1fr; align-items: center; gap: 12px; }
+  .walk.is-sheet .walk-card { gap: 0; }
+  .walk.is-sheet .walk-hint { display: none; }
+  .walk.is-sheet .walk-next { padding: 10px 14px; white-space: nowrap; }
+  .walk.is-sheet .walk-steps { justify-self: end; gap: 4px; }
+  .walk.is-sheet .walk-steps i { width: 13px; }
+  .walk.is-sheet .walk-steps span { margin-inline-start: 8px; }
+  .walk.is-sheet .walk-next { background: rgba(255, 255, 255, 0.1); border-color: rgba(244, 240, 233, 0.5); color: var(--ivory); }
+  .walk.is-sheet .walk-steps i { background: rgba(241, 237, 230, 0.28); } .walk.is-sheet .walk-steps i.is-done { background: var(--brass); } .walk.is-sheet .walk-steps i.is-on { background: var(--on-night); }
+  .walk.is-sheet .walk-steps span { color: var(--on-night-soft); text-shadow: none; }
+}
+/* a phone held sideways: no room for a device drawn inside it; the app is a panel down the side, the room beside it */
+@media (max-height: 520px) and (orientation: landscape) {
+  .phone-wrap { right: 0; top: 0; bottom: 0; width: min(46vw, 340px); margin-top: 0; perspective: none; font-size: clamp(11.5px, 3.3vh, 14px); transform: translate3d(102%, 0, 0); }
+  .phone, .walk-app.is-on .phone { height: 100%; aspect-ratio: auto; padding: 0; border-radius: 1.3em 0 0 1.3em; transform: none; animation: none; background: none; box-shadow: -1em 0 2.6em rgba(0, 0, 0, 0.5); }
+  .phone-glass { padding: 0; border-radius: inherit; background: none; }
+  .phone-screen { border-radius: inherit; padding: 0.9em 1em 0.8em; }
+  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav, .app-hint { display: none; }
+  .app-head { grid-template-columns: 1fr; margin-top: 0; }
+  .app-head h2 { text-align: start; }
+  .app-seg i { width: 3.1em; height: 3.1em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-wrap, .phone-screen > *, .app-mark { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+  .walk-app.is-on .phone { animation: none; }
+  .app-thumb-knob::after, .app-mark.is-live::after, .app-links path.is-live { animation: none !important; }
+}

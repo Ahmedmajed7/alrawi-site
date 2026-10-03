@@ -20,7 +20,7 @@ export const GI = {
   wingX: [-0.15, 3.35] as const, mainZ: -1.88, split: -1.53,
 };
 
-export interface RoomGI { group: THREE.Group; /** 'wait' until the first frame is drawn with every texture in */ readonly state: 'wait' | 'baking' | 'done' | 'failed'; dispose(): void }
+export interface RoomGI { group: THREE.Group; /** 'wait' until the first frame is drawn with every texture in */ readonly state: 'wait' | 'baking' | 'done' | 'failed'; /** bake again on the next frame, with what moves (the drapes) where it stands now: the film's app scene records the room at every position of its drapes, and the light the room gives back must follow them */ rebake(): void; dispose(): void }
 
 /**
  * `uGI` is the surfaces' switch from their stand-in ambient to the probes (set to 1 when the bake is in); `ready` says when the
@@ -37,7 +37,7 @@ export function createRoomGI(o: { record: boolean; uGI: { value: number }; ready
   const speck = new THREE.Mesh(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([0, -3, 0, 0.001, -3, 0, 0, -3, 0.001], 3)), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false }));
   speck.frustumCulled = false; speck.renderOrder = -1000; speck.castShadow = false; speck.name = 'room-gi-speck';
   group.add(grid, spare, speck);
-  let state: RoomGI['state'] = 'wait';
+  let state: RoomGI['state'] = 'wait', posed = true;
 
   const bake = (renderer: THREE.WebGLRenderer, scene: THREE.Scene) => {
     const t0 = performance.now(), undo: (() => void)[] = [];
@@ -46,7 +46,7 @@ export function createRoomGI(o: { record: boolean; uGI: { value: number }; ready
     // them (its lower half is the sand's bounce); the front door is open whenever the camera is indoors, so the probes see it open
     for (const name of ['environment', 'door_walnut', 'door_steel']) hide(scene.getObjectByName(name));
     for (const ob of o.hide) hide(ob);
-    if (o.pose) { undo.push(o.pose()); scene.updateMatrixWorld(true); }
+    if (o.pose && posed) { undo.push(o.pose()); scene.updateMatrixWorld(true); }
     scene.traverse((ob) => { const m = ob as THREE.Mesh; if (!m.isMesh || Array.isArray(m.material)) return; const mt = m.material as THREE.MeshPhysicalMaterial; if (mt && mt.isMeshPhysicalMaterial && mt.transmission > 0) hide(m); });
     const bg = scene.background, bi = scene.backgroundIntensity, bb = scene.backgroundBlurriness;
     scene.background = scene.environment; scene.backgroundIntensity = 1; scene.backgroundBlurriness = 0.25;
@@ -70,5 +70,5 @@ export function createRoomGI(o: { record: boolean; uGI: { value: number }; ready
     try { bake(renderer, scene as THREE.Scene); state = 'done'; }
     catch (e) { console.warn('[interior] probe grid unavailable, keeping the stand-in ambient', e); state = 'failed'; o.uGI.value = 0; group.remove(grid, spare); grid.dispose(); }
   };
-  return { group, get state() { return state; }, dispose() { grid.dispose(); spare.dispose(); speck.geometry.dispose(); (speck.material as THREE.Material).dispose(); } };
+  return { group, get state() { return state; }, rebake() { if (state === 'done') { posed = false; state = 'wait'; } }, dispose() { grid.dispose(); spare.dispose(); speck.geometry.dispose(); (speck.material as THREE.Material).dispose(); } };
 }

@@ -1,6 +1,6 @@
 /**
  * The landing walkthrough: villa exterior → tap → through the gate to the front door → the door
- * opens by itself → five devices inside → back out, the door closes → the smart lock → the site.
+ * opens by itself → five devices inside → the living room and the phone that runs it → back out, the door closes → the smart lock → the site.
  */
 import * as THREE from 'three';
 import { gsap } from 'gsap';
@@ -218,7 +218,8 @@ export async function mountWalkthrough(root: HTMLElement) {
   const tour = tourMoves(cfg as unknown as TourConfig);
   const fadeExposure = (to: number, dur: number) => { gsap.to(stage.renderer, { toneMappingExposure: to, duration: dur, ease: 'sine.inOut' }); stage.setLook(to === cfg.exposure.interior, dur); };
   const insideNow = (on: boolean) => { stage.renderer.toneMappingExposure = on ? cfg.exposure.interior : cfg.exposure.exterior; stage.setLook(on, 0); door.setOpen(on ? 1 : 0); };
-  const lensTo = (s: (typeof cfg.stops)[number]) => new THREE.Vector3(...s.camera.pos).distanceTo(devices.get(s.id)?.getWorldPosition(new THREE.Vector3()) ?? new THREE.Vector3(...s.camera.look));
+  // (the app stop is a view of the whole living room: deep focus, every part of it crisp)
+  const lensTo = (s: (typeof cfg.stops)[number]) => (s.kind === 'app' ? 40 : new THREE.Vector3(...s.camera.pos).distanceTo(devices.get(s.id)?.getWorldPosition(new THREE.Vector3()) ?? new THREE.Vector3(...s.camera.look)));
   const focusAtEnd = (s: (typeof cfg.stops)[number], T: number) => { const d = Math.min(1, T * 0.5); gsap.delayedCall(Math.max(0, T - d), () => stage.focusOn(lensTo(s), d)); }; // the lens racks onto the device as the move settles
   const arrive = (i: number) => { state = 'stop'; idx = i; showCard(i); };
   // the hero lens (it breathes, and is wider on portrait phones) eases to the tour's lens instead of cutting to it
@@ -240,7 +241,7 @@ export async function mountWalkthrough(root: HTMLElement) {
     stage.focusOn(40, 0);
     const plan = rig.move(tour.enter(), () => arrive(0));
     const tDoor = plan.timeWhen((p) => p.z < 0.3); // the lens reaches the threshold
-    gsap.delayedCall(Math.max(0, tDoor - 2.4), () => { void door.animate(true, 1.5); });
+    gsap.delayedCall(Math.max(0, tDoor - 3.0), () => { void door.animate(true); }); // the bolts draw back and the leaf swings in on its own weight: at rest against the wall most of a second before the lens is at the threshold
     gsap.delayedCall(Math.max(0, tDoor - 1), () => fadeExposure(cfg.exposure.interior, 1.6));
     focusAtEnd(cfg.stops[0], plan.T);
   };
@@ -254,18 +255,18 @@ export async function mountWalkthrough(root: HTMLElement) {
   };
   const leaveToLock = () => { // backwards out of the house, eyes on the rooms: through the hall and the front door, straight onto the lock's frame; the door closes in front of the lens and brings the lock with it
     state = 'travelling'; showCard(-1);
-    const s = cfg.stops[lockIdx], CLOSE = 1.1;
+    const s = cfg.stops[lockIdx], CLOSE = 2.4; // door.ts SWING.close: the closer's sweep, the slow last degrees, the bolts
     stage.focusOn(40, 1);
     const plan = rig.move(tour.leave());
     const tOut = plan.timeWhen((p) => p.z > 0.2); // the lens is over the threshold: the leaf can swing behind it
     gsap.delayedCall(Math.max(0, tOut - 0.8), () => fadeExposure(cfg.exposure.exterior, 1.4));
-    const tClose = Math.max(tOut, plan.T - 0.5);
-    gsap.delayedCall(tClose, () => { void door.animate(false, CLOSE); stage.focusOn(lensTo(s), CLOSE); });
-    gsap.delayedCall(tClose + CLOSE, () => arrive(lockIdx));
+    const tClose = Math.max(tOut + 0.05, plan.T - 1.25); // the lens comes to rest first, then watches the leaf land and lock
+    gsap.delayedCall(tClose, () => { void door.animate(false, CLOSE); stage.focusOn(lensTo(s), CLOSE * 0.8); });
+    gsap.delayedCall(tClose + CLOSE + 0.1, () => arrive(lockIdx));
   };
   const reenter = () => { // back from the lock: the door opens, then the way out in reverse
     state = 'travelling'; showCard(-1);
-    void door.animate(true, 1.2); stage.focusOn(40, 1);
+    void door.animate(true, 1.6); stage.focusOn(40, 1);
     gsap.delayedCall(0.6, () => { fadeExposure(cfg.exposure.interior, 1.4); const plan = rig.move(tour.reenter(), () => arrive(lockIdx - 1)); focusAtEnd(cfg.stops[lockIdx - 1], plan.T); });
   };
   const advance = () => {
@@ -344,13 +345,6 @@ export async function mountWalkthrough(root: HTMLElement) {
     // at one render per frame, so whatever stands still stays crisp
     const K = Math.max(1, Math.min(32, Math.round(Number(q.get('shutter')) || 1)));
     const tick = (h: number) => { T += h; gsap.updateRoot(T); rig.update(h); stage.update(h); interior.update(h, camera); };
-    let mid: { p: THREE.Vector3; q: THREE.Quaternion } | null = null; // where the lens was at the middle of the last blurred frame's shutter
-    /** run `fn` with the camera where the frame shows it (the shutter's middle when the frame is blurred) */
-    const asShown = <R,>(fn: () => R): R => {
-      if (!mid) return fn();
-      const p = camera.position.clone(), r = camera.quaternion.clone(); camera.position.copy(mid.p); camera.quaternion.copy(mid.q); camera.updateMatrixWorld(true);
-      try { return fn(); } finally { camera.position.copy(p); camera.quaternion.copy(r); camera.updateMatrixWorld(true); }
-    };
     w.__rec = {
       begin() { gsap.ticker.remove(gsap.updateRoot); T = gsap.globalTimeline.time(); rig.update(0); stage.update(0); interior.update(0, camera); stage.render(); return true; },
       go() { advance(); return state; },
@@ -360,59 +354,38 @@ export async function mountWalkthrough(root: HTMLElement) {
         // the stage renders at 2x (renderer.ts); average it down to the CSS size so the film is supersampled
         const w = canvas.clientWidth, h = canvas.clientHeight; if (down.width !== w || down.height !== h) { down.width = w; down.height = h; }
         const c = down.getContext('2d')!; c.imageSmoothingQuality = 'high';
-        const n = state === 'travelling' ? K : 1; mid = null;
+        const n = state === 'travelling' ? K : 1;
         if (n === 1) { tick(dt); stage.render(); c.globalAlpha = 1; c.drawImage(canvas, 0, 0, w, h); }
         else {
           // the shutter opens half a frame in; sub-frame i sits at (i + ½) / n of it and a running average (alpha 1 / (i + 1)) weighs
           // them equally. The scene then runs on to the end of the frame, so every clock ends the frame exactly where it would without
           // the blur, and a blurred frame is centred only a quarter frame before an unblurred one (no hitch where a move starts or ends)
-          const sub = dt / 2 / n, a = (n - 1) >> 1, b = n >> 1; let pa: THREE.Vector3 | null = null, qa: THREE.Quaternion | null = null;
-          for (let i = 0; i < n; i++) {
-            tick(i ? sub : dt / 2 + sub / 2); stage.render(); c.globalAlpha = 1 / (i + 1); c.drawImage(canvas, 0, 0, w, h);
-            if (i === a) { pa = camera.position.clone(); qa = camera.quaternion.clone(); }
-            if (i === b) mid = { p: pa!.clone().lerp(camera.position, a === b ? 0 : 0.5), q: qa!.clone().slerp(camera.quaternion, a === b ? 0 : 0.5) }; // the shutter's middle
-          }
+          const sub = dt / 2 / n;
+          for (let i = 0; i < n; i++) { tick(i ? sub : dt / 2 + sub / 2); stage.render(); c.globalAlpha = 1 / (i + 1); c.drawImage(canvas, 0, 0, w, h); }
           c.globalAlpha = 1; tick(sub / 2);
         }
         return { state, img: down.toDataURL('image/jpeg', quality) };
       },
       /** `step` without the picture: the same clocks and the same shutter timing, nothing rendered or read back. The recorder's
-       *  --data-only pass replays a clip with it to rebuild the clip's per-frame data (hotspot, features, the panel track) when its
-       *  frames are already recorded */
+       *  --data-only pass replays a clip with it to rebuild the clip's data (hotspot, features, marks) when its frames are already
+       *  recorded, and the app scene runs it to bring every clock to where the move that arrives there left them */
       dry(dt: number) {
-        const n = state === 'travelling' ? K : 1; mid = null;
+        const n = state === 'travelling' ? K : 1;
         if (n === 1) tick(dt);
-        else {
-          const sub = dt / 2 / n, a = (n - 1) >> 1, b = n >> 1; let pa: THREE.Vector3 | null = null, qa: THREE.Quaternion | null = null;
-          for (let i = 0; i < n; i++) {
-            tick(i ? sub : dt / 2 + sub / 2);
-            if (i === a) { pa = camera.position.clone(); qa = camera.quaternion.clone(); }
-            if (i === b) mid = { p: pa!.clone().lerp(camera.position, a === b ? 0 : 0.5), q: qa!.clone().slerp(camera.quaternion, a === b ? 0 : 0.5) };
-          }
-          tick(sub / 2);
-        }
+        else { const sub = dt / 2 / n; for (let i = 0; i < n; i++) tick(i ? sub : dt / 2 + sub / 2); tick(sub / 2); }
         camera.updateMatrixWorld(true); scene.updateMatrixWorld(true); // `render` would have done this: the projections read these matrices
         return { state };
       },
       /** normalised screen position (0..1 from top-left) of a stop's device, or null when behind the camera */
       hotspot(id: string) { return hotspotAt(id)?.map((v) => +v.toFixed(4)) ?? null; },
-      /** the panel's screen corners on this frame when fully in view and unoccluded (the landing keeps its live UI pinned to the moving
-       *  film with these), else null */
-      track(id: string) {
-        return asShown(() => {
-        const f = featuresAt(id); const q = f?.quads.screen; if (!q) return null;
-        if (q.some(([x, y]) => x < -0.02 || x > 1.02 || y < -0.02 || y > 1.02)) return null;
-        const scr = devices.get(id)?.getObjectByName('screen') as THREE.Mesh | undefined; if (!scr) return null;
-        scr.geometry.computeBoundingBox(); const b = scr.geometry.boundingBox!, z = b.max.z, cam = camera.getWorldPosition(new THREE.Vector3());
-        const n = new THREE.Vector3(0, 0, 1).transformDirection(scr.matrixWorld), mid = new THREE.Vector3(0, 0, z).applyMatrix4(scr.matrixWorld);
-        if (n.dot(cam.clone().sub(mid).normalize()) < 0.25) return null; // too oblique to read
-        const rc = new THREE.Raycaster(), occ = [house.root, interior.group, door.group];
-        for (const [x, y] of [[b.min.x, b.max.y], [b.max.x, b.max.y], [b.max.x, b.min.y], [b.min.x, b.min.y], [0, 0]]) {
-          const pt = new THREE.Vector3(x, y, z).applyMatrix4(scr.matrixWorld), dir = pt.clone().sub(cam), dist = dir.length(); rc.set(cam, dir.normalize()); rc.far = dist - 0.03;
-          if (rc.intersectObjects(occ, true).length) return null; // a jamb or a wall is in front of it
-        }
-        return q.map((c) => c.map((v) => +v.toFixed(4)));
-        });
+      /** the app scene: the west drapes (and the motor's runners) held at `t`, the sky's light through that window following them;
+       *  what only lives by moving is left out. (The light the room gives back is baked once per page, ?bake=1 or 0: the encoder
+       *  blends the two takes by `t`.) `rebake`: dev stills, the probes baked again for this very position */
+      drapes(t: number, rebake = false) { interior.still?.(true); interior.curtain.follow?.(true); interior.curtain.setOpen(t); if (rebake) { interior.rebake?.(); scene.updateMatrixWorld(true); stage.render(); } return true; },
+      /** a stop's marks (house.json `marks`: points in the room the landing pins its markers to) in normalised screen space */
+      marks(id: string) {
+        const st = cfg.stops.find((x) => x.id === id); if (!st?.marks) return null; camera.updateMatrixWorld(true);
+        return Object.fromEntries(Object.entries(st.marks).map(([k, p]) => { const v = new THREE.Vector3(...p).project(camera); return [k, [+((v.x + 1) / 2).toFixed(5), +((1 - v.y) / 2).toFixed(5)]]; }));
       },
       /** the device's live features (quads + points) in normalised screen space, 5 decimals (text edges need sub-pixel corners) */
       features(id: string) { const f = featuresAt(id); if (!f) return null; const r = (a: number[]) => a.map((v) => +v.toFixed(5)); return { quads: Object.fromEntries(Object.entries(f.quads).map(([k, q]) => [k, q.map(r)])), points: Object.fromEntries(Object.entries(f.points).map(([k, v]) => [k, r(v)])) }; },

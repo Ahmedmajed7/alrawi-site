@@ -1,0 +1,40 @@
+---
+/** "Smart & Easy Control" (company profile, page 16): the four ways to run the home, as the profile lays them out: four
+    tall photographs side by side with the caption on the foot of each. Hover is quiet (the photograph eases in a
+    little, the card lifts): the cards never change size, which made the small source photos look soft. Photos:
+    public/img/profile/ (scripts/extract-profile.py). `more` adds the link to the Smart Control page (the home). */
+import Icon from '@/components/Icons.astro';
+import SecHead from '@/components/SecHead.astro';
+import { useT, strings, localePath, type Locale } from '@/i18n/utils';
+interface Props { locale: Locale; band?: 'paper' | 'mist'; more?: boolean }
+const { locale, band = 'paper', more = false } = Astro.props;
+const t = useT(locale);
+const items = strings(locale).ways.items;
+// in the profile's order; `at` keeps the subject in frame
+const photos = [
+  { src: '/img/profile/control-app.webp', w: 667, h: 1000, at: '62% 45%' },
+  { src: '/img/profile/control-panel.webp', w: 743, h: 1100, at: '50% 46%' },
+  { src: '/img/profile/control-voice.webp', w: 750, h: 1000, at: '42% 60%' },
+  { src: '/img/profile/control-scenes.webp', w: 561, h: 1000, at: '50% 40%' },
+];
+// a caption's bracketed Latin part ("(Alexa / Google Home)") takes its own line, kept whole and left-to-right: wrapped
+// inside an Arabic line its brackets would land on the wrong sides
+const parts = (s: string) => { const m = s.match(/^(.*?)\s*(\([^)]*\))$/); return m ? { main: m[1], sub: m[2] } : { main: s, sub: '' }; };
+---
+<section class:list={['band', `band--${band}`, 'ways']} id="ways" data-tone="lime">
+  <div class="wrap">
+    <SecHead title={t('ways.title')} lead={t('ways.lead')} />
+    <ol class="ways-row" data-stagger="0.12">
+      {photos.map((p, i) => (
+        <li class="way" data-reveal="rise">
+          <img src={p.src} alt="" width={p.w} height={p.h} loading="lazy" decoding="async" style={`object-position:${p.at}`} />
+          <div class="way-cap">
+            <i class="way-rule" aria-hidden="true"></i>
+            <h3>{parts(items[i]).main}{parts(items[i]).sub && <span class="way-sub">{parts(items[i]).sub}</span>}</h3>
+          </div>
+        </li>
+      ))}
+    </ol>
+    {more && <p class="sec-more" data-reveal><a class="link" href={localePath(locale, 'smart-control')}>{t('nav.control')} <Icon name="arrow" class="icon-dir" /></a></p>}
+  </div>
+</section>

@@ -1,10 +1,10 @@
 /* ============================ NAV ============================ */
-.nav { position: fixed; top: 0; inset-inline: 0; z-index: 900; color: var(--ink); transition: background-color 0.5s var(--ease-out), box-shadow 0.5s, transform 0.6s var(--ease-out), opacity 0.6s, color 0.45s; }
+/* the bar is the logo's navy at night, always (1 Oct 2026): ivory type, a brass hairline under it. Only over the film,
+   before the first scroll, is it clear. */
+.nav { position: fixed; top: 0; inset-inline: 0; z-index: 900; color: var(--on-esp); background: rgba(11, 19, 48, 0.97); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 1px 0 rgba(216, 192, 146, 0.22); transition: background-color 0.5s var(--ease-out), box-shadow 0.5s, transform 0.6s var(--ease-out), opacity 0.6s, color 0.45s; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 84px; transition: height 0.5s var(--ease-out); }
 .nav.is-scrolled .nav-inner { height: 68px; }
-.nav.is-scrolled { background: rgba(248, 244, 236, 0.86); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 1px 0 var(--line); }
-.nav.on-night { color: var(--on-esp); }
-.nav.on-night.is-scrolled { background: rgba(30, 25, 21, 0.74); box-shadow: 0 1px 0 var(--line-esp); }
+.nav.on-night:not(.is-scrolled):not(.is-open) { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
 .nav.is-hidden { transform: translateY(-100%); }
 .nav.is-off { opacity: 0; pointer-events: none; }
 .nav-progress { position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: linear-gradient(to right, var(--brass), var(--brass-light)); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); opacity: 0; transition: opacity 0.4s; }
@@ -13,7 +13,7 @@
 .nav-logo { display: inline-flex; align-items: center; gap: 12px; font-family: var(--f-display); font-size: 1.12rem; letter-spacing: 0.1em; line-height: 1.1; }
 .nav-logo svg { width: 36px; height: 29px; transition: transform 0.6s var(--ease-out); }
 .nav-logo:hover svg { transform: rotate(-6deg) scale(1.05); }
-.nav.on-night .nav-logo svg, .footer .nav-logo svg { --logo-ink: currentColor; }
+.nav .nav-logo svg, .footer .nav-logo svg { --logo-ink: currentColor; }
 .nav-logo small { display: block; font-family: var(--f-sans); font-weight: 400; font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.66; margin-top: 3px; }
 html[lang='ar'] .nav-logo small { text-transform: none; letter-spacing: 0.02em; font-size: 0.72rem; }
 .nav-links { display: none; align-items: center; gap: 6px; font-family: var(--f-sans); font-weight: 400; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; }
@@ -28,7 +28,7 @@ html[lang='ar'] .nav-links { text-transform: none; letter-spacing: 0; font-size:
 .lang-toggle::after { content: ''; position: absolute; inset-inline: 0; bottom: 2px; height: 1px; background: currentColor; transform: scaleX(0); transition: transform 0.4s var(--ease-out); }
 .lang-toggle:hover::after { transform: scaleX(1); }
 .nav .nav-cta { display: none; color: inherit; border-color: currentColor; }
-.nav.on-night .nav-cta { border-color: rgba(239, 231, 218, 0.4); }
+.nav .nav-cta { border-color: rgba(244, 241, 234, 0.4); }
 .nav-burger { display: inline-grid; place-items: center; width: 44px; height: 44px; }
 .nav-burger span { display: block; width: 24px; height: 1px; background: currentColor; position: relative; transition: background 0.3s; }
 .nav-burger span::before, .nav-burger span::after { content: ''; position: absolute; inset-inline: 0; height: 1px; background: currentColor; transition: transform 0.45s var(--ease-out), width 0.45s var(--ease-out); }
@@ -39,7 +39,7 @@ html[lang='ar'] .nav-links { text-transform: none; letter-spacing: 0; font-size:
 .nav.is-open { color: var(--on-esp); background: transparent !important; box-shadow: none !important; }
 @media (min-width: 1040px) { .nav-links { display: flex; } .nav .nav-cta { display: inline-flex; } .nav-burger { display: none; } }
 
-/* drawer: warm espresso with a faint golden-hour light; links rise in one after another */
+/* drawer: navy at night with a faint brass light; links rise in one after another */
 .nav-drawer { position: fixed; inset: 0; z-index: 890; background: radial-gradient(ellipse 80% 60% at 85% 0%, rgba(216, 192, 146, 0.12), transparent 70%), var(--espresso); color: var(--on-esp); display: grid; align-content: center; padding: 110px var(--pad) 60px; gap: 34px; clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path 0.8s var(--ease-io), visibility 0.8s; }
 .nav-drawer.is-open { clip-path: inset(0 0 0 0); visibility: visible; }
 .drawer-links { display: grid; position: relative; }

@@ -4,8 +4,11 @@ import Walkthrough from '@/components/Walkthrough.astro';
 import Icon from '@/components/Icons.astro';
 import SecHead from '@/components/SecHead.astro';
 import Stat from '@/components/Stat.astro';
-import ServiceArt from '@/components/ServiceArt.astro';
-import { staticLangPaths, useT, strings, l, type Locale } from '@/i18n/utils';
+import ProjectsMap from '@/components/ProjectsMap.astro';
+import CeoMessage from '@/components/CeoMessage.astro';
+import ControlWays from '@/components/ControlWays.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 import services from '@/data/services.json';
 import film from '@/data/film.json';
@@ -18,7 +21,12 @@ const s = strings(locale);
 const heroPoster = film.clips.find((c) => c.id === 'hero')?.poster ?? '/img/brand/villa-poster.webp';
 const two = (n: number) => String(n).padStart(2, '0');
 const helpline = site.offices[0].phones[0];
-// the live site's home, in its order: slider lines, About us, Our Services, Why Choose Us, How It Works, two questions
+const wa = `https://wa.me/${site.whatsapp}`;
+// The home tells one story, in the order a visitor's questions come (1 Oct 2026; words from the live site and the
+// company profile only):  the film (attention) → the promise, with the way to a quote → proof (the projects map) →
+// what living with it is like (the ways to control) → what we do (services) → why us → how it goes (the four steps,
+// then the quote button) → who we are (About us, the CEO's message) → the two questions → the closing call.
+// Each part hands on to the next page a reader would want; nothing repeats.
 ---
 <Base {locale} title={t('meta.siteTitle')} description={t('meta.siteDescription')}>
   <link slot="head" rel="preload" as="image" href={heroPoster} fetchpriority="high" />
@@ -59,56 +67,39 @@ const helpline = site.offices[0].phones[0];
       </h2>
       <p class="hero2-sub"><span class="caps">{t('hero.l3')}</span><i class="hit" aria-hidden="true"></i></p>
       <p class="hero2-lead">{t('hero.lead')}</p>
-      <a class="hero2-cue" href="#about-us" aria-label={t('aboutUs.eyebrow')}><i></i></a>
+      <div class="hero2-cta">
+        <a class="btn btn-primary" href={wa} target="_blank" rel="noopener" data-magnetic><span class="dot"></span>{t('nav.quote')}</a>
+        <a class="link" href={localePath(locale, 'smart-control')}>{t('nav.control')} <Icon name="arrow" class="icon-dir" /></a>
+      </div>
+      <a class="hero2-cue" href="#projects" aria-label={t('projects.eyebrow')}><i></i></a>
     </div>
   </section>
 
-  <!-- 01 About us -->
-  <section class="band band--paper" id="about-us" data-tone="lime">
-    <div class="wrap about-grid">
-      <div class="about-text">
-        <SecHead label={t('aboutUs.eyebrow')} title={t('aboutUs.title')} />
-        <blockquote class="about-quote" data-reveal>
-          <span class="label">{t('aboutUs.brand')}</span>
-          <p>“{t('aboutUs.quote')}”</p>
-        </blockquote>
-        <p class="about-welcome" data-reveal style="--d:0.1s">{t('aboutUs.welcome')}</p>
-        <ul class="about-feats" data-stagger="0.1">
-          {s.aboutUs.features.map((f, i) => <li data-reveal><span class="feat-ic"><Icon name={i ? 'bulb' : 'check'} /></span><span>{f}</span></li>)}
-        </ul>
-        <a class="helpline" href={`tel:${helpline.replace(/\s/g, '')}`} data-reveal data-magnetic>
-          <span class="helpline-dot" aria-hidden="true"></span>
-          <span class="label">{t('aboutUs.helpline')}</span>
-          <b class="num">{helpline}</b>
-          <Icon name="phone" />
-        </a>
-      </div>
-      <div class="panel" data-reveal>
-        <div class="stats">
-          {s.aboutUs.stats.map((x) => <Stat n={x.n} suffix={x.suffix} label={x.label} />)}
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- proof: the company profile's map, the projects delivered across Oman region by region -->
+  <ProjectsMap {locale} />
 
-  <!-- 02 Our Services: the editorial ledger -->
-  <section class="band band--mist" id="services" data-tone="lime">
+  <!-- what living with it is like: the four ways to control the home (company profile) -->
+  <ControlWays {locale} more />
+
+  <!-- what we do: Our Services, each with its photograph from the company profile -->
+  <section class="band band--paper" id="services" data-tone="lime">
     <div class="wrap">
       <SecHead label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
       <div class="ledger">
         {services.map((x, i) => (
-          <article class="row" data-reveal>
+          <article class="row row--svc" data-reveal>
             <span class="row-no num">{two(i + 1)}</span>
             <div class="row-name"><h3>{l(x.name, locale)}</h3><em>{l(x.sub, locale)}</em></div>
             <p class="row-body">{l(x.body, locale)}</p>
-            <div class="row-art"><ServiceArt kind={x.slug} /></div>
+            <div class="row-pic"><img src={x.image} alt="" width="1080" height="720" loading="lazy" decoding="async" /></div>
           </article>
         ))}
       </div>
+      <p class="sec-more" data-reveal><a class="link" href={localePath(locale, 'products')}>{t('categories.all')} <Icon name="arrow" class="icon-dir" /></a></p>
     </div>
   </section>
 
-  <!-- 03 Why Choose Us -->
+  <!-- why us -->
   <section class="band band--paper" id="why" data-tone="lime">
     <div class="wrap">
       <SecHead title={t('why.title')} />
@@ -123,8 +114,8 @@ const helpline = site.offices[0].phones[0];
     </div>
   </section>
 
-  <!-- 04 How It Works: the flight arc -->
-  <section class="band band--mist" id="how" data-tone="lime">
+  <!-- how it goes: the four steps on the flight arc, then the way to a quote -->
+  <section class="band band--paper" id="how" data-tone="lime">
     <div class="wrap">
       <SecHead title={t('how.title')} />
       <div class="rail" data-rail>
@@ -143,10 +134,43 @@ const helpline = site.offices[0].phones[0];
           ))}
         </ol>
       </div>
+      <p class="sec-more sec-more--center" data-reveal><a class="btn btn-primary" href={wa} target="_blank" rel="noopener" data-magnetic><span class="dot"></span>{t('nav.quote')}</a></p>
     </div>
   </section>
 
-  <!-- 05 the live site's two questions -->
+  <!-- who we are: About us (its figures plain, no box), then the CEO's message -->
+  <section class="band band--paper" id="about-us" data-tone="lime">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="about-lead">
+          <SecHead label={t('aboutUs.eyebrow')} title={t('aboutUs.title')} />
+          <a class="link" href={localePath(locale, 'about')} data-reveal>{t('nav.about')} <Icon name="arrow" class="icon-dir" /></a>
+        </div>
+        <div class="about-text">
+          <blockquote class="about-quote" data-reveal>
+            <span class="label">{t('aboutUs.brand')}</span>
+            <p>“{t('aboutUs.quote')}”</p>
+          </blockquote>
+          <p class="about-welcome" data-reveal style="--d:0.1s">{t('aboutUs.welcome')}</p>
+          <ul class="about-feats" data-stagger="0.1">
+            {s.aboutUs.features.map((f, i) => <li data-reveal><span class="feat-ic"><Icon name={i ? 'bulb' : 'check'} /></span><span>{f}</span></li>)}
+          </ul>
+          <a class="helpline" href={`tel:${helpline.replace(/\s/g, '')}`} data-reveal>
+            <span class="helpline-ic" aria-hidden="true"><Icon name="phone" /></span>
+            <span class="label">{t('aboutUs.helpline')}</span>
+            <b class="num">{helpline}</b>
+          </a>
+        </div>
+      </div>
+      <div class="figures" data-reveal>
+        {s.aboutUs.stats.map((x) => <Stat n={x.n} suffix={x.suffix} label={x.label} />)}
+      </div>
+    </div>
+  </section>
+
+  <CeoMessage {locale} />
+
+  <!-- the live site's two questions -->
   <section class="band band--paper faq" id="faq" data-tone="lime">
     <div class="wrap faq-grid">
       <div class="faq-head" data-reveal aria-hidden="true">
@@ -162,6 +186,9 @@ const helpline = site.offices[0].phones[0];
       </div>
     </div>
   </section>
+
+  <!-- the closing call -->
+  <FinalCta {locale} />
 
   <script>
     import { initHome } from '@/scripts/motion/home';

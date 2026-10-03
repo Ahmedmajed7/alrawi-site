@@ -13,7 +13,8 @@
     "body": {
       "en": "Reduce your energy consumption and save on utility bills with our energy management solutions. Monitor and control your home’s energy usage, optimize heating and cooling systems, and implement smart lighting to maximize efficiency.",
       "ar": "قلّل استهلاكك للطاقة ووفّر في فواتير الخدمات مع حلول إدارة الطاقة لدينا. راقب استهلاك منزلك للطاقة وتحكّم فيه، وحسّن أنظمة التدفئة والتبريد، واعتمد الإضاءة الذكية لتحقيق أعلى كفاءة."
-    }
+    },
+    "image": "/img/profile/service-energy.webp"
   },
   {
     "slug": "automation",
@@ -29,7 +30,8 @@
     "body": {
       "en": "Our home automation solutions allow you to manage lighting, HVAC, security, and more from anywhere using your smartphone or voice commands. From automated lighting and climate control to immersive entertainment and state-of-the-art security, we seamlessly integrate technology to match your refined taste and style.",
       "ar": "تتيح لك حلول أتمتة المنزل لدينا إدارة الإضاءة والتكييف والأمان وغيرها من أي مكان باستخدام هاتفك الذكي أو الأوامر الصوتية. من الإضاءة المؤتمتة والتحكم في المناخ إلى الترفيه الغامر وأحدث أنظمة الأمان، ندمج التقنية بسلاسة لتلائم ذوقك الرفيع وأسلوبك."
-    }
+    },
+    "image": "/img/profile/service-automation.webp"
   },
   {
     "slug": "environment",
@@ -45,7 +47,8 @@
     "body": {
       "en": "Achieve optimum comfort with our environmental control systems. Adjust your air-conditioning thermostat remotely with ease. Create personalized settings and enjoy a comfortable living environment every day. Indulge in the luxury of effortless control.",
       "ar": "حقّق أقصى درجات الراحة مع أنظمة التحكم البيئي لدينا. اضبط منظّم حرارة المكيّف عن بُعد بكل سهولة. أنشئ إعدادات مخصصة واستمتع ببيئة معيشية مريحة كل يوم، وانعم بفخامة التحكم دون عناء."
-    }
+    },
+    "image": "/img/profile/service-environment.webp"
   },
   {
     "slug": "security",
@@ -61,7 +64,8 @@
     "body": {
       "en": "Our advanced security systems utilize cutting-edge technologies, ensuring comprehensive protection for your residence. The smart security and safety solutions include surveillance cameras, motion sensors, smart locks, smoke and gas detectors, and remote monitoring, giving you peace of mind wherever you are.",
       "ar": "تعتمد أنظمتنا الأمنية المتقدمة على أحدث التقنيات لضمان حماية شاملة لمسكنك. تشمل حلول الأمن والسلامة الذكية كاميرات المراقبة وحساسات الحركة والأقفال الذكية وكواشف الدخان والغاز والمراقبة عن بُعد، لتمنحك راحة البال أينما كنت."
-    }
+    },
+    "image": "/img/profile/service-security.webp"
   },
   {
     "slug": "lighting",
@@ -77,7 +81,8 @@
     "body": {
       "en": "Transform the ambiance of your home with smart lighting solutions. Set the mood, save energy, and automate lighting schedules to suit your lifestyle. Control your lights remotely or use voice commands for effortless control. Discover the ultimate convenience that enhances your lifestyle and elevates your everyday experience.",
       "ar": "غيّر أجواء منزلك مع حلول الإضاءة الذكية. اضبط المزاج ووفّر الطاقة وجدوِل الإضاءة تلقائياً بما يناسب أسلوب حياتك. تحكّم في الإضاءة عن بُعد أو بالأوامر الصوتية دون أي عناء. اكتشف راحة لا مثيل لها ترتقي بأسلوب حياتك وتجربتك اليومية."
-    }
+    },
+    "image": "/img/profile/service-lighting.webp"
   },
   {
     "slug": "entertainment",
@@ -93,6 +98,7 @@
     "body": {
       "en": "Experience the ultimate in-home entertainment with our cutting-edge audio and video systems. From immersive home theaters to multi-room audio setups, we’ll create an entertainment space that delivers an unparalleled audiovisual experience. With our intuitive interfaces, managing your home becomes a breeze.",
       "ar": "استمتع بأرقى تجارب الترفيه المنزلي مع أنظمتنا المتطورة للصوت والصورة. من المسارح المنزلية الغامرة إلى أنظمة الصوت متعددة الغرف، سننشئ لك مساحة ترفيه تقدّم تجربة سمعية وبصرية لا مثيل لها. ومع واجهاتنا سهلة الاستخدام، تصبح إدارة منزلك في غاية السهولة."
-    }
+    },
+    "image": "/img/profile/service-entertainment.webp"
   }
 ]

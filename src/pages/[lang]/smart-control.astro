@@ -3,6 +3,7 @@ import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icons.astro';
 import PageHero from '@/components/PageHero.astro';
 import SecHead from '@/components/SecHead.astro';
+import ControlWays from '@/components/ControlWays.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 import controls from '@/data/controls.json';
@@ -13,10 +14,12 @@ const c = strings(locale).control;
 const brand = l(site.name, locale);
 const two = (n: number) => String(n).padStart(2, '0');
 // the live Smart Control page: the headline, each system with its photo and text, then "100+ smart systems";
-// systems the catalogue carries link to their devices
+// systems the catalogue carries link to their devices. The page opens with the company profile's four ways to control
 ---
 <Base {locale} title={`${t('meta.controlTitle')} | ${brand}`} description={c.h2}>
   <PageHero title={c.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: c.title }]} />
+
+  <ControlWays {locale} />
 
   <section class="band band--paper" data-tone="lime">
     <div class="wrap">

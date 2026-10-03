@@ -1,0 +1,93 @@
+---
+/**
+ * The phone in the living room (the film's app stop): a real device drawn in HTML/CSS whose app runs the room behind it. The
+ * visitor drags the curtains, dims the lights or taps a scene, and the picture follows (scripts/film/scene.ts plays the room's
+ * recorded states, scripts/film/phone.ts wires these controls to it). On a wide screen it is a phone held up at the side of the
+ * frame; on an upright phone the picture moves to the top and this becomes the lower half of the visitor's own screen
+ * (styles/15-phone.css). Two markers in the room, tied to their cards by a fine dashed line, show what each control moves.
+ * Every control is a real one (slider, switch, button), so a tap on it never advances the tour.
+ */
+import type { Locale } from '@/i18n/utils';
+import { strings } from '@/i18n/utils';
+import { ICONS } from '@/data/panel-ui';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const w = strings(locale).walk, a = w.app, p = w.panel;
+const room = (w.stops as Record<string, string>).app;
+// what each scene sets: how far the curtains are open and how bright the lights are (the control panel's own four scenes)
+const SCENES = [[100, 100], [35, 70], [0, 14], [0, 0]];
+const I = {
+  curtain: 'M3 4h18M5 4v15c2.2-1.2 3.4-4.6 3.6-9.5M5 4c1.6 2.6 2.9 4.2 3.6 5.5M19 4v15c-2.2-1.2-3.4-4.6-3.6-9.5M19 4c-1.6 2.6-2.9 4.2-3.6 5.5',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z',
+  home: 'M4 11.5 12 4l8 7.5M6.5 10v9.5h11V10M10 19.5v-5h4v5',
+  grid: 'M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z',
+  gear: 'M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4ZM19 12l1.8-1.2-1.4-3.2-2.2.4-1.5-1.5.4-2.2-3.2-1.3L12 4.8 10.8 3 7.6 4.3 8 6.5 6.5 8l-2.2-.4-1.3 3.2L4.8 12 3 13.2l1.3 3.2 2.2-.4L8 17.5l-.4 2.2 3.2 1.3 1.2-1.8 1.2 1.8 3.2-1.3-.4-2.2 1.5-1.5 2.2.4 1.3-3.2Z',
+  back: 'M14.5 5.5 8 12l6.5 6.5',
+  sun: 'M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6ZM12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6',
+};
+---
+<div class="walk-app" data-walk-app hidden>
+  <!-- the markers in the room and the lines that tie them to their cards (placed by scripts/film/phone.ts) -->
+  <svg class="app-links" data-app-links aria-hidden="true"><path data-app-link="curtain" /><path data-app-link="lights" /></svg>
+  <i class="app-mark" data-app-mark="curtain" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={I.curtain} /></svg></i>
+  <i class="app-mark" data-app-mark="lights" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={I.bulb} /></svg></i>
+
+  <div class="phone-wrap"><div class="phone" data-phone lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} role="group" aria-label={a.label}>
+    <i class="phone-keys" aria-hidden="true"></i>
+    <div class="phone-glass">
+      <i class="phone-island" aria-hidden="true"></i>
+      <div class="phone-screen">
+        <div class="app-status" aria-hidden="true" dir="ltr">
+          <b data-app-time>9:41</b>
+          <span><svg viewBox="0 0 18 12"><path d="M1 9.5h2v2H1zM5.3 7h2v4.5h-2zM9.6 4.3h2v7.2h-2zM13.9 1.5h2v10h-2z" /></svg><svg viewBox="0 0 16 12"><path d="M8 10.9 5.9 8.6a3 3 0 0 1 4.2 0L8 10.9ZM3.7 6.3a6.1 6.1 0 0 1 8.6 0l-1.1 1.2a4.5 4.5 0 0 0-6.4 0L3.7 6.3ZM1.4 3.9a9.3 9.3 0 0 1 13.2 0l-1.1 1.2a7.7 7.7 0 0 0-11 0L1.4 3.9Z" /></svg><svg class="app-batt" viewBox="0 0 27 12"><rect x="0.6" y="0.6" width="22" height="10.8" rx="3.2" /><rect class="fill" x="2.2" y="2.2" width="18.8" height="7.6" rx="1.8" /><path d="M24.2 4v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" /></svg></span>
+        </div>
+        <div class="app-head">
+          <i class="app-nav" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={I.back} /></svg></i>
+          <h2>{room}</h2>
+          <i class="app-nav app-more" aria-hidden="true"><b></b><b></b><b></b></i>
+        </div>
+        <div class="app-view" aria-hidden="true"><canvas data-app-thumb width="480" height="290"></canvas></div>
+
+        <div class="app-scenes" role="group" aria-label={a.scenes}>
+          {p.scenes.map((name, i) => (
+            <button type="button" class:list={['app-scene', { 'is-on': i === 0 }]} data-app-scene={i} data-curtain={SCENES[i][0]} data-lights={SCENES[i][1]} aria-pressed={i === 0 ? 'true' : 'false'}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d={ICONS[i]} /></svg><span>{name}</span>
+            </button>
+          ))}
+        </div>
+
+        <section class="app-card" data-app-card="curtain">
+          <header>
+            <i class="app-ico app-ico-curtain" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h18" /><path class="l" d="M5 4v15c2.2-1.2 3.4-4.6 3.6-9.5M5 4c1.6 2.6 2.9 4.2 3.6 5.5" /><path class="r" d="M19 4v15c-2.2-1.2-3.4-4.6-3.6-9.5M19 4c-1.6 2.6-2.9 4.2-3.6 5.5" /></svg></i>
+            <div><h3>{a.curtains}</h3><p><span data-app-curtain-word data-open={w.hud.open} data-closed={w.hud.closed}>{w.hud.open}</span> <b dir="ltr"><span data-app-curtain-n>100</span>%</b></p></div>
+          </header>
+          <div class="app-slider" data-app-slider="curtain" role="slider" tabindex="0" aria-label={a.curtains} aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--v:1"><i class="app-track"><i></i></i><i class="app-thumb-knob"></i></div>
+          <div class="app-seg">
+            <button type="button" data-app-curtain="open"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M6 5v13h3V5M18 5v13h-3V5" /></svg></i>{p.open}</button>
+            <button type="button" data-app-curtain="pause"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6.5v11M15 6.5v11" /></svg></i>{p.pause}</button>
+            <button type="button" data-app-curtain="close"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M6 5v13h5.5V5M18 5v13h-5.5V5" /></svg></i>{p.close}</button>
+          </div>
+        </section>
+
+        <section class="app-card" data-app-card="lights">
+          <header>
+            <i class="app-ico app-ico-bulb" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={I.bulb} /></svg></i>
+            <div><h3>{a.lights}</h3><p><span data-app-lights-word data-on={a.on} data-off={a.off}>{a.on}</span> <b dir="ltr" data-app-lights-pc><span data-app-lights-n>100</span>%</b></p></div>
+            <button type="button" class="app-switch is-on" data-app-switch role="switch" aria-checked="true" aria-label={a.lights}><i></i></button>
+          </header>
+          <div class="app-dim">
+            <i class="app-sun" aria-hidden="true"><svg viewBox="0 0 24 24"><path d={I.sun} /></svg></i>
+            <div class="app-slider" data-app-slider="lights" role="slider" tabindex="0" aria-label={a.brightness} aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--v:1"><i class="app-track"><i></i></i><i class="app-thumb-knob"></i></div>
+          </div>
+        </section>
+
+        <nav class="app-tabs" aria-hidden="true">
+          <span class="is-on"><svg viewBox="0 0 24 24"><path d={I.home} /></svg>{a.home}</span>
+          <span><svg viewBox="0 0 24 24"><path d={I.grid} /></svg>{a.scenes}</span>
+          <span><svg viewBox="0 0 24 24"><path d={I.gear} /></svg>{a.settings}</span>
+        </nav>
+      </div>
+      <i class="phone-sheen" aria-hidden="true"></i>
+    </div>
+  </div><p class="app-hint" data-app-hint>{a.hint}</p></div>
+</div>

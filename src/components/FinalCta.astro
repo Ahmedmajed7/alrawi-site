@@ -1,0 +1,26 @@
+---
+/** The closing call: whoever read this far is ready to talk. The contact page's own heading and line, the quote button
+    (WhatsApp), the way to the contact page and the helpline. Only strings the site already has. */
+import Icon from '@/components/Icons.astro';
+import { useT, localePath, type Locale } from '@/i18n/utils';
+import site from '@/data/site.json';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useT(locale);
+const helpline = site.offices[0].phones[0];
+---
+<section class="band band--paper closer" id="talk" data-tone="lime">
+  <div class="wrap closer-in">
+    <h2 class="closer-title" data-reveal>{t('contactPage.h2')}</h2>
+    <i class="closer-rule" aria-hidden="true" data-reveal style="--d:0.1s"></i>
+    <p class="closer-lead" data-reveal style="--d:0.15s">{t('contactPage.body')}</p>
+    <div class="closer-actions" data-reveal style="--d:0.25s">
+      <a class="btn btn-primary" href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noopener" data-magnetic><span class="dot"></span>{t('nav.quote')}</a>
+      <a class="btn" href={localePath(locale, 'contact')}>{t('nav.contact')} <Icon name="arrow" class="icon-dir" /></a>
+    </div>
+    <a class="closer-call" href={`tel:${helpline.replace(/\s/g, '')}`} data-reveal style="--d:0.35s">
+      <span class="label">{t('contactPage.call')}</span>
+      <b class="num">{helpline}</b>
+    </a>
+  </div>
+</section>

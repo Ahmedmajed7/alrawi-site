@@ -14,6 +14,8 @@ type Tone = 'light' | 'dark';
 /** bands in normalised coordinates of the visible picture (after the object-fit: cover crop) [x0, y0, x1, y1] */
 const BANDS = { top: [0, 0, 1, 0.16], bottom: [0, 0.8, 1, 1], mid: [0.2, 0.25, 0.8, 0.75] } as const;
 type Band = keyof typeof BANDS;
+/** what is on screen: a clip, a still, or the app scene's canvas (the room the visitor is dimming) */
+type Picture = HTMLVideoElement | HTMLImageElement | HTMLCanvasElement;
 
 export function createToneSampler(root: HTMLElement) {
   const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -35,10 +37,10 @@ export function createToneSampler(root: HTMLElement) {
   const set = (band: Band, t: Tone) => { cur[band] = t; root.dataset[`bg${band[0].toUpperCase()}${band.slice(1)}`] = t; };
 
   /** Sample the picture now. `settle`: the frame is held (apply at once); otherwise a change needs two samples in a row. */
-  const sample = (v: HTMLVideoElement | HTMLImageElement | null, settle = false) => {
+  const sample = (v: Picture | null, settle = false) => {
     if (broken || !v) return;
-    const vw = v instanceof HTMLVideoElement ? (v.readyState >= 2 ? v.videoWidth : 0) : v.complete ? v.naturalWidth : 0;
-    const vh = v instanceof HTMLVideoElement ? v.videoHeight : v.naturalHeight; if (!vw || !vh) return;
+    const vw = v instanceof HTMLVideoElement ? (v.readyState >= 2 ? v.videoWidth : 0) : v instanceof HTMLCanvasElement ? v.width : v.complete ? v.naturalWidth : 0;
+    const vh = v instanceof HTMLVideoElement ? v.videoHeight : v instanceof HTMLCanvasElement ? v.height : v.naturalHeight; if (!vw || !vh) return;
     // the part of the picture actually on screen (object-fit: cover crops the long side)
     const rw = root.clientWidth || 1, rh = root.clientHeight || 1;
     const s = Math.max(rw / vw, rh / vh), cw = rw / s, ch = rh / s;
@@ -53,7 +55,7 @@ export function createToneSampler(root: HTMLElement) {
   return {
     sample,
     /** keep sampling `get()` every 300 ms (while the film is on screen); `stop()` ends it */
-    watch(get: () => HTMLVideoElement | HTMLImageElement | null) { clearInterval(timer); timer = window.setInterval(() => sample(get()), 300); },
+    watch(get: () => Picture | null) { clearInterval(timer); timer = window.setInterval(() => sample(get()), 300); },
     stop() { clearInterval(timer); timer = 0; },
   };
 }

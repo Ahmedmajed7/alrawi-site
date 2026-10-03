@@ -1,6 +1,6 @@
 /* ============================ TOKENS — luxury light cinematic ============================ */
 :root {
-  --paper: #f7f5f0;
+  --paper: #ffffff;
   --stone: #ede8e0;
   --stone-deep: #e2dbd0;
   --linen: #ffffff;
@@ -51,7 +51,7 @@
   --pad: clamp(20px, 5vw, 96px);
   --maxw: 1360px;
   --maxw-text: 62ch;
-  --sec: clamp(88px, 12vw, 168px);
+  --sec: clamp(72px, 9vw, 128px);
   --gap: clamp(20px, 3vw, 44px);
   --r: 2px;
   --r-card: 4px;
@@ -74,35 +74,36 @@ html[lang='ar'] {
 
 /* ===================== PAGES: shared motion and type tokens ===================== */
 :root {
-  --limestone: #f5f0e8;
-  --sand: #ebe2d4;
+  --limestone: #ffffff;
+  --sand: #ffffff;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-snap: cubic-bezier(0.3, 1.5, 0.5, 1);
   --caps: 0.34em; /* the film's spaced caps ("SMART LIVING") */
 }
 
-/* ===================== PAGES v3 (30 Sep 2026): warm quiet luxury =====================
-   Ivory and stone, a very fine static paper grain, thin brass hairlines, the display serif for headings, an espresso
-   footer: calm and expensive, carrying on the film's golden-hour warmth. (The home hero after the film keeps its v2 look.) */
+/* ===================== PAGES v4 (1 Oct 2026): white, the logo's navy, brass =====================
+   The client's request: every background white except the projects map's night band. So the bands, cards and plates
+   are pure white (no grain), told apart by space and thin brass hairlines; the one dark tone of the site is the
+   logo's navy at night (the bar on top, the drawer, the footer, filled hovers), the same family as the map's band.
+   The token names are v3's (`--page`, `--mist`, `--card`, `--espresso`): only their values changed. */
 :root {
-  --page: #f8f4ec;   /* ivory */
-  --mist: #efe8dc;   /* stone */
-  --card: #fcfaf6;   /* the face of cards and panels, a touch lighter than the ivory */
-  --navy: #18254f;   /* the logo's navy: an accent only */
-  --espresso: #1e1915;
-  --espresso-2: #29221c;
-  --on-esp: #efe7da;
+  --page: #ffffff;
+  --mist: #ffffff;
+  --card: #ffffff;
+  --navy: #18254f;   /* the logo's navy */
+  --espresso: #0b1330;   /* the dark tone: navy at night */
+  --espresso-2: #131d47;
+  --on-esp: #f4f1ea;
   --on-esp-soft: rgba(239, 231, 218, 0.72);
   --on-esp-mute: rgba(239, 231, 218, 0.45);
   --line-esp: rgba(216, 192, 146, 0.16);
   --line-esp-strong: rgba(216, 192, 146, 0.34);
   --hair: rgba(169, 138, 91, 0.42); /* the brass hairline */
-  --line: rgba(60, 44, 24, 0.12);
-  --line-strong: rgba(60, 44, 24, 0.3);
-  --shadow-soft: 0 1px 2px rgba(70, 50, 25, 0.05), 0 22px 48px -26px rgba(70, 50, 25, 0.3);
-  --shadow-lift: 0 2px 4px rgba(70, 50, 25, 0.06), 0 34px 70px -34px rgba(70, 50, 25, 0.42);
-  /* paper grain: a static fractal-noise tile, a few percent of warm umber (drawn once, no animation) */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.27 0 0 0 0 0.16 0 0 0 1.6 -0.62'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)' opacity='0.1'/%3E%3C/svg%3E");
+  --line: rgba(16, 26, 61, 0.12);
+  --line-strong: rgba(16, 26, 61, 0.3);
+  --shadow-soft: 0 1px 2px rgba(16, 26, 61, 0.05), 0 22px 48px -26px rgba(16, 26, 61, 0.28);
+  --shadow-lift: 0 2px 4px rgba(16, 26, 61, 0.06), 0 34px 70px -34px rgba(16, 26, 61, 0.4);
+  --grain: none; /* (v3's paper grain: off, the pages are pure white) */
   --f-head: var(--f-display-en); /* page headings: Marcellus (El Messiri in Arabic) */
 }
 html[lang='ar'] { --f-head: var(--f-display-ar); }

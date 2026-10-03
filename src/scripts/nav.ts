@@ -1,5 +1,5 @@
-/** Nav: solid plate after the first scroll, hides on the way down and returns on the way up, a brass progress hairline,
-    and its tone follows whatever band sits under it (night glass → light type, limestone → ink). */
+/** Nav: the navy bar hides on the way down and returns on the way up, carries a brass progress hairline, and knows
+    whether a dark band sits under it (over the film, before the first scroll, it is clear). */
 import { onScroll } from './motion/loop';
 
 export function initNav() {
@@ -7,7 +7,12 @@ export function initNav() {
   const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
   const drawer = document.querySelector<HTMLElement>('[data-drawer]');
   if (!nav) return;
-  let last = 0;
+  // Hiding follows the direction of travel, and a direction only counts once the page has really moved that way
+  // (TURN px from where it last turned). Comparing each frame with the one before made the bar shake: a smooth scroll
+  // ends in steps of less than a pixel, so two frames often read the same position, which looked like "not going down"
+  // and brought the bar back for a frame, over and over.
+  const TOP = 420, TURN = 14;
+  let hidden = false, anchor = 0;
   const tones = () => Array.from(document.querySelectorAll<HTMLElement>('[data-tone], [data-dark-hero]'));
   let bands = tones();
   window.addEventListener('load', () => { bands = tones(); });
@@ -15,8 +20,11 @@ export function initNav() {
     const h = document.documentElement.scrollHeight - window.innerHeight;
     nav.style.setProperty('--sp', h > 0 ? (y / h).toFixed(4) : '0');
     nav.classList.toggle('is-scrolled', y > 24);
-    if (!nav.classList.contains('is-open')) nav.classList.toggle('is-hidden', y > last && y > 420);
-    last = y;
+    if (y <= TOP) { hidden = false; anchor = y; }
+    else if (!hidden) { if (y > anchor + TURN) { hidden = true; anchor = y; } else if (y < anchor) anchor = y; }
+    else if (y < anchor - TURN) { hidden = false; anchor = y; }
+    else if (y > anchor) anchor = y;
+    if (!nav.classList.contains('is-open')) nav.classList.toggle('is-hidden', hidden);
     // dark band under the nav's midline?
     const mid = 40;
     let dark = false;

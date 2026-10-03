@@ -1,0 +1,14 @@
+{
+  "total": 620,
+  "regions": [
+    { "id": "muscat", "n": 326, "name": { "ar": "مسقط", "en": "Muscat" } },
+    { "id": "batinah", "n": 149, "name": { "ar": "الباطنة", "en": "Al Batinah" } },
+    { "id": "dakhiliyah", "n": 94, "name": { "ar": "الداخلية", "en": "Ad Dakhiliyah" } },
+    { "id": "dhahirah", "n": 29, "name": { "ar": "الظاهرة", "en": "Ad Dhahirah" } },
+    { "id": "sharqiyah", "n": 9, "name": { "ar": "الشرقية", "en": "Ash Sharqiyah" } },
+    { "id": "wusta", "n": 6, "name": { "ar": "الوسطى", "en": "Al Wusta" } },
+    { "id": "dhofar", "n": 3, "name": { "ar": "ظفار", "en": "Dhofar" } },
+    { "id": "buraimi", "n": 2, "name": { "ar": "البريمي", "en": "Al Buraimi" } },
+    { "id": "musandam", "n": 2, "name": { "ar": "مسندم", "en": "Musandam" } }
+  ]
+}

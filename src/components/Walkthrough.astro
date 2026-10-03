@@ -4,6 +4,7 @@ import { useT, strings, l, localePath } from '@/i18n/utils';
 import Logo from '@/components/Logo.astro';
 import Icon from '@/components/Icons.astro';
 import PanelScreen from '@/components/PanelScreen.astro';
+import PhoneScreen from '@/components/PhoneScreen.astro';
 import house from '@/data/house.json';
 import film from '@/data/film.json';
 import { allProducts, categoryOf } from '@/lib/products';
@@ -12,7 +13,8 @@ interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = useT(locale);
 const s = strings(locale);
-const stops = house.stops.map((st) => ({ ...st, product: allProducts.find((p) => p.slug === st.product)! }));
+// a device stop carries its product; the app stop (the phone in the living room) has none and no HUD card
+const stops = house.stops.map((st) => ({ ...st, product: allProducts.find((p) => p.slug === (st as { product?: string }).product) }));
 const roomNames = s.walk.stops as Record<string, string>;
 const heroPoster = film.clips.find((c) => c.id === 'hero')?.poster ?? '/img/brand/villa-poster.webp';
 // the HUD (styles/11-hud.css, scripts/film/callout.ts + hud.ts): strings, and the drawn parts as finished paths
@@ -41,6 +43,7 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
     <i class="walk-hotspot" data-walk-hotspot hidden aria-hidden="true"></i>
     {stops.map((st, i) => {
       const p = st.product;
+      if (!p) return <div class="walk-callout" data-walk-stop={i} data-kind="app" hidden></div>; // keeps the cards index-aligned with the stops
       return (
         <div class="walk-callout" data-walk-stop={i} data-shape={p.shape} data-side={(st as { side?: string }).side} data-clear={(st as { clear?: number }).clear} hidden>
           <div class="hud-tilt">
@@ -62,7 +65,7 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
               ) : null}
               {/* the signature widget: an illustration of the device at work (readouts are demonstrations, captioned as live readouts) */}
               <div class="hud-w" data-w={p.shape} aria-hidden="true">
-                <div class="hud-w-cap"><span><i></i>{h.live}</span><b>{{ panel: h.climate, switch: h.channels, rail: h.travel, disc: h.sound, puck: h.air, lock: h.scan }[p.shape]}</b></div>
+                <div class="hud-w-cap"><span><i></i>{h.live}</span><b data-w-method={p.shape === 'lock' ? '' : undefined}>{{ panel: h.climate, switch: h.channels, rail: h.travel, disc: h.sound, puck: h.air, lock: h.card }[p.shape]}</b></div>
                 {p.shape === 'panel' && (
                   <div class="hud-w-body w-climate">
                     <div class="w-dial" style="--hud-n:22;--hud-f:43">
@@ -102,12 +105,19 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
                     </div>
                   </div>
                 )}
+                {/* the four ways in, stepped by scripts/film/device-live.ts in time with the lock itself */}
                 {p.shape === 'lock' && (
-                  <div class="hud-w-body w-print">
-                    <div class="w-pad"><svg viewBox="0 0 64 72"><path class="w-ridge" d={print} /><path class="w-ridge is-lit" d={print} /></svg><i class="w-beam"></i></div>
+                  <div class="hud-w-body w-print" data-w-lock data-m="card">
+                    <div class="w-pad">
+                      <svg class="w-m" data-m="card" viewBox="0 0 64 72"><path d="M14 22h36a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4ZM10 31h44M17 42h9" /></svg>
+                      <svg class="w-m" data-m="finger" viewBox="0 0 64 72"><path d={print} /></svg>
+                      <svg class="w-m" data-m="face" viewBox="0 0 64 72"><path d="M9 20V10h10M45 10h10v10M55 52v10H45M19 62H9V52M21 36a11 13 0 1 0 22 0a11 13 0 1 0-22 0M27.5 33v2M36.5 33v2M27.5 42c2.8 2.3 6.2 2.3 9 0" /></svg>
+                      <svg class="w-m" data-m="password" viewBox="0 0 64 72"><circle cx="13" cy="36" r="3.4" /><circle cx="25.7" cy="36" r="3.4" /><circle cx="38.3" cy="36" r="3.4" /><circle cx="51" cy="36" r="3.4" /><path d="M8 48h48" /></svg>
+                      <i class="w-beam"></i>
+                    </div>
                     <div class="w-state">
-                      <span class="w-scanning">{h.scanning}</span>
-                      <span class="w-granted"><Icon name="check" />{h.granted}</span>
+                      <ul class="w-methods">{([['card', h.card], ['finger', h.scan], ['face', h.face], ['password', h.password]] as const).map(([k, name]) => <li data-m={k}>{name}</li>)}</ul>
+                      <div class="w-says"><span class="w-scanning">{h.scanning}</span><span class="w-granted"><Icon name="check" />{h.granted}</span></div>
                       <i class="w-prog"><i></i></i>
                     </div>
                   </div>
@@ -121,6 +131,8 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
       );
     })}
   </div></div>
+  <!-- the app stop: the phone that runs the living room (scripts/film/phone.ts + scene.ts, styles/15-phone.css) -->
+  <PhoneScreen locale={locale} />
 
   <div class="walk-ui">
     <div class="walk-top">

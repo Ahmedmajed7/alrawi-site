@@ -1,19 +1,22 @@
 /**
- * The landing film: a looping hero shot, then one clip per device. Tap anywhere to play the next
- * move; the film pauses on each device with a callout anchored beside it (a hairline leader runs
- * from the text to the device). Pure <video> (H.264), so it is as smooth on an old office PC as on
- * a new Mac. Clips come from src/data/film.json (scripts/film-encode.mjs); the 3D walkthrough is
- * still available with ?live3d.
+ * The landing film: a looping hero shot, then one clip per stop. Tap anywhere to play the next
+ * move; the film pauses on each device with its HUD beside it, and at the app stop on the living
+ * room, where a phone comes up whose app runs the room (film/phone.ts + scene.ts). Pure <video>
+ * (H.264 / HEVC), so it is as smooth on an old office PC as on a new Mac. Clips come from
+ * src/data/film.json (scripts/film-encode.mjs); the 3D walkthrough is still available with ?live3d.
+ * Nothing in HTML is ever pinned to a moving picture: every live layer comes up once a move has
+ * ended and is taken down before the next begins.
  */
 import film from '@/data/film.json';
 import house from '@/data/house.json';
 import { createCalloutPlacer } from './callout';
 import { createDeviceLive, type Features } from './device-live';
 import { createToneSampler } from './tone';
+import { createScene, type Scene, type SceneClip } from './scene';
+import { createPhone } from './phone';
 
 interface Rung { h: number; w: number; avc: string | null; hevc: string | null }
-interface Clip { id: string; loop: boolean; ends: string | null; duration: number; src: string; srcMobile: string; srcHevc?: string; srcHevcMobile?: string; rungs?: Rung[]; poster: string; last: string; hotspot: number[] | null; features?: Features | null; fps?: number; track?: string | null }
-interface Track { fps: number; panel: (number[] | 0)[] }
+interface Clip { id: string; loop: boolean; ends: string | null; duration: number; src: string; srcMobile: string; srcHevc?: string; srcHevcMobile?: string; rungs?: Rung[]; poster: string; last: string; hotspot: number[] | null; features?: Features | null; fps?: number; /** the app stop: where its markers stand, and the room in every state the phone can put it in */ marks?: Record<string, number[]> | null; scene?: SceneClip | null }
 type State = 'loading' | 'exterior' | 'travelling' | 'stop' | 'done';
 
 export function mountFilm(root: HTMLElement) {
@@ -64,23 +67,41 @@ export function mountFilm(root: HTMLElement) {
   const live = liveLayer ? createDeviceLive(root, liveLayer, { reduced }) : null;
   const shapes = ui.cards.map((c) => c.dataset.shape);
   const tone = createToneSampler(root); // ivory or dark ink for the chrome, from the picture under it
-  const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.('a, button, .walk-load, [data-live-ui], [data-panel-screen]');
+  const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.('a, button, .walk-load, [data-live-ui], [data-panel-screen], [data-phone]');
+  // the app stop (house.json `kind: "app"`): the living room, and the phone that runs it
+  const appIdx = house.stops.findIndex((st) => (st as { kind?: string }).kind === 'app'), appClip = appIdx >= 0 ? clips.get(stops[appIdx]) : undefined;
+  const appEl = root.querySelector<HTMLElement>('[data-walk-app]'), phone = appEl && appClip?.scene ? createPhone(root, appEl, { reduced }) : null;
+  let scene: Scene | null = null;
   if (!returning) nav?.classList.add('is-off');
 
   // ---------- still-image fallback: reduced motion, data saver, or no film published yet ----------
   if (reduced || lowData || !hero || q.has('slides')) {
     const host = root.querySelector<HTMLElement>('[data-walk-slides]')!; host.hidden = false;
-    const frames = [hero ? { u: hero.poster, h: null as number[] | null, f: null as Features | null } : null, ...stops.map((id) => { const c = clips.get(id); return c ? { u: c.last, h: c.hotspot, f: c.features ?? null } : null; })].filter(Boolean) as { u: string; h: number[] | null; f: Features | null }[];
-    const imgs = frames.map((f) => { const im = new Image(); im.src = f.u; im.alt = ''; im.decoding = 'async'; host.appendChild(im); return im; });
-    let k = 0;
-    const show = (i: number) => { k = i; imgs.forEach((im, j) => im.classList.toggle('is-on', j === i)); if (imgs[i].complete) tone.sample(imgs[i], true); else imgs[i].addEventListener('load', () => { if (k === i) tone.sample(imgs[i], true); }, { once: true }); showCard(i - 1); if (i > 0) { placeCallout(i - 1, frames[i].h); live?.show(i - 1, shapes[i - 1], frames[i].f, { w: 16, h: 9 }); } else live?.hide(); ui.prompt.classList.toggle('is-on', i === 0); root.classList.toggle('is-prompt', i === 0); };
-    const advance = () => { if (k >= imgs.length - 1) { finish(); return; } show(k + 1); };
-    const finish = () => { showCard(-1); lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ } setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' }), 300); show(0); };
-    show(0); root.classList.add('is-live'); ui.load.classList.add('is-done'); if (!returning) lockScroll(true);
+    // one slot per frame of the tour: the hero, then every stop (a stop whose clip is not published keeps its slot, so the frames
+    // and the cards never shift against each other; it is stepped over)
+    const frames = [hero ? { u: hero.poster, h: null as number[] | null, f: null as Features | null } : null, ...stops.map((id) => { const c = clips.get(id); return c ? { u: c.last, h: c.hotspot, f: c.features ?? null } : null; })];
+    const imgs = frames.map((f) => { if (!f) return null; const im = new Image(); im.src = f.u; im.alt = ''; im.decoding = 'async'; host.appendChild(im); return im; });
+    const step = (i: number, d: number) => { for (i += d; i >= 0 && i < frames.length; i += d) if (frames[i]) return i; return -1; };
+    let k = Math.max(0, step(-1, 1));
+    const appOff = () => { if (phone?.shown) { void phone.hide(true); scene?.leave(); tone.stop(); } };
+    const show = (i: number) => {
+      k = i; const im = imgs[i]!, fr = frames[i]!; appOff();
+      imgs.forEach((x, j) => x?.classList.toggle('is-on', j === i)); if (im.complete) tone.sample(im, true); else im.addEventListener('load', () => { if (k === i) tone.sample(im, true); }, { once: true });
+      showCard(i - 1); ui.prompt.classList.toggle('is-on', i === 0); root.classList.toggle('is-prompt', i === 0);
+      if (i === 0) { void live?.hide(true); return; }
+      placeCallout(i - 1, fr.h); live?.show(i - 1, shapes[i - 1], fr.f, { w: 16, h: 9 });
+      if (i - 1 === appIdx && phone && appClip?.scene) { // the room in its four corner stills, blended
+        scene ??= createScene(host, appClip.scene, { hevc: false, rungH: () => 1080, still: true, reduced });
+        phone.show(scene, appClip.marks); void scene.enter(); tone.watch(() => (phone.shown && scene ? scene.canvas : null)); // the chrome's ink follows the room as it is dimmed
+      }
+    };
+    const advance = () => { const nx = step(k, 1); if (nx < 0) { finish(); return; } show(nx); };
+    const finish = () => { appOff(); showCard(-1); lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ } setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' }), 300); show(Math.max(0, step(-1, 1))); };
+    show(k); root.classList.add('is-live'); ui.load.classList.add('is-done'); if (!returning) lockScroll(true);
     root.addEventListener('click', (e) => { if (!isControl(e)) advance(); }); ui.nexts.forEach((b) => b.addEventListener('click', advance)); ui.tap.addEventListener('click', advance);
     ui.skip.addEventListener('click', (e) => { e.preventDefault(); finish(); });
-    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); advance(); } if (e.key === 'ArrowLeft' && k > 0) show(k - 1); });
-    addEventListener('resize', () => { if (k > 0) { placeCallout(k - 1, frames[k].h); live?.place(frames[k].f, { w: 16, h: 9 }); } });
+    window.addEventListener('keydown', (e) => { if (isControl(e)) return; if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); advance(); } if (e.key === 'ArrowLeft') { const pv = step(k, -1); if (pv >= 0) show(pv); } });
+    addEventListener('resize', () => { if (k > 0) { placeCallout(k - 1, frames[k]!.h); live?.place(frames[k]!.f, { w: 16, h: 9 }); } });
     return;
   }
 
@@ -98,7 +119,8 @@ export function mountFilm(root: HTMLElement) {
     720: { avc: 'avc1.640020', hevc: 'hvc1.1.6.L93.B0', bps: 3e6 }, 1080: { avc: 'avc1.64002A', hevc: 'hvc1.1.6.L123.B0', bps: 7e6 },
     1440: { avc: 'avc1.640033', hevc: 'hvc1.1.6.L150.B0', bps: 12e6 },
   };
-  const hevc = (() => { try { return document.createElement('video').canPlayType(`video/mp4; codecs="${CODEC[1080].hevc}"`) === 'probably' || document.createElement('video').canPlayType('video/mp4; codecs="hvc1"') === 'probably'; } catch { return false; } })();
+  // (dev/QA: ?avc keeps to H.264, which a browser without a GPU can still decode)
+  const hevc = !q.has('avc') && (() => { try { return document.createElement('video').canPlayType(`video/mp4; codecs="${CODEC[1080].hevc}"`) === 'probably' || document.createElement('video').canPlayType('video/mp4; codecs="hvc1"') === 'probably'; } catch { return false; } })();
   const nav_ = navigator as Navigator & { deviceMemory?: number; connection?: { downlink?: number } };
   const ladder = [720, 1080, 1440].filter((h) => (hero?.rungs ?? []).some((r) => r.h === h && (hevc ? r.hevc : r.avc)) || (!hero?.rungs && h <= 1080));
   const DROP_KEY = 'alrawi-film-cap';
@@ -136,7 +158,7 @@ export function mountFilm(root: HTMLElement) {
     ceiling = rungH = h;
   };
   /** Mb/s a rung's moves need to stream faster than they play (60 fps caps from film-encode.mjs, with headroom) */
-  const NEED: Record<number, [number, number]> = { 720: [6, 4], 1080: [14, 9], 1440: [24, 15] }; // [H.264, HEVC]
+  const NEED: Record<number, [number, number]> = { 720: [7, 5], 1080: [16, 10], 1440: [28, 18] }; // [H.264, HEVC] (3 Oct 2026: the crisper encode carries about a quarter more)
   /** Once the hero has fully downloaded, its resource timing says how fast this line really is: the moves step down to the rung
    *  the line can stream (never up: the start rung is already the most the screen and the device want). A hero still not buffered
    *  after 20 s means a slow line. */
@@ -177,18 +199,14 @@ export function mountFilm(root: HTMLElement) {
     const lower = ladder.filter((x) => x < rungH); if (!lower.length) return;
     rungH = dropCap = lower[lower.length - 1]; try { sessionStorage.setItem(DROP_KEY, String(rungH)); } catch { /* ignore */ }
   };
-  const tracks = new Map<string, Promise<Track | null>>();
-  const loadTrack = (c: Clip) => { if (!c.track) return null; if (!tracks.has(c.track)) tracks.set(c.track, fetch(c.track).then((r) => (r.ok ? r.json() : null)).catch(() => null)); return tracks.get(c.track)!; };
-  const panelIdx = stops.indexOf('panel');
-  const prepare = (v: HTMLVideoElement, c: Clip) => { void loadTrack(c); const u = srcOf(c); if (v.dataset.clip === c.id && v.dataset.src === u) return; v.dataset.clip = c.id; v.dataset.src = u; v.poster = c.poster; v.src = u; v.load(); };
-  /** while `v` plays clip `c`, keep the control panel's live screen pinned to it frame by frame (its recorded track) */
-  const follow = async (v: HTMLVideoElement, c: Clip) => {
-    const t = await loadTrack(c); if (!t || !live || panelIdx < 0) return;
-    const quad = (f: number) => { const q = t.panel[Math.max(0, Math.min(t.panel.length - 1, f))]; return q ? [[q[0], q[1]], [q[2], q[3]], [q[4], q[5]], [q[6], q[7]]] : null; };
-    const rv = (v as HTMLVideoElement & { requestVideoFrameCallback?: (cb: (now: number, m: { mediaTime: number }) => void) => number }).requestVideoFrameCallback;
-    const step = (time: number) => { if (v !== front || v.dataset.clip !== c.id) { live.trackPanel(panelIdx, null); return false; } live.trackPanel(panelIdx, quad(Math.round(time * t.fps)), { w: videoW, h: videoH }); return !v.ended; };
-    if (rv) { const cb = (_: number, m: { mediaTime: number }) => { if (step(m.mediaTime)) rv.call(v, cb); else live.trackPanel(panelIdx, null); }; rv.call(v, cb); }
-    else { const loop = () => { if (step(v.currentTime)) requestAnimationFrame(loop); else live.trackPanel(panelIdx, null); }; requestAnimationFrame(loop); }
+  const prepare = (v: HTMLVideoElement, c: Clip) => { const u = srcOf(c); if (v.dataset.clip === c.id && v.dataset.src === u) return; v.dataset.clip = c.id; v.dataset.src = u; v.poster = c.poster; v.src = u; v.load(); };
+  // the app stop's room: a canvas in the stage over the paused clip (film/scene.ts); fetched while the visitor is at the stop before it
+  const room = () => (scene ??= appClip?.scene ? createScene(stage, appClip.scene, { hevc, rungH: () => rungH, still: false, reduced }) : null);
+  /** the phone goes down and the room is put back as the film shows it (drapes parted, lights on); then the film may move */
+  const leaveApp = async (now = false) => {
+    if (!phone?.shown) return;
+    if (now) { void phone.hide(true); scene?.leave(); return; }
+    const down = phone.hide(); await scene?.reset(); await down; scene?.leave();
   };
   const nextClipId = () => (state === 'exterior' ? stops[0] : idx < n - 1 ? stops[idx + 1] : 'outro');
   const ready = (v: HTMLVideoElement) => new Promise<void>((res) => { if (v.readyState >= 3) { res(); return; } const on = () => { v.removeEventListener('canplay', on); res(); }; v.addEventListener('canplay', on); });
@@ -208,10 +226,10 @@ export function mountFilm(root: HTMLElement) {
   addEventListener('resize', () => { if (state === 'stop' && holdClip) { placeCallout(idx, holdClip.hotspot); live?.place(holdClip.features, { w: videoW, h: videoH }); } });
 
   const play = async (c: Clip) => {
-    state = 'travelling'; showCard(-1);
-    if (c.track && idx === panelIdx && live) { const q = (await loadTrack(c))?.panel[0]; if (q) live.trackPanel(panelIdx, [[q[0], q[1]], [q[2], q[3]], [q[4], q[5]], [q[6], q[7]]], { w: videoW, h: videoH }); } // hand the screen straight to the track: no dip
-    live?.hide(); ui.prompt.classList.remove('is-on'); root.classList.remove('is-prompt');
-    prepare(back, c); back.loop = false;
+    state = 'travelling'; showCard(-1); ui.prompt.classList.remove('is-on'); root.classList.remove('is-prompt');
+    prepare(back, c); back.loop = false; // (already buffered: it was prepared on arrival)
+    // whatever HTML lies on the held frame is off it before the picture moves: the live device layer (a short fade), the phone
+    await Promise.all([live?.hide(), leaveApp()]);
     // the next move is normally buffered already (it was prepared on arrival); only a slow line ever sees the loader, and only after a beat
     const slow = back.readyState < 3 ? setTimeout(() => { ui.load.classList.remove('is-done'); ui.bar.style.width = '60%'; }, 250) : 0;
     if (back.readyState < 3) await ready(back);
@@ -221,19 +239,23 @@ export function mountFilm(root: HTMLElement) {
     await firstFrame(back);
     root.classList.remove('is-hold'); // the held drift eases back to rest as the new move begins
     swap();
-    if (c.track) void follow(front, c); // the panel's screen stays live while the film moves past it
+    // the move into the living room: the phone starts up while the lens is still settling (the last three quarters of a second),
+    // so the two arrive together, as one shot
+    if (phone && c.id === stops[appIdx]) { const v = front; const early = () => { if (v !== front || v.dataset.clip !== c.id || state !== 'travelling') return; if (v.currentTime >= c.duration - 0.8) phone.rise(); else requestAnimationFrame(early); }; requestAnimationFrame(early); }
     if (front.videoWidth) { videoW = front.videoWidth; videoH = front.videoHeight; }
     await new Promise<void>((res) => { const done = () => { front.removeEventListener('ended', done); res(); }; front.addEventListener('ended', done); });
     judge(front);
   };
   const arrive = (i: number, c: Clip) => {
     state = 'stop'; idx = i; holdClip = c; tone.sample(front, true); showCard(i); placeCallout(i, c.hotspot);
-    live?.show(i, shapes[i], c.features, { w: videoW, h: videoH }); // over the identical baked frame: the handoff is invisible, then it comes alive
-    root.classList.add('is-hold'); // slow drift on the paused frame keeps it alive; the callout layer drifts with it
+    live?.show(i, shapes[i], c.features, { w: videoW, h: videoH }); // over the held frame, at rest: it comes up as the film shows it, then wakes
+    if (i === appIdx && phone && room()) { const sc = room()!; phone.show(sc, c.marks); void sc.enter(); } // the living room: the phone comes up, the room is the visitor's
+    else root.classList.add('is-hold'); // slow drift on the paused frame keeps it alive; the callout layer drifts with it
     const next = i < n - 1 ? clips.get(stops[i + 1]) : clips.get('outro'); if (next) prepare(back, next); // preload the next move
+    if (i + 1 === appIdx) room()?.prepare(); // … and the room's states, one stop ahead
   };
   const finish = () => {
-    state = 'done'; showCard(-1); live?.hide(); root.classList.remove('is-hold');
+    state = 'done'; showCard(-1); void live?.hide(true); void leaveApp(true); root.classList.remove('is-hold');
     lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ }
     root.classList.add('is-done');
     setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
@@ -251,7 +273,7 @@ export function mountFilm(root: HTMLElement) {
   const back_ = async () => { // jump (cut) back to the previous device's paused frame
     if (state !== 'stop' || idx <= 0) return;
     const c = clips.get(stops[idx - 1]); if (!c) return;
-    state = 'travelling'; showCard(-1); live?.hide(); root.classList.remove('is-hold');
+    state = 'travelling'; showCard(-1); void live?.hide(true); void leaveApp(true); root.classList.remove('is-hold');
     prepare(back, c); back.loop = false; await ready(back);
     back.currentTime = Math.max(0, c.duration - 0.05); await new Promise((r) => back.addEventListener('seeked', r, { once: true }));
     back.pause(); swap(); arrive(idx - 1, c);
@@ -262,11 +284,12 @@ export function mountFilm(root: HTMLElement) {
   root.addEventListener('click', (e) => { if (!isControl(e) && (state === 'stop' || state === 'exterior')) void advance(); });
   window.addEventListener('keydown', (e) => {
     if (root.getBoundingClientRect().bottom < 80) return; // only while the hero is on screen
+    if (isControl(e)) return; // a key on one of the film's own controls (the phone's sliders, a panel button) is that control's
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); void advance(); }
     if (e.key === 'ArrowLeft') void back_();
   });
   // pause everything while the hero is off screen or the tab is hidden
-  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); } else { tone.watch(() => front); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
+  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); } else { tone.watch(() => (scene?.canvas.classList.contains('is-on') ? scene.canvas : front)); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
   io.observe(root);
   document.addEventListener('visibilitychange', () => { if (document.hidden) front.pause(); else if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); });
 

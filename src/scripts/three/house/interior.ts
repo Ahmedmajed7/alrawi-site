@@ -25,7 +25,7 @@ import { band, cushion, drape, lampShade, noGlint, noise2, pillow, triplanar, vo
 import { book, bowl, dallah, dates, finjan, jar, mabkhara, tableLamp, tray, tree, turned } from './interior-decor';
 import { bindingTexture, coalTexture, emberTexture, fringeTexture, paintingTexture, rugTexture, saduTexture } from './interior-textiles';
 
-export interface Interior { group: THREE.Group; /** the porch and path pieces that stand in the sun (they get the cloud shadows) */ outdoor: THREE.Group; curtain: { setOpen(t: number, animate?: boolean): void; /** hold the drapes at `t` for a moment (the probe bake); returns what puts them back */ pose?(t: number): () => void }; /** per-frame life: flames, lantern breathing, sheers, dust, frankincense smoke (dt-driven, so it records frame-exact) */ update(dt: number, camera: THREE.Camera): void; dispose(): void }
+export interface Interior { group: THREE.Group; /** the porch and path pieces that stand in the sun (they get the cloud shadows) */ outdoor: THREE.Group; curtain: { setOpen(t: number, animate?: boolean): void; /** hold the drapes at `t` for a moment (the probe bake); returns what puts them back */ pose?(t: number): () => void; /** the sky's light through the west window follows the drapes (the film's app scene; elsewhere it is constant, as every clip was recorded) */ follow?(on: boolean): void }; /** bake the bounced light again on the next frame, the drapes where they stand (dev: stills; too heavy to do per frame of a recording) */ rebake?(): void; /** the app scene's frames are one held instant shown in any order: what only lives by moving (the thread of smoke, the motes in the sun) is left out of them */ still?(on: boolean): void; /** per-frame life: flames, lantern breathing, sheers, dust, frankincense smoke (dt-driven, so it records frame-exact) */ update(dt: number, camera: THREE.Camera): void; dispose(): void }
 interface Win { id: string; face: '-x' | '+x' | '+z' | '-z'; at: number; a0: number; a1: number; y0: number; y1: number; mullions?: number }
 const villa = villaJson as unknown as { plan: { x0: number; x1: number; z0: number; z1: number; wing: { x0: number; x1: number; z0: number; z1: number }; floorY: number; ceilY: number; slabY: number }; windows: Win[] };
 
@@ -83,6 +83,16 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   const V2 = !q.has('iw0');
   // dev: ?lk=spots,coves,strips,bounce scales those groups of light (1 = as designed), to weigh them against each other in stills
   const lkv = (q.get('lk') ?? '').split(',').map(Number), lk = (i: number) => (lkv[i] > 0 ? lkv[i] : 1);
+  // ?lights=0…1: the rooms' own lights (downlights, pendants, lamps, coves, the grazer and their fixtures' glow), 1 = as designed.
+  // The film's app scene is recorded twice, lights on and off (scripts/record-film.mjs): the fire, the sky and the sun are not touched
+  const LV = q.has('lights') ? Math.max(0, Math.min(1, Number(q.get('lights')) || 0)) : 1;
+  // ?lamps=0…1: the table lamps on their own (they follow ?lights unless said otherwise). The app scene is also recorded with the
+  // lamps alone (?lights=0&lamps=1): a room dims ceiling first, and the lamps' glow is what is left before the dark
+  const LAMPS = q.has('lamps') ? Math.max(0, Math.min(1, Number(q.get('lamps')) || 0)) : LV;
+  // ?bake=0…1: where the west drapes stand while the bounce light is baked (1 = parted, as every clip is baked; 0 = drawn), the
+  // sky's light through that window following them from the start. The app scene is recorded under both and the encoder blends
+  // the two by the drapes' position: baking again for every frame hung the browser after a few (2 Oct 2026)
+  const BAKE = q.has('bake') ? Math.max(0, Math.min(1, Number(q.get('bake')) || 0)) : null;
   const group = new THREE.Group(); group.name = 'interior';
   const outdoor = new THREE.Group(); outdoor.name = 'porch'; group.add(outdoor);
   // reflections come from a studio-room map (bright soft panels, dark corners), not the sky: the sky is not occluded by
@@ -125,9 +135,9 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   const strips: Strip[] = [
     // the wall grazer in the slot over the panel wall: a beam aimed down the stone, 9 cm off its face, behind an opal diffuser. Brightest
     // half a metre under the ceiling and over the control panel, fading toward both ends of the wall and toward the floor
-    { a: [faceX - 0.09, CY + 0.07, zN - 0.08], b: [faceX - 0.09, CY + 0.07, zS + 0.08], aim: [0.03, -1, 0], spread: 0.3, power: 34 * lk(2), reach: 3.4, color: led, peak: { at: [faceX - 0.09, CY + 0.07, PANEL_Z], width: 1.0, floor: 0.4 } },
+    { a: [faceX - 0.09, CY + 0.07, zN - 0.08], b: [faceX - 0.09, CY + 0.07, zS + 0.08], aim: [0.03, -1, 0], spread: 0.3, power: 34 * lk(2) * LV, reach: 3.4, color: led, peak: { at: [faceX - 0.09, CY + 0.07, PANEL_Z], width: 1.0, floor: 0.4 } },
     // the picture light over the painting at the end of the hall
-    { a: [W.x1 - 0.13, F + 2.32, -1.2], b: [W.x1 - 0.13, F + 2.32, -0.6], aim: [0.3, -1, 0], spread: 0.5, power: 4 * lk(2), reach: 1.7, color: led },
+    { a: [W.x1 - 0.13, F + 2.32, -1.2], b: [W.x1 - 0.13, F + 2.32, -0.6], aim: [0.3, -1, 0], spread: 0.5, power: 4 * lk(2) * LV, reach: 1.7, color: led },
   ];
   const cy = CY + DROP + 0.025, sb = 0.06; // LED strips lie on the dropped ceiling, 6 cm back from its edge: no eye below can see them
   const coves: Cove[] = [
@@ -137,7 +147,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   ];
   // dusk: the rooms are carried by their accents (scallops, coves, the grazer, the lamps' pools) and by the sun through the glass; what
   // they give back (the probes) and the sky's fill are kept low, so a plain wall sits in half light and the corners fall off
-  const kit = createSurfaceKit({ rooms, apertures, panes, strips, coves, cove: { power: 1.7 * lk(1), bounce: 1.5 * lk(1), fall: 0.7, color: led, y: CY }, gi: 0.8 * lk(3), fill: 0.06, sun: 1.45, taps: record ? 32 : 16, tight: V2 ? 1 : 0 });
+  const kit = createSurfaceKit({ rooms, apertures, panes, strips, coves, cove: { power: 1.7 * lk(1) * LV, bounce: 1.5 * lk(1) * LV, fall: 0.7, color: led, y: CY }, gi: 0.8 * lk(3), fill: 0.06, sun: 1.45, taps: record ? 32 : 16, tight: V2 ? 1 : 0 });
   const sh = <T extends THREE.MeshStandardMaterial>(m: T, o?: ShadeOpts) => kit.shade(m, o);
 
   /* ---------- materials ---------- */
@@ -180,7 +190,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
     fringe: sh(new THREE.MeshStandardMaterial({ map: fringeTexture(), alphaTest: 0.35, roughness: 1, side: THREE.DoubleSide, envMapIntensity: 0 }), { strength: 0.3 }),
     brass: sh(new THREE.MeshStandardMaterial({ color: '#b8935c', metalness: 1, roughness: 0.32, envMapIntensity: 0.85 }), { strength: 0.3 }),
     bronze: sh(new THREE.MeshStandardMaterial({ color: '#2b2622', metalness: 0.85, roughness: 0.42, envMapIntensity: 0.7 }), { strength: 0.3 }), // window frames, firebox, fittings
-    cone: new THREE.MeshStandardMaterial({ color: '#0c0c0d', metalness: 0.5, roughness: 0.38, emissive: '#ffb878', emissiveIntensity: 0.12, side: THREE.DoubleSide, envMapIntensity: 0.3 }), // the downlights' anti-glare cone, with the trace of glow its lamp leaves on it
+    cone: new THREE.MeshStandardMaterial({ color: '#0c0c0d', metalness: 0.5, roughness: 0.38, emissive: '#ffb878', emissiveIntensity: 0.12 * LV, side: THREE.DoubleSide, envMapIntensity: 0.3 }), // the downlights' anti-glare cone, with the trace of glow its lamp leaves on it
     black: new THREE.MeshStandardMaterial({ color: '#15161a', metalness: 0.85, roughness: 0.4, envMapIntensity: 0.6 }),
     stoneDark: sh(new THREE.MeshStandardMaterial({ color: '#57504a', roughness: 0.75, normalMap: tex('plaster_nor', 2), normalScale: new THREE.Vector2(0.6, 0.6), envMapIntensity: envI }), { worldUv: 1.5 }),
     // window glass: what lies beyond it is let through three quarters of a stop brighter (a photographer's window pull: at dusk the garden is
@@ -192,7 +202,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
       ? new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.04, metalness: 0, transmission: 0.97, ior: 1.5, thickness: 0.01, envMapIntensity: 0.35, side: THREE.DoubleSide })
       : new THREE.MeshPhysicalMaterial({ color: '#dfeaf5', roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.16, envMapIntensity: 0.5, side: THREE.DoubleSide })), // the glass over works on paper
     // a lamp shade with its lamp on: the linen glows from inside
-    shade: lampShade(new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 1, map: tex('fabric_diff', 2, 1, true), emissive: '#ffb676', emissiveMap: tex('fabric_diff', 2, 1, true), emissiveIntensity: 1, side: THREE.DoubleSide, envMapIntensity: 0 })),
+    shade: lampShade(new THREE.MeshStandardMaterial({ color: '#d9c9ae', roughness: 1, map: tex('fabric_diff', 2, 1, true), emissive: '#ffb676', emissiveMap: tex('fabric_diff', 2, 1, true), emissiveIntensity: 1 * LAMPS, side: THREE.DoubleSide, envMapIntensity: 0 })),
     // voile: what shows through it depends on how much cloth the eye crosses (little where it faces the eye, all of it where a fold turns away)
     sheer: voile(sh(new THREE.MeshPhysicalMaterial({ color: '#efe6d6', roughness: 1, transparent: true, opacity: 0.16, side: THREE.DoubleSide, envMapIntensity: 0, depthWrite: false }), { strength: 0.3 })),
     // heavy flax linen, a shade deeper than the walls so the drapes frame the window; the weave at its own scale (a scan tile ≈ 20 cm,
@@ -202,9 +212,9 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
     soot: sh(new THREE.MeshStandardMaterial({ color: '#0b0a09', roughness: 0.95, envMapIntensity: 0.1 }), { strength: 0.2 }),
     fire: new THREE.MeshBasicMaterial({ map: emberTexture(), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, side: THREE.DoubleSide }),
     embers: new THREE.MeshBasicMaterial({ map: coalTexture(), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }),
-    lamp: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#ffe3bd', emissiveIntensity: 6, roughness: 0.5 }),      // the lamp deep in a downlight: a point, it may bloom
-    diffuser: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#ffd9ad', emissiveIntensity: 2.3, roughness: 0.6, envMapIntensity: 0 }), // an opal diffuser seen from the room (pendants, the shades' undersides): bright, under the bloom's threshold, so its edge stays an edge
-    opal: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#fff1e2', emissiveIntensity: 1.7, roughness: 0.6, envMapIntensity: 0 }), // the grazer's diffuser: bright, under the bloom's threshold
+    lamp: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#ffe3bd', emissiveIntensity: 6 * LV, roughness: 0.5 }),      // the lamp deep in a downlight: a point, it may bloom
+    diffuser: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#ffd9ad', emissiveIntensity: 2.3 * LV, roughness: 0.6, envMapIntensity: 0 }), // an opal diffuser seen from the room (pendants, the shades' undersides): bright, under the bloom's threshold, so its edge stays an edge
+    opal: new THREE.MeshStandardMaterial({ color: '#111', emissive: '#fff1e2', emissiveIntensity: 1.7 * LV, roughness: 0.6, envMapIntensity: 0 }), // the grazer's diffuser: bright, under the bloom's threshold
     leaf: sh(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, side: THREE.DoubleSide, envMapIntensity: envI * 0.6 }), { strength: 0.3 }),
     pot: sh(new THREE.MeshStandardMaterial({ color: '#d8ccb8', roughness: 0.85, normalMap: tex('plaster_nor', 1), normalScale: new THREE.Vector2(0.8, 0.8), envMapIntensity: envI }), { worldUv: 0.8 }),
     bark: sh(new THREE.MeshStandardMaterial({ color: '#5e5044', roughness: 0.95, envMapIntensity: envI * 0.4 }), { strength: 0.3 }),
@@ -426,12 +436,15 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   const fx0 = plan.x0 + 0.3, fx1 = plan.x0 + 3.4, nx0 = fx0 + 0.36, nx1 = fx1 - 0.36, ny0 = F + 0.36, ny1 = F + 0.66, nzb = plan.z0 - 0.125, nzf = plan.z0 + 0.06; // the niche: 18 cm deep behind the stone's face
   add(merge([slab(fx0, nx0, F, S - 0.03, plan.z0, nzf), slab(nx1, fx1, F, S - 0.03, plan.z0, nzf), slab(nx0, nx1, F, ny0, plan.z0, nzf), slab(nx0, nx1, ny1, S - 0.03, plan.z0, nzf)]), M.hearth);
   add(merge([slab(nx0 - 0.03, nx0, ny0 - 0.03, ny1 + 0.03, nzf, nzf + 0.012), slab(nx1, nx1 + 0.03, ny0 - 0.03, ny1 + 0.03, nzf, nzf + 0.012), slab(nx0, nx1, ny0 - 0.03, ny0, nzf, nzf + 0.012), slab(nx0, nx1, ny1, ny1 + 0.03, nzf, nzf + 0.012)]), M.bronze, false); // a bronze trim round the opening
-  add(merge([slab(nx0, nx1, ny0, ny1, nzb - 0.01, nzb), slab(nx0, nx1, ny0 - 0.01, ny0, nzb, nzf), slab(nx0, nx1, ny1, ny1 + 0.01, nzb, nzf), slab(nx0 - 0.01, nx0, ny0, ny1, nzb, nzf), slab(nx1, nx1 + 0.01, ny0, ny1, nzb, nzf)]), M.soot, false); // the firebox itself: black
+  // the firebox itself: black. A 3 mm liner standing inside the opening, so each of its four inner planes is the liner's alone (built
+  // in the planes of the wall's hole and the stone's opening, the three surfaces fought for every pixel as the lens moved: a flicker)
+  const LN = 0.003;
+  add(merge([slab(nx0, nx1, ny0, ny1, nzb - 0.01, nzb), slab(nx0, nx1, ny0, ny0 + LN, nzb, nzf), slab(nx0, nx1, ny1 - LN, ny1, nzb, nzf), slab(nx0, nx0 + LN, ny0 + LN, ny1 - LN, nzb, nzf), slab(nx1 - LN, nx1, ny0 + LN, ny1 - LN, nzb, nzf)]), M.soot, false);
   { // a bed of coals along it, their glow between them, and a low lick of flame over the bed (it breathes; nothing dances)
     const rnd = seeded(61), coals: THREE.BufferGeometry[] = [];
-    for (let x = nx0 + 0.03; x < nx1 - 0.03; x += 0.035 + rnd() * 0.03) { const r = 0.014 + rnd() * 0.016; coals.push(new THREE.IcosahedronGeometry(r, 0).rotateX(rnd() * 3).rotateY(rnd() * 3).scale(1.3, 0.8, 1).translate(x, ny0 + r * 0.6, nzb + 0.05 + rnd() * 0.09)); }
+    for (let x = nx0 + 0.03; x < nx1 - 0.03; x += 0.035 + rnd() * 0.03) { const r = 0.014 + rnd() * 0.016; coals.push(new THREE.IcosahedronGeometry(r, 0).rotateX(rnd() * 3).rotateY(rnd() * 3).scale(1.3, 0.8, 1).translate(x, ny0 + LN + r * 0.6, nzb + 0.05 + rnd() * 0.09)); }
     add(merge(coals), M.soot, false, false);
-    const bed = new THREE.Mesh(new THREE.PlaneGeometry(nx1 - nx0, nzf - nzb - 0.03).rotateX(-Math.PI / 2).translate((nx0 + nx1) / 2, ny0 + 0.004, (nzb + nzf) / 2 - 0.005), M.embers); bed.renderOrder = 3; group.add(bed);
+    const bed = new THREE.Mesh(new THREE.PlaneGeometry(nx1 - nx0 - LN * 2, nzf - nzb - 0.03).rotateX(-Math.PI / 2).translate((nx0 + nx1) / 2, ny0 + LN + 0.006, (nzb + nzf) / 2 - 0.005), M.embers); bed.renderOrder = 3; group.add(bed);
     const lick = new THREE.Mesh(new THREE.PlaneGeometry(nx1 - nx0, ny1 - ny0).translate((nx0 + nx1) / 2, (ny0 + ny1) / 2, nzb + 0.06), M.fire); lick.renderOrder = 4; group.add(lick);
   }
   add(slab(fx0 - 0.05, fx1 + 0.05, F + 0.18, F + 0.24, plan.z0, plan.z0 + 0.42), M.stoneW);                                // floating hearth bench
@@ -538,9 +551,11 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   contact(st.x, st.z, 0.42, 0.42, true, 0.5);
   /** A table lamp, lit: what it stands on (x, y, z), its height, the foot's glaze. */
   const lamps: [number, number, number, number][] = [];
+  // the glow under and over a lamp's shade: the pendants' opal diffuser, but on the lamps' own switch
+  const lampGlow = LAMPS === LV ? M.diffuser : (() => { const m = M.diffuser.clone(); m.emissiveIntensity = 2.3 * LAMPS; extra.push(m); return m; })();
   const tableLampAt = (x: number, y: number, z: number, h: number, foot: THREE.Material, seed: number) => {
     const l = tableLamp(h, seed), at = (g: THREE.BufferGeometry) => g.translate(x, y, z);
-    add(at(l.foot), foot); add(at(l.metal), M.brass, false); add(at(l.shade), M.shade, false, false); add(at(l.glow), M.diffuser, false, false); lamps.push([x, y + h * 0.78, z, h]);
+    add(at(l.foot), foot); add(at(l.metal), M.brass, false); add(at(l.shade), M.shade, false, false); add(at(l.glow), lampGlow, false, false); lamps.push([x, y + h * 0.78, z, h]);
   };
   tableLampAt(st.x, F + st.h, st.z, 0.64, M.glaze, 2);
   tableLampAt(fx1 - 0.3, F + 0.24, plan.z0 + 0.22, 0.52, M.ceramic, 3); // … and one on the end of the hearth bench: a warm pool at seat height
@@ -604,7 +619,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   add(quad(sx0, sx1, pz0, pz1 - 0.16, porchY + 0.02, 1, false), M.porchBack, false);
   const psl: THREE.BufferGeometry[] = []; for (let x = sx0 + 0.03; x + 0.07 <= sx1; x += 0.1) psl.push(slab(x, x + 0.07, porchY - 0.035, porchY + 0.02, pz0, pz1 - 0.16));
   add(merge(psl), M.porchSlat, false);
-  add(merge([[-1.0, 0.9], [0.6, 0.9], [2.2, 0.9], [3.5, 0.9]].map(([x, z]) => new THREE.CircleGeometry(0.045, 20).rotateX(Math.PI / 2).translate(x, porchY - 0.036, z))), M.lamp, false, false);
+  add(merge([[-1.0, 0.9], [0.6, 0.9], [2.2, 0.9], [3.5, 0.9]].map(([x, z]) => new THREE.CircleGeometry(0.045, 20).rotateX(Math.PI / 2).translate(x, porchY - 0.036, z))), LV < 1 ? (() => { const m = M.lamp.clone(); m.emissiveIntensity = 6; extra.push(m); return m; })() : M.lamp, false, false); // (the porch's own: not the rooms' lights)
   add(merge([slab(ppx0 - 0.24, ppx0 + 0.16, -0.05, S + 0.05, -0.36, pz1 + 0.16), slab(ppx1 - 0.16, ppx1 + 0.24, -0.05, S + 0.05, -0.36, pz1 + 0.16)]), M.render); // piers close the cut, up to the slab and past its front edge (the cut shell's torn edges end at z 2.7)
   add(merge([slab(ppx0 - 0.02, ppx1 + 0.02, porchY - 0.04, S + 0.05, pz1 - 0.16, pz1), slab(ppx0 + 0.16, W.x0 - t + 0.01, porchY + 0.02, S + 0.05, -0.36, -0.2), slab(W.x0 - t + 0.01, ppx1 - 0.16, porchY + 0.02, S + 0.05, W.z1 + 0.006, -0.2)]), M.render); // fascia + back upstand: the void above the soffit never shows (along the hall the upstand stays inside the hall's own wall)
   add(slab(ppx0 + 0.16, W.x0 - 0.12, -0.05, porchY + 0.06, -0.36, -0.14), M.render); // wall left of the wing, under the soffit
@@ -629,6 +644,9 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   sconce(-1.0); sconce(1.0);                                                        // beside the front door
   add(merge([0, 1, 2, 3].flatMap((i) => [-0.95, 0.45].map((x) => new THREE.CylinderGeometry(0.035, 0.035, 0.05, 12).translate(x, 0.03, 1.5 + i * 0.45)))), lampGlass, false, false); // path lights (the east row clear of court.ts's fin and the open gate leaf)
   if (high) { const porch = new THREE.PointLight('#ffc78e', 3, 6, 2); porch.position.set(0.2, 2.5, 1.1); group.add(porch); }
+  // the soffit downlight by the door is a real spot on the leaf round the lock: the escutcheon and the handle throw their shadow down
+  // the oak and the lacquer takes a highlight along its roundover (lit by the sky map alone, the lock lay flat on the door)
+  if (high) { const s = new THREE.SpotLight('#ffd2a2', 9, 5, 0.46, 0.75, 2); s.position.set(0.6, porchY - 0.05, 0.9); s.target.position.set(0.38, F + 0.9, 0.03); s.castShadow = true; s.shadow.mapSize.set(1024, 1024); s.shadow.bias = -0.0003; s.shadow.normalBias = 0.004; s.shadow.radius = 5; s.shadow.camera.near = 0.3; s.shadow.camera.far = 4; group.add(s, s.target); }
   // up/down wall lights on the porch piers (the key visual's warm sconces on the facade)
   const pierLight = (x: number) => { add(slab(x - 0.06, x + 0.06, 1.95, 2.35, pz1, pz1 + 0.1), M.black); add(slab(x - 0.045, x + 0.045, 2.0, 2.3, pz1 + 0.1, pz1 + 0.105), lampGlass, false, false); };
   pierLight(ppx0 + 0.02); pierLight(ppx1 - 0.02);
@@ -706,6 +724,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
   /* ---------- the west window: drapes and sheers on the motor's track ---------- */
   const west = windows.find((w) => w.face === '-x');
   let curtain: Interior['curtain'] = { setOpen() {} };
+  let westSky: THREE.RectAreaLight | null = null, skyFollows = BAKE !== null; const WEST_SKY = 1.2; // the sky's light through the west window (lit below), and whether it follows the drapes
   if (west) {
     const z0 = Math.min(west.a0, west.a1), z1 = Math.max(west.a0, west.a1), top = Math.min(west.y1 + 0.16, C - 0.22), H = top - (F + 0.015), PW = (z1 - z0) / 2 + 0.06;
     // (turned a quarter: +x of a leaf runs toward −z, its folds stand out into the room; the south leaf's return is its +x edge, the north one's its −x edge)
@@ -717,10 +736,11 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
     const state = { t: 1 };
     // parted, a drape is gathered to a quarter of its width (its cloth then stands in deep folds by itself); the sheers part to the
     // window's outer quarters. (devices.ts' curtain track moves its runners by the same law)
-    const apply = () => { for (const [{ m, d }, k, side] of [[dA, 0.26 + (1 - state.t) * 0.74, -1], [dB, 0.26 + (1 - state.t) * 0.74, 1], [sA, 0.5 + (1 - state.t) * 0.5, -1], [sB, 0.5 + (1 - state.t) * 0.5, 1]] as [{ m: THREE.Mesh; d: Drape }, number, number][]) { d.set(PW * k); m.position.z = side < 0 ? z0 - 0.05 + (PW * k) / 2 : z1 + 0.05 - (PW * k) / 2; } };
+    const apply = () => { if (westSky) westSky.intensity = WEST_SKY * (skyFollows ? 0.1 + 0.9 * state.t : 1); for (const [{ m, d }, k, side] of [[dA, 0.26 + (1 - state.t) * 0.74, -1], [dB, 0.26 + (1 - state.t) * 0.74, 1], [sA, 0.5 + (1 - state.t) * 0.5, -1], [sB, 0.5 + (1 - state.t) * 0.5, 1]] as [{ m: THREE.Mesh; d: Drape }, number, number][]) { d.set(PW * k); m.position.z = side < 0 ? z0 - 0.05 + (PW * k) / 2 : z1 + 0.05 - (PW * k) / 2; } };
     apply();
     curtain = { setOpen(v, animate = false) { if (!animate) { state.t = v; apply(); return; } gsap.to(state, { t: v, duration: 2.8, ease: 'power2.inOut', onUpdate: apply }); },
-      pose(v) { const was = state.t; state.t = v; apply(); return () => { state.t = was; apply(); }; } };
+      pose(v) { const was = state.t; state.t = v; apply(); return () => { state.t = was; apply(); }; },
+      follow(on) { skyFollows = on; apply(); } };
   }
 
   /* ---------- dust in the window light ---------- */
@@ -747,30 +767,30 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
     // every downlight is a real spot in its own fixture: pools on the floor, scallops on the walls, soft shadows under the key ones.
     // Walls hide them analytically (interior-surface.ts), so none of them needs a shadow map to stay in its own room
     for (const d of downs) {
-      const s = new THREE.SpotLight(lampWhite, d.i * lk(0), 9, d.angle ?? 0.68, 0.8, 2); s.position.set(d.x, CY - 0.01, d.z); s.target.position.set(d.aim?.[0] ?? d.x, d.aim?.[1] ?? F, d.aim?.[2] ?? d.z);
+      const s = new THREE.SpotLight(lampWhite, d.i * lk(0) * LV, 9, d.angle ?? 0.68, 0.8, 2); s.position.set(d.x, CY - 0.01, d.z); s.target.position.set(d.aim?.[0] ?? d.x, d.aim?.[1] ?? F, d.aim?.[2] ?? d.z);
       if (d.shadow) { s.castShadow = true; s.shadow.mapSize.set(1024, 1024); s.shadow.bias = -0.0004; s.shadow.normalBias = 0.02; s.shadow.radius = 6; s.shadow.camera.near = 0.2; s.shadow.camera.far = 6; }
       group.add(s, s.target);
     }
-    for (const dz of [-0.55, 0.55]) { const s = new THREE.SpotLight('#ffe9d0', 7 * lk(0), 5, 0.95, 0.7, 2); s.position.set(ix, F + 1.86, iz + dz); s.target.position.set(ix, F, iz + dz); if (dz < 0) { s.castShadow = true; s.shadow.mapSize.set(1024, 1024); s.shadow.bias = -0.0004; s.shadow.normalBias = 0.02; s.shadow.radius = 6; s.shadow.camera.near = 0.1; s.shadow.camera.far = 4; } group.add(s, s.target); } // the island's pendants
+    for (const dz of [-0.55, 0.55]) { const s = new THREE.SpotLight('#ffe9d0', 7 * lk(0) * LV, 5, 0.95, 0.7, 2); s.position.set(ix, F + 1.86, iz + dz); s.target.position.set(ix, F, iz + dz); if (dz < 0) { s.castShadow = true; s.shadow.mapSize.set(1024, 1024); s.shadow.bias = -0.0004; s.shadow.normalBias = 0.02; s.shadow.radius = 6; s.shadow.camera.near = 0.1; s.shadow.camera.far = 4; } group.add(s, s.target); } // the island's pendants
     // the evening sky through the two big windows: a cool, soft area light against the warm lamps (the sky map itself is not occluded by walls)
     RectAreaLightUniformsLib.init();
     for (const w of windows) { if (w.id !== 'living-front' && w.id !== 'living-west') continue;
-      const a0 = Math.min(w.a0, w.a1), a1 = Math.max(w.a0, w.a1); const L = new THREE.RectAreaLight('#cfdcff', 1.2, a1 - a0, w.y1 - w.y0);
+      const a0 = Math.min(w.a0, w.a1), a1 = Math.max(w.a0, w.a1); const L = new THREE.RectAreaLight('#cfdcff', WEST_SKY, a1 - a0, w.y1 - w.y0); if (w.id === 'living-west') westSky = L;
       if (w.face === '+z') { L.position.set((a0 + a1) / 2, (w.y0 + w.y1) / 2, w.at - 0.05); L.lookAt((a0 + a1) / 2, (w.y0 + w.y1) / 2 - 0.6, w.at - 4); }
       else { L.position.set(w.at + 0.05, (w.y0 + w.y1) / 2, (a0 + a1) / 2); L.lookAt(w.at + 4, (w.y0 + w.y1) / 2 - 0.6, (a0 + a1) / 2); }
       group.add(L); }
-    for (const [x, y, z, h] of lamps) { const l = new THREE.PointLight('#ffd2a0', 2.8 * (h / 0.6) * lk(0), 3.4, 2); l.position.set(x, y, z); group.add(l); } // the table lamps
+    for (const [x, y, z, h] of lamps) { const l = new THREE.PointLight('#ffd2a0', 2.8 * (h / 0.6) * lk(0) * LAMPS, 3.4, 2); l.position.set(x, y, z); group.add(l); } // the table lamps
     fireLight = new THREE.PointLight('#ff9c58', 1.0, 3.5, 2); fireLight.position.set(plan.x0 + 1.85, F + 0.5, plan.z0 + 0.3); group.add(fireLight); // what the embers throw on the bench and the floor
   } else {
-    const p = new THREE.PointLight('#fff0e0', 16, 12, 1.6); p.position.set(0.2, C - 0.4, -3.6); group.add(p);
-    const e = new THREE.PointLight('#fff0e0', 9, 9, 1.6); e.position.set(2.9, C - 0.4, -2.6); group.add(e); // … and one beyond the pier, which hides the first from the hallway and the kitchen
+    const p = new THREE.PointLight('#fff0e0', 16 * LV, 12, 1.6); p.position.set(0.2, C - 0.4, -3.6); group.add(p);
+    const e = new THREE.PointLight('#fff0e0', 9 * LV, 9, 1.6); e.position.set(2.9, C - 0.4, -2.6); group.add(e); // … and one beyond the pier, which hides the first from the hallway and the kitchen
   }
 
   /* ---------- the light the rooms give back ---------- */
   let gi: RoomGI | null = null;
   // (the probes always see the west window's drapes parted: every clip of the film bakes its own lattice, and a clip that starts
   // with them drawn must end in the same light the next one starts in)
-  if (high && q.get('gi') !== '0') { gi = createRoomGI({ record, uGI: kit.uGI, ready: () => loading <= 0, hide: [smoke, ...(dust ? [dust] : [])], pose: () => curtain.pose?.(1) ?? (() => {}) }); group.add(gi.group); }
+  if (high && q.get('gi') !== '0') { gi = createRoomGI({ record, uGI: kit.uGI, ready: () => loading <= 0, hide: [smoke, ...(dust ? [dust] : [])], pose: () => curtain.pose?.(BAKE ?? 1) ?? (() => {}) }); group.add(gi.group); }
 
   const camDir = new THREE.Vector3();
   let auditAll = q.has('nan');
@@ -790,7 +810,7 @@ export function buildInterior(tier: Tier, roomEnv?: THREE.Texture, props?: Props
     }
   };
   return {
-    group, outdoor, curtain,
+    group, outdoor, curtain, rebake: () => gi?.rebake(), still: (on) => { smoke.visible = !on; if (dust) dust.visible = !on; },
     update(dt, camera) {
       if (noContact) group.parent?.traverse((o) => { if (o.name === 'contact-shadow') o.visible = false; });
       if (auditAll) { auditAll = false; (group.parent ?? group).traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && m.geometry) { const names: string[] = []; for (let k: THREE.Object3D | null = o; k; k = k.parent) if (k.name) names.push(k.name); audit(m.geometry, m.material, names.join(' < ')); } }); }

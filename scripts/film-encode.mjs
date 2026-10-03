@@ -11,7 +11,7 @@
  * from assets/film/source/manifest.json; put overrides in assets/film/hotspots.json {"panel":[0.52,0.48]}
  * when an AI clip moved a device. Optional per-clip trims in assets/film/trim.json {"panel":[0.3, 8.1]}.
  *
- * Output (content-hashed names: /film/* is cached immutable), a ladder the player picks from per device (player.ts `pickRung`):
+ * Output (content-hashed names: /film/* is cached immutable), a ladder the player picks from per device (player.ts `chooseRung`):
  *   public/film/<id>-<hash>.mp4          1920×1080 H.264  (src)
  *   public/film/<id>-m-<hash>.mp4        1280×720 H.264   (srcMobile: slow lines, weak devices)
  *   public/film/<id>-q-<hash>.mp4        2560×1440 H.264  (large and high-density screens)
@@ -20,6 +20,14 @@
  *   (A 4K rung was tried on 29 Sep 2026 and dropped at the client's request: 2K is the top.)
  *   public/film/<id>-first|last-<hash>.webp   posters (first frame = page poster for hero; last = paused frame)
  *   public/og.jpg                    from the hero poster
+ *
+ * The app scene (a stop recorded in every state of its drapes and its lights: record-film.mjs `--only=app-scene`) is published as
+ * ONE video per rung, so that the light states can never be a frame apart:
+ *   public/film/<id>-scene[-m|-q]-<hash>.mp4, …-scene-hevc…   three pictures stacked (w × 3h): the rooms' lights on, the table lamps
+ *       alone, all off; the drapes going from parted to drawn and back again (2N − 1 frames: both directions play forwards), a
+ *       keyframe every 15 frames and no B-frames, so any position is a short seek away. The landing adds the lamps' light and the
+ *       ceiling's to the unlit room, each at its own level (film/scene.ts)
+ *   public/film/<id>-scene-<on|lamps|off>-<open|closed>-<hash>.webp   its six corners, for visitors who get stills instead of film
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -62,8 +70,12 @@ const MAX_BYTES = 24 * 1048576; // Cloudflare Pages serves at most 25 MiB per fi
 const cover = (w, h) => `scale=${w}:${h}:force_original_aspect_ratio=increase:flags=lanczos,crop=${w}:${h},setsar=1`;
 const probeFrames = (f) => +execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'default=nw=1:nk=1', f]).toString().trim();
 // the grade: debanded, a clarity pass (local contrast against a wide blur, clamped), the mids deeper with the highlights
-// held (lamps and screens keep their glow), a touch more colour, a faint vignette, a contrast-adaptive sharpen
-const LOOK = "deband=1thr=0.012:2thr=0.012:3thr=0.012:range=12:blur=1,split[la][lb];[lb]scale=iw/4:ih/4,gblur=sigma=6,scale=iw*4:ih*4:flags=bicubic[lbl];[la][lbl]blend=c0_expr='clip(A+0.22*(A-B)\\,0\\,255)':c1_expr='A':c2_expr='A',curves=master='0/0 0.25/0.185 0.5/0.415 0.75/0.7 1/1',eq=saturation=1.07,vignette=angle=0.2,cas=strength=0.45";
+// held (lamps and screens keep their glow), a touch more colour, a faint vignette, a contrast-adaptive sharpen. Crisper since
+// 3 Oct 2026 at the client's request (clarity 0.22 → 0.3, sharpen 0.45 → 0.68: weave, cushion patterns and the palms through
+// the glass read; no halo at 1:1)
+const LOOK = "deband=1thr=0.012:2thr=0.012:3thr=0.012:range=12:blur=1,split[la][lb];[lb]scale=iw/4:ih/4,gblur=sigma=6,scale=iw*4:ih*4:flags=bicubic[lbl];[la][lbl]blend=c0_expr='clip(A+0.3*(A-B)\\,0\\,255)':c1_expr='A':c2_expr='A',curves=master='0/0 0.25/0.185 0.5/0.415 0.75/0.7 1/1',eq=saturation=1.07,vignette=angle=0.2,cas=strength=0.68";
+// a rung cut down from the master gets a light sharpen of its own
+const RUNG_CAS = 0.42;
 /**
  * The master of one clip (scripts/_cache/film-master/<id>.mp4, at the source's size — 4K from a 4K recording — near-lossless), every published size is cut from it:
  *  - boxes listed in steady.json are held with a temporal median (coplanar faces that flash frame to frame)
@@ -89,9 +101,68 @@ function master(id, input, fps, loop, sp, tIn, blurred = false) {
   // neighbouring frames on top of real motion blur doubles every edge on a fast pan
   const resample = loop || sp !== 1 || !blurred;
   if (resample) g += `,framerate=fps=${fps * 4}:interp_start=0:interp_end=255:scene=100${loop ? '' : `,tpad=stop_mode=clone:stop=${H}`},tmix=frames=${2 * H + 1}:weights='${tri}',select='${pick}',setpts=N/(${fps}*TB)`;
-  g += `,hqdn3d=0:0:5:5,${LOOK},format=yuv420p[v]`; // hqdn3d, temporal only: the recorded grain left still surfaces crawling, which pulsed at every keyframe and at the loop seam
+  // hqdn3d, temporal only: the recorded grain left still surfaces crawling, which pulsed at every keyframe and at the loop seam. The
+  // recorder renders no grain now, and on a move it smeared fine detail: the moves keep a trace of it, the hero loop all of it
+  g += `,hqdn3d=0:0:${loop ? '5:5' : '2.5:2.5'},${LOOK},format=yuv420p[v]`;
   ff([...(loop ? ['-stream_loop', '2'] : []), ...tIn, '-i', input, '-filter_complex', g, '-map', '[v]', '-r', String(fps), '-an', '-c:v', 'libx264', '-crf', '8', '-preset', 'medium', '-color_range', 'tv', out]);
   return out;
+}
+
+/**
+ * The app scene of stop `id`. Per state of the rooms' lights (all on, the table lamps alone, all off), the two recorded takes
+ * (frame k = drapes at 1 − k / (N − 1); one with the bounce light baked for parted drapes, one for drawn) are blended by the
+ * drapes' position and graded like the film (no deflicker and no temporal denoise: here the light really changes from frame to
+ * frame); then the three states are stacked (on, lamps, off), played there and back, and cut to the ladder. Returns what the
+ * landing needs (film.json `scene`), or null when it is not recorded.
+ */
+// a keyframe every SCENE_GOP frames: a drag seeks at most that far from one, and the three stacked pictures are mostly the same from
+// frame to frame, so it is the keyframes that weigh (every 8 frames made the 1080p file 23 MB)
+const SCENE_GOP = 15;
+async function scene(id, srcH) {
+  const sc = manifest.scenes?.[id], STATES = ['on', 'lamps', 'off'], take = (state, bake) => `${ROOT}assets/film/source/${id}-scene-${state}-b${bake}.mp4`;
+  if (!sc || !STATES.every((st) => existsSync(take(st, 1)) && existsSync(take(st, 0)))) return null;
+  const N = probeFrames(take('on', 1)), fps = sc.fps ?? 30; for (const st of STATES) for (const b of [1, 0]) if (probeFrames(take(st, b)) !== N) throw new Error(`${id} scene: the takes differ in length`);
+  const graded = {};
+  for (const state of STATES) {
+    graded[state] = `${CACHE}/${id}-scene-${state}.mp4`;
+    // frame 0 is the parted bake alone (the film's own frame), the last the drawn bake alone
+    ff(['-i', take(state, 1), '-i', take(state, 0), '-filter_complex', `[0:v]setpts=N/(${fps}*TB),format=gbrp[a];[1:v]setpts=N/(${fps}*TB),format=gbrp[b];[a][b]blend=all_expr='A*(1-N/${N - 1})+B*N/${N - 1}',format=yuv444p,${LOOK},format=yuv444p[v]`, '-map', '[v]', '-r', String(fps), '-an', '-c:v', 'libx264', '-crf', '6', '-preset', 'medium', '-pix_fmt', 'yuv444p', '-color_range', 'tv', graded[state]]);
+  }
+  // [suffix, width, height of one state, H.264 level of the three stacked, crf]
+  const RUNGS = [['m', 1280, 720, '5.0', 20], ['', 1920, 1080, '5.1', 20], ['q', 2560, 1440, '6.0', 21]].filter(([, , h]) => h <= Math.max(1080, srcH));
+  const outs = {}, base = `${id}-scene`;
+  for (const [suf, w, h, lvA, crf] of RUNGS) {
+    // each state cut to the rung like the film's own frames, then stacked, then there and back. Where the rung's height is not a
+    // whole number of 16 px blocks (1080), a state is carried on by `gap` rows of its own last row, so that no block holds floor
+    // from one state and ceiling from the next
+    const half = cover(w, h) + (h < srcH ? `,cas=strength=${RUNG_CAS}` : ''), gap = (16 - (h % 16)) % 16, pad = gap ? `,pad=iw:ih+${gap}:0:0,fillborders=bottom=${gap}:mode=smear` : '';
+    const g = `[0:v]${half}${pad}[a];[1:v]${half}${pad}[b];[2:v]${half}[c];[a][b][c]vstack=inputs=3,split[f][r0];[r0]reverse,trim=start_frame=1,setpts=PTS-STARTPTS[r];[f][r]concat=n=2:v=1,format=yuv420p[v]`;
+    const ins = STATES.flatMap((st) => ['-i', graded[st]]);
+    const name = suf ? `${base}-${suf}` : base, hname = `${base}-hevc${suf ? `-${suf}` : ''}`;
+    const tmp = `${OUT}/.${name}.mp4`;
+    for (let c = crf; ; c += 2) {
+      ff([...ins, '-filter_complex', g, '-map', '[v]', '-r', String(fps), '-an', '-c:v', 'libx264', '-profile:v', 'high', '-level:v', lvA, '-x264-params', 'ref=2:scenecut=0', '-bf', '0', '-g', String(SCENE_GOP), '-keyint_min', String(SCENE_GOP), '-pix_fmt', 'yuv420p', '-color_range', 'tv', '-preset', 'slow', '-movflags', '+faststart', '-crf', String(c), tmp]);
+      if (readFileSync(tmp).length <= MAX_BYTES) break; console.warn(`  ${name}: over 24 MB at crf ${c}, retrying`);
+    }
+    outs[name] = publish(tmp, name, 'mp4');
+    const tmpH = `${OUT}/.${hname}.mp4`;
+    for (let c = crf + 3; ; c += 2) {
+      ff([...ins, '-filter_complex', g, '-map', '[v]', '-r', String(fps), '-an', '-c:v', 'libx265', '-tag:v', 'hvc1', '-pix_fmt', 'yuv420p', '-color_range', 'tv', '-preset', 'medium', '-x265-params', `keyint=${SCENE_GOP}:min-keyint=${SCENE_GOP}:bframes=0:scenecut=0:log-level=error`, '-movflags', '+faststart', '-crf', String(c), tmpH]);
+      if (readFileSync(tmpH).length <= MAX_BYTES) break; console.warn(`  ${hname}: over 24 MB at crf ${c}, retrying`);
+    }
+    outs[hname] = publish(tmpH, hname, 'mp4');
+  }
+  const stills = {};
+  for (const state of STATES) for (const [pos, k] of [['open', 0], ['closed', N - 1]]) {
+    const png = `${OUT}/.${base}-${state}-${pos}.png`, webp = `${OUT}/.${base}-${state}-${pos}.webp`;
+    ff(['-i', graded[state], '-vf', `select='eq(n\\,${k})'`, '-frames:v', '1', '-update', '1', png]); await sharp(png).resize(1600).webp({ quality: 80 }).toFile(webp); unlinkSync(png);
+    stills[`${state}${pos[0].toUpperCase()}${pos.slice(1)}`] = publish(webp, `${base}-${state}-${pos}`, 'webp');
+  }
+  const kb = (p) => Math.round(readFileSync(`${ROOT}public${p}`).length / 1024);
+  // `gap`: state k begins k × (h + gap) rows down
+  const rungs = RUNGS.map(([suf, w, h]) => ({ h, w, gap: (16 - (h % 16)) % 16, avc: outs[suf ? `${base}-${suf}` : base], hevc: outs[`${base}-hevc${suf ? `-${suf}` : ''}`] }));
+  console.log(`${base.padEnd(8)} ${N} positions × ${STATES.length} lights  ` + rungs.map((r) => `${r.h}p ${kb(r.avc)}/${kb(r.hevc)} KB`).join('  '));
+  return { frames: N, fps, layers: STATES, rungs, stills };
 }
 
 const clips = [];
@@ -112,15 +183,15 @@ for (const id of order) {
   // and high-density screens: cut from a 1440p recording rendered at 1.5× (record-film.mjs --size=2560x1440), it carries real
   // detail, not an upscale
   const RUNGS = [
-    ['m', 1280, 720, ['3.1', '3.2'], 22, seg.loop ? 2.4 : 3],
-    ['', 1920, 1080, ['4.1', '4.2'], 19, seg.loop ? 6 : 7],
-    ['q', 2560, 1440, ['5.0', '5.1'], 19, seg.loop ? 10 : 12],
+    ['m', 1280, 720, ['3.1', '3.2'], 20, seg.loop ? 3 : 3.6],
+    ['', 1920, 1080, ['4.1', '4.2'], 17, seg.loop ? 7.5 : 8.8],
+    ['q', 2560, 1440, ['5.0', '5.1'], 17, seg.loop ? 12.5 : 15],
   ].filter(([, , h]) => h <= Math.max(1080, srcH));
   const cap = (m) => ['-maxrate', `${m.toFixed(2)}M`, '-bufsize', `${(m * 2).toFixed(2)}M`];
   const outs = {};
   for (const [suf, w, h, lv, crf, max] of RUNGS) {
     // the master is sharpened at its own size; a rung cut down from it gets a light pass of its own so 1080p stays as crisp as before
-    const vf = cover(w, h) + (h < srcH ? ',cas=strength=0.3' : '');
+    const vf = cover(w, h) + (h < srcH ? `,cas=strength=${RUNG_CAS}` : '');
     const name = suf ? `${id}-${suf}` : id, hname = `${id}-hevc${suf ? `-${suf}` : ''}`;
     {
       const tmp = `${OUT}/.${name}.mp4`;
@@ -140,6 +211,7 @@ for (const id of order) {
   }
   for (const f of readdirSync(OUT)) { // a rung this source no longer makes (a 1080p recording, the dropped 4K rung): drop its old file
     const m = f.match(new RegExp(`^(${id}(?:-hevc)?(?:-[mqu])?)-[0-9a-f]{8}\\.mp4$`)); if (m && !outs[m[1]]) unlinkSync(`${OUT}/${f}`);
+    if (new RegExp(`^track-${id}-[0-9a-f]{8}\\.json$`).test(f)) unlinkSync(`${OUT}/${f}`); // the panel's per-frame track: no longer published (2 Oct 2026, the live screen is handed over at rest only)
   }
   const tmpD = `${ROOT}public${outs[id]}`;
   const duration = +probe(tmpD).toFixed(3);
@@ -155,8 +227,9 @@ for (const id of order) {
     hotspot: hotspotOverrides[id] ?? seg.hotspot ?? null,
     features: featureOverrides[id] ?? (ai ? null : seg.features) ?? null, // a recorded frame's features only fit the recorded frame
     fps,
-    // the control panel's screen, frame by frame (recorded clips only): the landing keeps its live UI pinned to the moving film
-    track: !ai && seg.track?.panel ? (() => { const t = `${OUT}/.track-${id}.json`; writeFileSync(t, JSON.stringify({ fps: fps * sp, panel: seg.track.panel.map((q) => (q ? q.flat() : 0)) })); return publish(t, `track-${id}`, 'json'); })() : null,
+    // the app stop: where its markers stand in the frame, and the room in every state the phone can put it in
+    ...(!ai && seg.marks ? { marks: seg.marks } : {}),
+    ...(!ai && manifest.scenes?.[id] ? { scene: await scene(id, srcH) } : {}),
   };
   clips.push(clip);
   const kb = (p) => Math.round(readFileSync(`${ROOT}public${p}`).length / 1024);

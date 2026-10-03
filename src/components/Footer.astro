@@ -11,9 +11,9 @@ const t = useT(locale);
 const year = new Date().getFullYear();
 const links = [
   { href: localePath(locale), label: t('nav.home') },
-  { href: localePath(locale, 'about'), label: t('nav.about') },
   { href: localePath(locale, 'smart-control'), label: t('nav.control') },
   { href: localePath(locale, 'products'), label: t('nav.products') },
+  { href: localePath(locale, 'about'), label: t('nav.about') },
   { href: localePath(locale, 'contact'), label: t('nav.contact') },
 ];
 const mark = t('walk.title').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();

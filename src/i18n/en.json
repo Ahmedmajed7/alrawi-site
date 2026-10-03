@@ -39,7 +39,7 @@
   ],
   "stats": [
    {
-    "n": 7,
+    "n": 10,
     "suffix": "+",
     "label": "Years of experience"
    },
@@ -49,12 +49,39 @@
     "label": "Smart Devices"
    },
    {
-    "n": 400,
+    "n": 620,
     "suffix": "+",
     "label": "Completed Projects"
    }
   ],
   "helpline": "Instant Helpline"
+ },
+ "projects": {
+  "eyebrow": "Our Clients",
+  "pre": "We have delivered more than",
+  "post": "projects across the Sultanate of Oman",
+  "unit": "projects",
+  "map": "Map of Oman showing the projects delivered in each governorate"
+ },
+ "ceo": {
+  "eyebrow": "CEO Message",
+  "body": [
+   "In our fast-paced world, energy efficiency has become not just an option, but a necessity to achieve economic and environmental sustainability.",
+   "We are committed to adopting best practices and advanced technologies to ensure a brighter future, where buildings become smarter and our environment more sustainable.",
+   "Together, we can achieve a balance between progress and responsible awareness."
+  ],
+  "name": "Eng. Hamad Al-Jahwari",
+  "role": "CEO, Al Rawi"
+ },
+ "ways": {
+  "title": "Smart & Easy Control",
+  "lead": "Full control of your home from anywhere, your way.",
+  "items": [
+   "Mobile app control",
+   "Smart wall-mounted control panels",
+   "Voice control (Alexa / Google Home)",
+   "Automated scene making"
+  ]
  },
  "services": {
   "eyebrow": "Services",
@@ -124,10 +151,6 @@
   "h2": "Al Rawi Investment is a leading Systems Integrator",
   "p1": "Al Rawi Investment is a leading Systems Integrator focusing on the Consultancy, Design, Deployment and Maintenance of all ELV Systems based on Conventional & IP network switching infrastructure. Years of hands-on experience enables our ELV Consultants and System Designers to provide immediate suggestions in face to face meetings with our clients leading to comprehensive turnkey solutions.",
   "p2": "We believe that technology has the power to transform your living space into an intelligent home that offers convenience, comfort, and security. Our goal is to provide homeowners like you with smart home solutions that enhance your lifestyle and simplify your everyday routines. We invite discerning homeowners to unlock the true potential of their residences with our exclusive smart home solutions. Discover a world of convenience, sophistication, and unmatched elegance that will transform your home into a haven of opulence.",
-  "years": {
-   "n": 4,
-   "label": "Years of Experience"
-  },
   "vision": {
    "title": "Our Vision",
    "body": "To be the leading Smart Home solutions provider, creating homes that are efficient, secure, and connected."
@@ -232,7 +255,8 @@
    "switch": "Hallway",
    "curtain": "Living room window",
    "speaker": "Lounge ceiling",
-   "sensor": "Kitchen"
+   "sensor": "Kitchen",
+   "app": "Living room"
   },
   "panel": {
    "date": "Tuesday 10 February",
@@ -267,6 +291,20 @@
    "sound": "Sound on or off",
    "screen": "Try the panel: tap a scene, drag a light, set the temperature"
   },
+  "app": {
+   "label": "The home app: try the curtains, the lights and the scenes",
+   "hint": "Drag a slider or tap a scene: the room follows",
+   "curtains": "Curtains",
+   "lights": "Lights",
+   "on": "On",
+   "off": "Off",
+   "brightness": "Brightness",
+   "home": "Home",
+   "scenes": "Scenes",
+   "settings": "Settings",
+   "back": "Rooms",
+   "more": "More"
+  },
   "hud": {
    "status": "Online",
    "specs": "Specifications",
@@ -284,7 +322,10 @@
    "smoke": "Smoke",
    "scan": "Fingerprint",
    "scanning": "Scanning",
-   "granted": "Access granted"
+   "granted": "Access granted",
+   "card": "Card",
+   "face": "Face recognition",
+   "password": "Password"
   }
  }
 }

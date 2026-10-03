@@ -47,6 +47,16 @@ function keypadLight() {
   return t;
 }
 
+/** the card reader's mark between the camera and the keypad: a card with the waves of its field, the same light as the digits */
+function cardLight() {
+  return canvasTex(256, 160, (g, w, h) => {
+    g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(232,240,255,0.9)'; g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round'; g.shadowColor = 'rgba(160,195,255,0.8)'; g.shadowBlur = 10;
+    g.beginPath(); g.roundRect(w * 0.14, h * 0.2, w * 0.4, h * 0.6, 12); g.stroke();
+    for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(w * 0.56, h * 0.5, 22 + k * 22, -0.75, 0.75); g.stroke(); }
+  });
+}
+
 /** the handle's section: its flanks roll off (3 mm) to 45°, then a polished 45° chamfer (1.2 mm deep) meets the face */
 function handleProfile(z0: number, z1: number): Step[] {
   const r = 3, c = 1.2, k = 1 - Math.SQRT1_2, zc = z1 - c;               // the roundover ends at 45°, the chamfer starts there
@@ -80,7 +90,7 @@ export function doorLock({ p }: Ctx): THREE.Group | null {
   const handle = obsidian;
   const ring = new THREE.MeshStandardMaterial({ color: '#9da1a8', metalness: 1, roughness: 0.12, envMapIntensity: 1 });
   const dome = new THREE.MeshPhysicalMaterial({ color: '#07060d', roughness: 0.03, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 0.5, iridescenceIOR: 1.6, iridescenceThicknessRange: [260, 420], envMapIntensity: 1.2 });
-  const ir = new THREE.MeshPhysicalMaterial({ color: '#140405', roughness: 0.05, metalness: 0, clearcoat: 1, envMapIntensity: 1 }); // the infrared emitters' deep red filter
+  const ir = new THREE.MeshPhysicalMaterial({ color: '#140405', emissive: '#ff2414', emissiveIntensity: 0.22, roughness: 0.05, metalness: 0, clearcoat: 1, envMapIntensity: 1 }); // the infrared emitters' deep red filter, the dull glow an eye still sees in it
 
   // the escutcheon: a soft roundover into a flat face
   addLoft(mm, loft(W, H, [RT, RT, RB, RB], rounded(0, D, RO, 0, 6), { cap: 0, back: 0, seg: 10 }), [obsidian]);
@@ -102,6 +112,12 @@ export function doorLock({ p }: Ctx): THREE.Group | null {
   const kpMat = new THREE.MeshBasicMaterial({ map: keypadLight(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, color: new THREE.Color(1.25, 1.25, 1.3) });
   const kp = new THREE.Mesh(new THREE.PlaneGeometry(KEYS.w, KEYS.h), kpMat); kp.name = 'keypad'; kp.position.set(0, y(KEYS.top + KEYS.h / 2), PANE_Z + 0.04); kp.renderOrder = 3; mm.add(kp);
 
+  // the card reader, between the camera and the keypad: its mark lit like the digits; `btn_card`, `btn_face`: where the landing shows
+  // a card read and a face scanned
+  { const cm = new THREE.Mesh(new THREE.PlaneGeometry(13, 8.1), new THREE.MeshBasicMaterial({ map: cardLight(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, color: new THREE.Color(0.7, 0.72, 0.78) })); cm.position.set(0, y(63), PANE_Z + 0.04); cm.renderOrder = 3; mm.add(cm);
+    const bc = new THREE.Object3D(); bc.name = 'btn_card'; bc.position.set(0, y(63), PANE_Z + 0.5); mm.add(bc);
+    const bf = new THREE.Object3D(); bf.name = 'btn_face'; bf.position.set(0, y(21.5), PANE_Z + 0.5); mm.add(bf); }
+
   // the handle: left-aligned, a tight arch at the top, the long cut at the lower left; a 3 mm roundover off its flanks turning into
   // the polished chamfer round its face
   const hx = HANDLE.left + HANDLE.w / 2, hy = y((HANDLE.top + HANDLE.bot) / 2);
@@ -109,6 +125,8 @@ export function doorLock({ p }: Ctx): THREE.Group | null {
   { // the fingerprint reader on the handle's left flank, where the index finger lies: dark glass in a polished ring
     const fp = new THREE.Group(); fp.rotation.y = -Math.PI / 2; fp.position.set(HANDLE.left, y(HANDLE.top + 30), D + HANDLE.proud * 0.45); mm.add(fp);
     addLoft(fp, loft(13, 11, 4, [{ i: 0, z: -0.2, a: 0, m: 1 }, { i: 0, z: 0.3, a: 0 }, { i: 0, z: 0.3, a: 45 }, { i: 0.35, z: 0.6, a: 45 }], { cap: 0 }), [glass, rim]);
+    // the reader's guide light: a fine ring round it, so a finger finds it in the dark
+    const halo = new THREE.Mesh(new THREE.RingGeometry(1, 1.13, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.42, 0.62, 1.0), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); halo.scale.set(7.6, 6.6, 1); halo.position.z = 0.34; halo.renderOrder = 3; fp.add(halo);
     const f = new THREE.Object3D(); f.name = 'btn_finger'; f.position.z = 0.7; fp.add(f);
   }
 

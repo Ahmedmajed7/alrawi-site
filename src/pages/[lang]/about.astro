@@ -4,6 +4,8 @@ import Icon from '@/components/Icons.astro';
 import PageHero from '@/components/PageHero.astro';
 import SecHead from '@/components/SecHead.astro';
 import Stat from '@/components/Stat.astro';
+import CeoMessage from '@/components/CeoMessage.astro';
+import FinalCta from '@/components/FinalCta.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
 import services from '@/data/services.json';
@@ -11,8 +13,10 @@ export const getStaticPaths = staticLangPaths;
 const locale = Astro.params.lang as Locale;
 const t = useT(locale);
 const a = strings(locale).aboutPage;
+const years = strings(locale).aboutUs.stats[0]; // the years of experience: the same figure as the home's, kept in one place
 const brand = l(site.name, locale);
-// the live About page, in its order: the company, years of experience, vision and mission, services, range of products
+// the live About page, in its order: the company, years of experience, vision and mission, services, range of products;
+// the CEO's message (company profile) follows the vision and mission; the closing call ends the page
 ---
 <Base {locale} title={`${t('meta.aboutTitle')} | ${brand}`} description={a.p1.slice(0, 160)}>
   <PageHero title={a.title} crumbs={[{ href: localePath(locale), label: t('nav.home') }, { label: a.title }]} />
@@ -24,8 +28,8 @@ const brand = l(site.name, locale);
         <p class="about-co-lead" data-reveal>{a.p1}</p>
         <p data-reveal style="--d:0.12s">{a.p2}</p>
       </div>
-      <div class="panel panel--solo" data-reveal>
-        <Stat n={a.years.n} label={a.years.label} big />
+      <div class="solo" data-reveal>
+        <Stat n={years.n} suffix={years.suffix} label={years.label} big />
       </div>
     </div>
   </section>
@@ -42,7 +46,9 @@ const brand = l(site.name, locale);
     </div></div>
   </section>
 
-  <section class="band band--paper" id="services" data-tone="lime">
+  <CeoMessage {locale} />
+
+  <section class="band band--mist" id="services" data-tone="lime">
     <div class="wrap">
       <SecHead label={t('services.eyebrow')} title={t('services.title')} lead={t('services.intro')} />
       <div class="cells" data-stagger="0.07">
@@ -57,7 +63,7 @@ const brand = l(site.name, locale);
     </div>
   </section>
 
-  <section class="band band--mist" data-tone="lime">
+  <section class="band band--paper" data-tone="lime">
     <div class="wrap">
       <SecHead title={a.range} />
       <ul class="brands" data-stagger="0.05">
@@ -67,4 +73,6 @@ const brand = l(site.name, locale);
       </ul>
     </div>
   </section>
+
+  <FinalCta {locale} />
 </Base>

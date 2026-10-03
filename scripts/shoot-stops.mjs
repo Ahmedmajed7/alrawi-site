@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Render the exterior (stop 0), the six stops and the exit view for posters, OG and the slideshow fallback. */
+/** Render the exterior (stop 0), every stop and the exit view for posters, OG and the slideshow fallback. */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import house from '../src/data/house.json' with { type: 'json' };

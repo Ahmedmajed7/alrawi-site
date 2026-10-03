@@ -1,0 +1,43 @@
+---
+/** The CEO's message (company profile, page 5), word for word, as an editorial spread: a tall photograph from the
+    profile in a brass hairline frame (it drifts a little as the page scrolls), and beside it the message, its first
+    sentence set as the statement in the display serif and the rest as text. The words take their ink as the reader
+    scrolls through them (scripts/motion/read.ts); the signature closes it under a brass rule. */
+import Logo from '@/components/Logo.astro';
+import { useT, strings, type Locale } from '@/i18n/utils';
+interface Props { locale: Locale; band?: 'paper' | 'mist' }
+const { locale, band = 'paper' } = Astro.props;
+const t = useT(locale);
+const c = strings(locale).ceo;
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const words = (s: string) => s.split(' ').map((w) => `<span class="rw">${esc(w)}</span>`).join(' ');
+---
+<section class:list={['band', `band--${band}`, 'ceo']} id="ceo" data-tone="lime">
+  <div class="wrap ceo-grid">
+    <div class="ceo-photo" data-reveal="rise">
+      <i class="ceo-frame" aria-hidden="true"></i>
+      <span class="ceo-pic" data-par><img src="/img/profile/ceo-room.webp" alt="" width="1040" height="1300" loading="lazy" decoding="async" /></span>
+    </div>
+    <figure class="ceo-body">
+      <span class="kicker" data-reveal>{t('ceo.eyebrow')}</span>
+      <span class="ceo-mark" aria-hidden="true" data-reveal style="--d:0.1s"></span>
+      <blockquote class="ceo-quote" data-read>
+        {c.body.map((s, i) => <p class={i === 0 ? 'ceo-lead' : undefined} set:html={words(s)} />)}
+      </blockquote>
+      <figcaption class="ceo-sign" data-reveal>
+        <i class="ceo-rule" aria-hidden="true"></i>
+        <span class="ceo-ring"><Logo /></span>
+        <span class="ceo-who">
+          <b class="ceo-name">{c.name}</b>
+          <span class="label">{c.role}</span>
+        </span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import { initReading, initParallax } from '@/scripts/motion/read';
+  initReading();
+  initParallax();
+</script>

@@ -9,18 +9,19 @@ const { locale, light = false } = Astro.props;
 const t = useT(locale);
 const path = Astro.url.pathname;
 const other = otherLocale(locale);
-// the live site's pages (Home, About, Smart Control, Contact) plus the product catalogue
+// the live site's pages (Home, About, Smart Control, Contact) plus the product catalogue:
+// what we do first, who we are after, the way to reach us last (first and last places are the ones remembered)
 const links = [
   { href: localePath(locale), label: t('nav.home'), exact: true },
-  { href: localePath(locale, 'about'), label: t('nav.about') },
   { href: localePath(locale, 'smart-control'), label: t('nav.control') },
   { href: localePath(locale, 'products'), label: t('nav.products') },
+  { href: localePath(locale, 'about'), label: t('nav.about') },
   { href: localePath(locale, 'contact'), label: t('nav.contact') },
 ];
 const isCurrent = (href: string, exact = false) => (exact ? path === href : path.startsWith(href));
 const wa = `https://wa.me/${site.whatsapp}`;
 ---
-<header class:list={['nav', { 'on-night': !light }]} data-nav data-light={light ? '1' : '0'}>
+<header class:list={['nav', { 'on-night': !light && path === localePath(locale) }]} data-nav data-light={light ? '1' : '0'}>
   <div class="wrap nav-inner">
     <a class="nav-logo" href={localePath(locale)} aria-label={l(site.name, locale)}>
       <Logo />
