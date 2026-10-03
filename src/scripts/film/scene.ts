@@ -10,7 +10,9 @@
  *     One dimmer runs both: the ceiling comes down first and the lamps' glow is what is left before the dark, as in a room.
  *     All three pictures come out of one decoded frame, so they can never be a frame apart.
  * The canvas sits in the film's stage over the paused clip, whose last frame is the scene's first (drapes parted, lights on): it
- * comes up over the identical picture and hands back to it before the tour moves on.
+ * comes up over the identical picture, and when the tour moves on it dissolves back into it (the room returns to the film's own
+ * state in that dissolve, nothing is played back to get there), and the room's video and its texture are let go of before the
+ * camera sets off: a second decoder at work beside the film's own is what made the move out of the house stutter (3 Oct 2026).
  * Where the stacked video cannot be decoded (or the visitor gets stills instead of film: reduced motion, data saver), the six
  * corner stills are blended instead: the drapes dissolve between parted and drawn.
  */
@@ -29,9 +31,8 @@ export interface Scene {
   /** halt the drapes where they are */
   halt(): void;
   lightsTo(l: number, animate: boolean): void;
-  /** back to the film's own frame (drapes parted, lights on), quickly: the tour is moving on */
-  reset(): Promise<void>;
-  leave(): void;
+  /** dissolve back into the film's own frame and let go of the room's video; resolves once the canvas is off the picture */
+  leave(now?: boolean): Promise<void>;
   onChange(cb: (s: SceneState, moving: boolean) => void): void;
 }
 
@@ -176,6 +177,12 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
     } catch { return true; }
   };
   let videoReady: Promise<boolean> | null = null;
+  /** the room's video and its picture on the graphics card, given back (they are fetched again from the cache if the visitor returns) */
+  const release = () => {
+    if (v) { const el = v; v = null; el.removeAttribute('src'); el.load(); el.remove(); }
+    rung = null; videoReady = null; seeking = false; held = null; mode = 'none';
+    if (gl && !lost) { try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(3)); } catch { /* gone already */ } }
+  };
   const loadVideo = () => (videoReady ??= (async () => {
     let r = pick();
     while (r && !(await supported(r))) { const lower: SceneRung[] = clip.rungs.filter((x) => x.h < r!.h && usable(x)).sort((a, b) => a.h - b.h); r = lower[lower.length - 1] ?? null; }
@@ -236,16 +243,15 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
       else if (stillTween) { cancelAnimationFrame(stillTween); stillTween = 0; moving = false; tell(); }
     },
     lightsTo(l, animate) { l = clamp(l); if (animate && !opts.reduced) tweenLights(l, 420 + 620 * Math.abs(l - st.lights)); else { cancelAnimationFrame(lightTween); lightTween = 0; st.lights = l; draw(); } },
-    reset() {
-      return new Promise<void>((res) => {
-        let n = 2; const one = () => { if (--n === 0) { clearTimeout(t); res(); } }; const t = setTimeout(() => { n = 0; res(); }, 2200);
-        if (st.lights < 0.999) { tweenLights(1, opts.reduced ? 1 : 420); setTimeout(one, opts.reduced ? 20 : 440); } else one();
-        if (st.curtain > 0.999) one();
-        else if (mode === 'video') travel(0, 3.4, one);
-        else if (mode === 'still') tweenStill(1, opts.reduced ? 1 : 500, one); else one();
-      });
+    leave(now = false) {
+      cancelAnimationFrame(lightTween); lightTween = 0; cancelAnimationFrame(stillTween); stillTween = 0;
+      if (v) { playTo = null; onArrive = null; pending = null; moving = false; v.pause(); }
+      canvas.classList.remove('is-on');
+      return new Promise<void>((res) => setTimeout(() => {
+        if (!canvas.classList.contains('is-on')) release();
+        res();
+      }, now || opts.reduced ? 0 : 520));
     },
-    leave() { canvas.classList.remove('is-on'); if (v) { playTo = null; moving = false; v.pause(); } cancelAnimationFrame(lightTween); lightTween = 0; cancelAnimationFrame(stillTween); stillTween = 0; },
     onChange(cb) { subs.push(cb); },
   };
 }

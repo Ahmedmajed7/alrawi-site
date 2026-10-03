@@ -44,10 +44,14 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     phone.style.setProperty('--lights', s.lights.toFixed(3)); phone.style.setProperty('--curtain', s.curtain.toFixed(3));
     el.style.setProperty('--lights', s.lights.toFixed(3)); el.style.setProperty('--curtain', s.curtain.toFixed(3));
     if (Math.abs(s.curtain - prev.curtain) > 0.002) live('curtain'); if (Math.abs(s.lights - prev.lights) > 0.004) live('lights');
-    prev = { ...s };
-    // the room's own picture in the app's header: the middle of the frame, as the canvas shows it now
-    if (tctx && scene && scene.canvas.width && thumb.offsetParent) { const cw = scene.canvas.width, ch = scene.canvas.height, a = thumb.width / thumb.height, sh = ch * 0.74, sw2 = sh * a; tctx.drawImage(scene.canvas, clamp(cw * 0.4 - sw2 / 2, 0, cw - sw2), ch * 0.1, sw2, sh, 0, 0, thumb.width, thumb.height); }
+    prev = { ...s }; thumbSoon();
   };
+  // the room's own picture in the app's header: the middle of the frame, as the canvas shows it. Copying the room's picture off the
+  // graphics card into this small canvas costs a frame's worth of time, so while the room moves it is taken five times a second,
+  // and once more when it comes to rest (every frame of a curtain run, it made the room stutter on an ordinary machine)
+  let thumbT = 0, thumbLast = 0;
+  const drawThumb = () => { thumbT = 0; thumbLast = performance.now(); if (!tctx || !scene || !scene.canvas.width || !thumb.offsetParent) return; const cw = scene.canvas.width, ch = scene.canvas.height, a = thumb.width / thumb.height, sh = ch * 0.74, sw2 = sh * a; tctx.drawImage(scene.canvas, clamp(cw * 0.4 - sw2 / 2, 0, cw - sw2), ch * 0.1, sw2, sh, 0, 0, thumb.width, thumb.height); };
+  const thumbSoon = () => { if (thumbT) clearTimeout(thumbT); thumbT = window.setTimeout(drawThumb, performance.now() - thumbLast > 200 ? 0 : 200); };
   const chip = (i: number) => chips.forEach((b, k) => { b.classList.toggle('is-on', k === i); b.setAttribute('aria-pressed', String(k === i)); });
   const first = () => { if (!touched) { touched = true; el.classList.add('is-touched'); } };
 
@@ -132,7 +136,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
       show(s.state); clearInterval(clock); clock = window.setInterval(tick, 20000);
       settle(opts.reduced ? 100 : 1500);
     },
-    /** the tour moves on: the phone goes down (the room is put back by scene.reset) */
+    /** the tour moves on: the phone goes down (the room dissolves back into the film's frame: scene.leave) */
     hide(now = false) {
       if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock);
       el.classList.remove('is-on', 'is-rising'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h');

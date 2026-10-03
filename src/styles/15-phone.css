@@ -5,7 +5,8 @@
    the visitor's own screen (.is-sheet). Colours: graphite glass with the site's brass for what is on. */
 
 /* the room's picture while the phone runs it: a canvas over the paused clip, covering it exactly as the clip does */
-.walk-scene { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: calc(50% + var(--hud-pan)) calc(50% + var(--hud-pan-y)); z-index: 3; opacity: 0; transition: opacity 0.4s linear; pointer-events: none; }
+.walk-scene { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: calc(50% + var(--hud-pan)) calc(50% + var(--hud-pan-y)); z-index: 3; opacity: 0; transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; } /* (going: the room dissolves back into the film's own frame) */
+.walk-scene.is-on { transition-duration: 0.4s; }
 .walk-scene.is-on { opacity: 1; }
 .walk-scene-src { position: absolute; left: 0; top: 0; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
 

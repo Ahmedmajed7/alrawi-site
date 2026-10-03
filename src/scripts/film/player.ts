@@ -87,7 +87,7 @@ export function mountFilm(root: HTMLElement) {
     const imgs = frames.map((f) => { if (!f) return null; const im = new Image(); im.src = f.u; im.alt = ''; im.decoding = 'async'; host.appendChild(im); return im; });
     const step = (i: number, d: number) => { for (i += d; i >= 0 && i < frames.length; i += d) if (frames[i]) return i; return -1; };
     let k = Math.max(0, step(-1, 1));
-    const appOff = () => { if (phone?.shown) { void phone.hide(true); scene?.leave(); tone.stop(); glow.stop(); } };
+    const appOff = () => { if (phone?.shown) { void phone.hide(true); void scene?.leave(true); tone.stop(); glow.stop(); } };
     const show = (i: number) => {
       k = i; const im = imgs[i]!, fr = frames[i]!; appOff();
       imgs.forEach((x, j) => x?.classList.toggle('is-on', j === i)); if (im.complete) { tone.sample(im, true); glow.draw(im); } else im.addEventListener('load', () => { if (k === i) { tone.sample(im, true); glow.draw(im); } }, { once: true });
@@ -214,11 +214,11 @@ export function mountFilm(root: HTMLElement) {
   const prepare = (v: HTMLVideoElement, c: Clip) => { const u = srcOf(c); if (v.dataset.clip === c.id && v.dataset.src === u) return; v.dataset.clip = c.id; v.dataset.src = u; v.poster = c.poster; v.src = u; v.load(); };
   // the app stop's room: a canvas in the stage over the paused clip (film/scene.ts); fetched while the visitor is at the stop before it
   const room = () => (scene ??= appClip?.scene ? createScene(stage, appClip.scene, { hevc, rungH: () => rungH, still: false, reduced }) : null);
-  /** the phone goes down and the room is put back as the film shows it (drapes parted, lights on); then the film may move */
+  /** the phone goes down and the room dissolves back into the film's own frame (drapes parted, lights on: what the next move
+   *  starts from), then its video is let go of; only then does the film move */
   const leaveApp = async (now = false) => {
     if (!phone?.shown) return;
-    if (now) { void phone.hide(true); scene?.leave(); return; }
-    const down = phone.hide(); await scene?.reset(); await down; scene?.leave();
+    await Promise.all([phone.hide(now), scene?.leave(now)]);
   };
   const nextClipId = () => (state === 'exterior' ? stops[0] : idx < n - 1 ? stops[idx + 1] : 'outro');
   const ready = (v: HTMLVideoElement) => new Promise<void>((res) => { if (v.readyState >= 3) { res(); return; } const on = () => { v.removeEventListener('canplay', on); res(); }; v.addEventListener('canplay', on); });
