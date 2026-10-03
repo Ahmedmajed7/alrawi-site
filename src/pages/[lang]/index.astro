@@ -62,7 +62,7 @@ const wa = `https://wa.me/${site.whatsapp}`;
       </div>
       <span class="sh-coord hero2-coord"><span data-decode data-delay="1350">{l(site.name, locale)}</span></span>
       <h2 class="hero2-title">
-        <span class="caps h2-l1" data-split>{t('hero.l1')}</span>
+        {t('hero.l1') && <span class="caps h2-l1" data-split>{t('hero.l1')}</span>}{/* (empty in Arabic: the client had "تجارب" removed, 3 Oct 2026) */}
         <span class="h2-l2"><span class="h2-l2-in">{t('hero.l2')}</span></span>
       </h2>
       <p class="hero2-sub"><span class="caps">{t('hero.l3')}</span><i class="hit" aria-hidden="true"></i></p>
