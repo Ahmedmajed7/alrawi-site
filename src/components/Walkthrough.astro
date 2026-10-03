@@ -25,6 +25,11 @@ const print = fingerprint();
 const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k / 5) + 0.3 * Math.exp(-((k - 13) ** 2) / 14) + 0.08 * Math.sin(k * 2.4)).toFixed(2));
 ---
 <section class="walk is-prompt" data-walk data-dark-hero data-aria={t('walk.title').replace(/<[^>]+>/g, '')} aria-label={t('walk.eyebrow')}>
+  <!-- before first paint: the live 3D (a dev and recording tool) keeps the full-screen stage on every screen; a first visit hides
+       the site's nav at once (player.ts does it again once loaded), so the bar never shows over the film before its own row -->
+  <script is:inline>(function () { var el = document.currentScript.parentElement, q = new URLSearchParams(location.search); if (['live3d', 'stop', 'cam', 'author', 'record', 'tier'].some(function (k) { return q.has(k); })) { el.classList.add('is-3d'); return; } var done = false; try { done = sessionStorage.getItem('alrawi-walk') === 'done'; } catch (e) {} if (!done) { var n = document.querySelector('[data-nav]'); if (n) n.classList.add('is-off'); } })();</script>
+  <!-- upright screens: the picture's own light round the band (scripts/film/glow.ts) -->
+  <canvas class="walk-glow" data-walk-glow width="32" height="18" aria-hidden="true"></canvas>
   <div class="walk-poster" aria-hidden="true"><img src={heroPoster} alt="" width="1600" height="900" fetchpriority="high" /></div>
   <div class="walk-canvas" data-walk-canvas aria-hidden="true"></div>
   <div class="walk-slides" data-walk-slides hidden aria-hidden="true"></div>
@@ -141,7 +146,7 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
     </div>
     <div class="walk-mid">
       <div class="walk-prompt is-on" data-walk-prompt>
-        <span class="eyebrow" style="color:var(--brass-deep)">{t('walk.eyebrow')}</span>
+        <span class="eyebrow">{t('walk.eyebrow')}</span>
         <h1 set:html={t('walk.title')} />
         <p>{t('walk.subtitle')}</p>
         <button class="walk-tap" type="button" data-walk-tap><i></i>{t('walk.tap')}</button>

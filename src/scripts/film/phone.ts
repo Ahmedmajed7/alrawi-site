@@ -6,10 +6,11 @@
  *   - lights: the switch, the dimmer;
  *   - scenes: the control panel's own four, each a curtain position and a light level set together.
  * Two markers stand in the room (the stop's recorded `marks`), each tied to its card by a dashed line that runs while its control
- * moves. On an upright phone the app is the lower half of the screen and the picture the upper (`is-sheet`): the film's stage is
- * given the top `--app-h` and shows as much of the room's width as fits there.
+ * moves. On an upright screen the whole picture stands in a band at the top (film/stage.ts) and the app is a sheet under it
+ * (`is-sheet`, starting at `--app-h`, the band's bottom edge).
  */
 import type { Scene, SceneState } from './scene';
+import { stageBox, stagePx, upright } from './stage';
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 type Marks = Record<string, number[]> | null | undefined;
@@ -23,7 +24,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
   const cWord = $('[data-app-curtain-word]'), cNum = $('[data-app-curtain-n]'), lWord = $('[data-app-lights-word]'), lNum = $('[data-app-lights-n]'), lPc = $('[data-app-lights-pc]');
   const marks = { curtain: $('[data-app-mark="curtain"]'), lights: $('[data-app-mark="lights"]') }, links = { curtain: el.querySelector<SVGPathElement>('[data-app-link="curtain"]')!, lights: el.querySelector<SVGPathElement>('[data-app-link="lights"]')! };
   const cards = { curtain: $('[data-app-card="curtain"]'), lights: $('[data-app-card="lights"]') };
-  const sheetMq = matchMedia('(max-width: 700px) and (orientation: portrait)');
+  const sheetMq = upright;
   let scene: Scene | null = null, marksAt: Marks = null, on = false, risen = false, lastLevel = 1, clock = 0, touched = false, wired = false;
   let liveTimer: Record<string, number> = {};
 
@@ -85,26 +86,21 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
   };
 
   /* ---------------- where things stand ---------------- */
-  /** the stage's box and how the 16:9 picture covers it: where a point of the frame (0 … 1) lands in the root */
+  /** the stage's box (film/stage.ts): where a point of the frame (0 … 1) lands in the root, and where the picture ends */
   const picture = () => {
-    const sheet = sheetMq.matches, W = root.clientWidth, H = root.clientHeight;
-    // an upright phone: the picture takes the top of the screen, as tall as shows a little over half the frame's width
-    const bh = sheet ? Math.round(clamp((W / 0.56) * (9 / 16), H * 0.36, H * 0.5)) : H, s = Math.max(W / 16, bh / 9), pw = 16 * s, ph = 9 * s;
-    // … and is slid so that the window and the sofa (the frame's 40 %) sit in the middle of it
-    const pan = sheet ? clamp((0.5 - 0.4) * pw, -(pw - W) / 2, (pw - W) / 2) : 0;
-    return { sheet, W, H, bh, pan, at: (p: number[]) => [W / 2 + (p[0] - 0.5) * pw + pan, bh / 2 + (p[1] - 0.5) * ph] as [number, number] };
+    const box = stageBox(root), W = root.clientWidth;
+    return { sheet: box.band, W, top: box.y, bh: box.y + box.h, at: (p: number[]) => stagePx(p, box, { w: 16, h: 9 }) };
   };
   const layout = () => {
     const g = picture();
     const up = on || risen;
     root.classList.toggle('is-sheet', g.sheet && up);
-    if (g.sheet && up) { root.style.setProperty('--app-h', `${g.bh}px`); root.style.setProperty('--hud-pan', `${g.pan.toFixed(1)}px`); }
-    else { root.style.removeProperty('--app-h'); root.style.removeProperty('--hud-pan'); }
+    if (g.sheet && up) root.style.setProperty('--app-h', `${g.bh.toFixed(1)}px`); else root.style.removeProperty('--app-h');
     if (!on) return;
     const r0 = root.getBoundingClientRect(), pr = phone.getBoundingClientRect();
     for (const k of ['curtain', 'lights'] as const) {
       const p = marksAt?.[k], m = marks[k], line = links[k];
-      const xy = p ? g.at(p) : null, inView = !!xy && xy[0] > 24 && xy[0] < g.W - 24 && xy[1] > 24 && xy[1] < g.bh - 16 && !(!g.sheet && xy[0] > pr.left - r0.left - 30);
+      const xy = p ? g.at(p) : null, inView = !!xy && xy[0] > 24 && xy[0] < g.W - 24 && xy[1] > g.top + 24 && xy[1] < g.bh - 16 && !(!g.sheet && xy[0] > pr.left - r0.left - 30);
       m.classList.toggle('is-off', !inView); line.classList.toggle('is-off', !inView); if (!inView || !xy) continue;
       m.style.left = `${xy[0].toFixed(1)}px`; m.style.top = `${xy[1].toFixed(1)}px`;
       // from the marker's rim to its card: the card's near edge beside the room, or its top edge under it
@@ -139,7 +135,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     /** the tour moves on: the phone goes down (the room is put back by scene.reset) */
     hide(now = false) {
       if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock);
-      el.classList.remove('is-on', 'is-rising'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h'); root.style.removeProperty('--hud-pan');
+      el.classList.remove('is-on', 'is-rising'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h');
       return new Promise<void>((res) => setTimeout(() => { if (!on && !risen) el.hidden = true; res(); }, now || opts.reduced ? 0 : 560));
     },
     get shown() { return on || risen; },

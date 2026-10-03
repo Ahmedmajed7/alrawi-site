@@ -21,6 +21,8 @@ The clips in the repo right now are recorded from our 3D villa at golden hour, i
 
 Each clip starts where the previous one ends, so the film reads as one continuous camera move. The player dissolves 0.7 s between clips (the incoming clip fades in over the held frame; the held frame never fades, so there is no dip), which hides small mismatches. Every device's caption is a callout anchored beside it with a hairline leader to the `hotspot` in `film.json`; the recorder projects the recipe's child named `hotspot` (the panel's screen centre, the curtain motor body, the lock's keypad), so keep those points where the device visually is.
 
+On an upright screen (a phone held upright, a tablet) the player shows the whole 16:9 frame in a full-width band rather than covering the screen with a cropped quarter of it, and fetches the rung that band needs (`src/scripts/film/stage.ts`; CLAUDE.md "Upright screens"). Clips stay 16:9: nothing about recording or encoding changes for phones.
+
 ## Files and commands
 
 ```

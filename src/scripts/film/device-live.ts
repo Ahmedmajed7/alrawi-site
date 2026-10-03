@@ -204,10 +204,10 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
       publishDevice(root, i, f); // the HUD keeps its panel clear of what is known of the device (film/hud.ts)
       if (!f || !shape || !make[shape]) return;
       const live = get(i, shape); if (!live) return;
-      live.place(f, root.clientWidth, root.clientHeight, frame); live.enter(); cur = live;
+      live.place(f, layer.clientWidth, layer.clientHeight, frame); live.enter(); cur = live;
     },
     /** re-place (resize, or every frame in the live 3D where the features are projected live) */
-    place(f?: Features | null, frame?: Frame) { if (f) { features = f; if (stop >= 0) publishDevice(root, stop, f); } if (frame !== undefined) frameNow = frame; if (cur && features) cur.place(features, root.clientWidth, root.clientHeight, frameNow); },
+    place(f?: Features | null, frame?: Frame) { if (f) { features = f; if (stop >= 0) publishDevice(root, stop, f); } if (frame !== undefined) frameNow = frame; if (cur && features) cur.place(features, layer.clientWidth, layer.clientHeight, frameNow); },
     /** take the layer down; resolves once it is off the picture (the film may then move) */
     hide(now = false) {
       const was = cur; cur?.leave(); cur = null; features = null; if (!was || now || opts.reduced) return Promise.resolve();

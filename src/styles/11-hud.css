@@ -132,6 +132,7 @@ html[lang='ar'] .hud-specs dd { font-size: 0.88rem; letter-spacing: 0; }
 html[lang='ar'] .walk-view { text-transform: none; letter-spacing: 0; font-size: 0.84rem; }
 .walk-view svg { width: 1.1em; height: 1.1em; }
 .walk-view:hover { background: rgba(61, 155, 255, 0.36); border-color: var(--hud-1); }
+.walk-view:active { background: rgba(61, 155, 255, 0.5); border-color: var(--hud-1); }
 .walk-view:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 /* in front of everything: corner marks, a ruler on the far edge, and a bar of light on the near edge, level with the device */
 .hud-deco { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; }
@@ -308,6 +309,40 @@ html[lang='ar'] .w-granted { font-size: 0.86rem; }
 .walk-callout.is-sheet .hud-body { padding-bottom: calc(var(--zone, 0px) + 14px); }
 .walk-callout.is-sheet .walk-view { position: absolute; inset-inline-end: 16px; top: var(--act, auto); translate: 0 -50%; margin: 0; padding: 14px 16px; }
 .walk-callout.is-sheet .hud-corner-b { display: none; }
+/* under the band (upright screens): the glass reaches the bottom edge whatever the text's height (callout.ts sets --sheet-h) */
+.walk-callout.is-sheet .hud-tilt { min-height: var(--sheet-h, 0px); }
+@media (orientation: portrait) {
+  .walk.is-hold:not(.is-3d) .walk-callouts { transform: none; } /* the picture drifts in its band; the sheet under it holds still */
+  .walk:not(.is-3d) .hud-pan::before { display: none; } /* the room-focus vignette would only darken the small band */
+  /* a short screen keeps the live widget (the card's showpiece) and gives up spec rows instead: two at the last step */
+  .walk:not(.is-3d) .walk-callout.is-sheet.is-min .hud-w { display: grid; }
+  .walk:not(.is-3d) .walk-callout.is-sheet.is-min .hud-specs > div:nth-child(n + 3) { display: none; }
+  .walk.hud-sheet:not(.is-3d) .walk-steps { opacity: 0; }
+}
+@media (orientation: portrait) and (max-width: 360px) {
+  .walk:not(.is-3d) .walk-callout.is-sheet .walk-view { padding-inline: 10px; letter-spacing: 0.1em; font-size: 0.62rem; inset-inline-end: 12px; }
+}
+@media (orientation: portrait) and (max-height: 600px) {
+  .walk:not(.is-3d) .walk-callout.is-sheet.is-min .hud-specs { display: none; } /* the smallest phones: the name and the widget */ /* the card counts the stops itself (01 / 07); "view product" takes this end of the row */
+}
+@media (orientation: portrait) and (min-width: 701px) {
+  .walk:not(.is-3d) .walk-callout.is-sheet .hud-body { max-width: 640px; margin-inline: auto; }
+}
+/* a phone held sideways: the side panel in the dock's compact dress, so it stands between the brand row and the next button */
+@media (orientation: landscape) and (max-height: 500px) {
+  .walk-callout:not(.is-dock) { width: clamp(280px, 40vw, 340px); }
+  .walk-callout:not(.is-dock) .hud-body { gap: 7px; padding: 11px 14px 13px; }
+  .walk-callout:not(.is-dock) h2 { font-size: 1.15rem; margin: 0; }
+  .walk-callout:not(.is-dock) .hud-blurb { display: none; }
+  .walk-callout:not(.is-dock) .hud-specs { grid-template-columns: 1fr 1fr; column-gap: 16px; }
+  .walk-callout:not(.is-dock) .hud-specs > div { grid-template-columns: minmax(0, 1fr); padding: 2px 0 4px; }
+  .walk-callout:not(.is-dock) .hud-specs dd { text-align: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .walk-callout:not(.is-dock) .hud-dc { max-width: 100%; }
+  .walk-callout:not(.is-dock) .hud-tx { overflow: hidden; text-overflow: ellipsis; }
+  .walk-callout:not(.is-dock) .hud-w { padding: 7px 10px 8px; gap: 6px; }
+  .walk-callout:not(.is-dock) .hud-w-body { min-height: 50px; }
+  .walk-callout.is-tight:not(.is-dock) .hud-specs > div:nth-child(n + 5) { display: none; }
+}
 /* the chrome over the sheet reads on dark, whatever the picture under the sheet is */
 .walk.hud-sheet .walk-hint, .walk.hud-sheet .walk-steps span { color: var(--on-night-soft); text-shadow: none; }
 .walk.hud-sheet .walk-steps i { background: rgba(241, 237, 230, 0.28); } .walk.hud-sheet .walk-steps i.is-done { background: var(--brass); } .walk.hud-sheet .walk-steps i.is-on { background: var(--on-night); }

@@ -9,6 +9,8 @@
  * contrast equally at L ≈ 0.21), and while the film moves a change must hold for two samples in a row (0.6 s) before
  * it is applied, so passing a window or a lamp never makes the text blink. On a held frame the verdict is immediate.
  */
+import { stageBox } from './stage';
+
 const W = 48, H = 27;
 type Tone = 'light' | 'dark';
 /** bands in normalised coordinates of the visible picture (after the object-fit: cover crop) [x0, y0, x1, y1] */
@@ -39,10 +41,13 @@ export function createToneSampler(root: HTMLElement) {
   /** Sample the picture now. `settle`: the frame is held (apply at once); otherwise a change needs two samples in a row. */
   const sample = (v: Picture | null, settle = false) => {
     if (broken || !v) return;
+    // an upright screen: the chrome stands on the night ground round the band, never on the picture
+    const box = stageBox(root);
+    if (box.band) { for (const band of Object.keys(BANDS) as Band[]) { pending[band] = null; if (cur[band] !== 'dark') set(band, 'dark'); } return; }
     const vw = v instanceof HTMLVideoElement ? (v.readyState >= 2 ? v.videoWidth : 0) : v instanceof HTMLCanvasElement ? v.width : v.complete ? v.naturalWidth : 0;
     const vh = v instanceof HTMLVideoElement ? v.videoHeight : v instanceof HTMLCanvasElement ? v.height : v.naturalHeight; if (!vw || !vh) return;
     // the part of the picture actually on screen (object-fit: cover crops the long side)
-    const rw = root.clientWidth || 1, rh = root.clientHeight || 1;
+    const rw = box.w || 1, rh = box.h || 1;
     const s = Math.max(rw / vw, rh / vh), cw = rw / s, ch = rh / s;
     try { g!.drawImage(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, W, H); } catch { broken = true; return; }
     let data: Uint8ClampedArray; try { data = g!.getImageData(0, 0, W, H).data; } catch { broken = true; return; } // a tainted canvas: keep the CSS defaults

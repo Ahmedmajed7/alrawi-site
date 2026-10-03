@@ -14,6 +14,8 @@ import { createDeviceLive, type Features } from './device-live';
 import { createToneSampler } from './tone';
 import { createScene, type Scene, type SceneClip } from './scene';
 import { createPhone } from './phone';
+import { createGlow } from './glow';
+import { stageBox, upright } from './stage';
 
 interface Rung { h: number; w: number; avc: string | null; hevc: string | null }
 interface Clip { id: string; loop: boolean; ends: string | null; duration: number; src: string; srcMobile: string; srcHevc?: string; srcHevcMobile?: string; rungs?: Rung[]; poster: string; last: string; hotspot: number[] | null; features?: Features | null; fps?: number; /** the app stop: where its markers stand, and the room in every state the phone can put it in */ marks?: Record<string, number[]> | null; scene?: SceneClip | null }
@@ -67,6 +69,8 @@ export function mountFilm(root: HTMLElement) {
   const live = liveLayer ? createDeviceLive(root, liveLayer, { reduced }) : null;
   const shapes = ui.cards.map((c) => c.dataset.shape);
   const tone = createToneSampler(root); // ivory or dark ink for the chrome, from the picture under it
+  const glow = createGlow(root); // upright screens: the picture's light round the band (film/glow.ts)
+  glow.draw(root.querySelector<HTMLImageElement>('.walk-poster img'));
   const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.('a, button, .walk-load, [data-live-ui], [data-panel-screen], [data-phone]');
   // the app stop (house.json `kind: "app"`): the living room, and the phone that runs it
   const appIdx = house.stops.findIndex((st) => (st as { kind?: string }).kind === 'app'), appClip = appIdx >= 0 ? clips.get(stops[appIdx]) : undefined;
@@ -83,16 +87,16 @@ export function mountFilm(root: HTMLElement) {
     const imgs = frames.map((f) => { if (!f) return null; const im = new Image(); im.src = f.u; im.alt = ''; im.decoding = 'async'; host.appendChild(im); return im; });
     const step = (i: number, d: number) => { for (i += d; i >= 0 && i < frames.length; i += d) if (frames[i]) return i; return -1; };
     let k = Math.max(0, step(-1, 1));
-    const appOff = () => { if (phone?.shown) { void phone.hide(true); scene?.leave(); tone.stop(); } };
+    const appOff = () => { if (phone?.shown) { void phone.hide(true); scene?.leave(); tone.stop(); glow.stop(); } };
     const show = (i: number) => {
       k = i; const im = imgs[i]!, fr = frames[i]!; appOff();
-      imgs.forEach((x, j) => x?.classList.toggle('is-on', j === i)); if (im.complete) tone.sample(im, true); else im.addEventListener('load', () => { if (k === i) tone.sample(im, true); }, { once: true });
+      imgs.forEach((x, j) => x?.classList.toggle('is-on', j === i)); if (im.complete) { tone.sample(im, true); glow.draw(im); } else im.addEventListener('load', () => { if (k === i) { tone.sample(im, true); glow.draw(im); } }, { once: true });
       showCard(i - 1); ui.prompt.classList.toggle('is-on', i === 0); root.classList.toggle('is-prompt', i === 0);
       if (i === 0) { void live?.hide(true); return; }
       placeCallout(i - 1, fr.h); live?.show(i - 1, shapes[i - 1], fr.f, { w: 16, h: 9 });
       if (i - 1 === appIdx && phone && appClip?.scene) { // the room in its four corner stills, blended
         scene ??= createScene(host, appClip.scene, { hevc: false, rungH: () => 1080, still: true, reduced });
-        phone.show(scene, appClip.marks); void scene.enter(); tone.watch(() => (phone.shown && scene ? scene.canvas : null)); // the chrome's ink follows the room as it is dimmed
+        phone.show(scene, appClip.marks); void scene.enter(); tone.watch(() => (phone.shown && scene ? scene.canvas : null)); glow.watch(() => (phone.shown && scene ? scene.canvas : null)); // the chrome's ink (and the glow) follow the room as it is dimmed
       }
     };
     const advance = () => { const nx = step(k, 1); if (nx < 0) { finish(); return; } show(nx); };
@@ -101,7 +105,7 @@ export function mountFilm(root: HTMLElement) {
     root.addEventListener('click', (e) => { if (!isControl(e)) advance(); }); ui.nexts.forEach((b) => b.addEventListener('click', advance)); ui.tap.addEventListener('click', advance);
     ui.skip.addEventListener('click', (e) => { e.preventDefault(); finish(); });
     window.addEventListener('keydown', (e) => { if (isControl(e)) return; if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); advance(); } if (e.key === 'ArrowLeft') { const pv = step(k, -1); if (pv >= 0) show(pv); } });
-    addEventListener('resize', () => { if (k > 0) { placeCallout(k - 1, frames[k]!.h); live?.place(frames[k]!.f, { w: 16, h: 9 }); } });
+    addEventListener('resize', () => { const im = imgs[k]; if (im?.complete) { tone.sample(im, true); glow.draw(im); } if (k > 0) { placeCallout(k - 1, frames[k]!.h); live?.place(frames[k]!.f, { w: 16, h: 9 }); } });
     return;
   }
 
@@ -124,10 +128,15 @@ export function mountFilm(root: HTMLElement) {
   const nav_ = navigator as Navigator & { deviceMemory?: number; connection?: { downlink?: number } };
   const ladder = [720, 1080, 1440].filter((h) => (hero?.rungs ?? []).some((r) => r.h === h && (hevc ? r.hevc : r.avc)) || (!hero?.rungs && h <= 1080));
   const DROP_KEY = 'alrawi-film-cap';
-  /** the tallest rung worth fetching: the covered picture's rows in device pixels, then capped by what the device and line can carry */
-  const target = () => {
+  /** the picture's rows in device pixels: an upright screen shows the whole frame in a full-width band (film/stage.ts); a
+   *  landscape one is covered, which spans at least this many rows. `turned`: the same screen held the other way */
+  const rowsNow = (turned = false) => {
     const dpr = Math.min(3, devicePixelRatio || 1);
-    const rows = Math.max(innerWidth * 9 / 16, innerHeight) * dpr; // object-fit: cover spans at least this many screen pixels vertically
+    const w = turned ? innerHeight : innerWidth, h = turned ? innerWidth : innerHeight;
+    return (h >= w ? w * 9 / 16 : Math.max(w * 9 / 16, h)) * dpr; // (orientation: portrait) is h ≥ w
+  };
+  /** the tallest rung worth fetching: the picture's rows, then capped by what the device and line can carry */
+  const target = (rows = rowsNow()) => {
     let cap = 1440;
     const phone = Math.min(screen.width, screen.height) < 600, tablet = !phone && small;
     if (phone) cap = 1080; else if (tablet) cap = 1440; // phones decode 1080p60 in their sleep; more is data, not detail at arm's length
@@ -140,10 +149,12 @@ export function mountFilm(root: HTMLElement) {
     const want = ladder.find((h) => h >= rows * 0.85) ?? ladder[ladder.length - 1] ?? 1080;
     return Math.min(want, cap);
   };
-  let rungH = 1080, ceiling = 1080, dropCap = 1440;
-  /** walk down from the target until the browser says the rung decodes smoothly (and, above 1080p, in hardware) */
+  let rungH = 1080, ceiling = 1080, dropCap = 1440, lineBest = Infinity;
+  /** walk down from the target until the browser says the rung decodes smoothly (and, above 1080p, in hardware). The check runs
+   *  for the larger of the screen's two ways round, so a phone turned sideways mid-tour can step up; the start takes what this
+   *  way round wants */
   const chooseRung = async () => {
-    let h = target();
+    let h = Math.max(target(), target(rowsNow(true)));
     const mc = (navigator as Navigator & { mediaCapabilities?: { decodingInfo(c: unknown): Promise<{ supported: boolean; smooth: boolean; powerEfficient: boolean }> } }).mediaCapabilities;
     for (; mc; ) {
       const k = CODEC[h]; const r = ladder.filter((x) => x <= h);
@@ -155,7 +166,7 @@ export function mountFilm(root: HTMLElement) {
       const lower = ladder.filter((x) => x < h); if (!lower.length) break; h = lower[lower.length - 1];
     }
     const forced = +(q.get('rung') || 0); if (ladder.includes(forced)) h = forced; // dev/QA: ?rung=720|1080|1440
-    ceiling = rungH = h;
+    ceiling = h; rungH = ladder.includes(forced) ? forced : Math.min(h, target());
   };
   /** Mb/s a rung's moves need to stream faster than they play (60 fps caps from film-encode.mjs, with headroom) */
   const NEED: Record<number, [number, number]> = { 720: [7, 5], 1080: [16, 10], 1440: [28, 18] }; // [H.264, HEVC] (3 Oct 2026: the crisper encode carries about a quarter more)
@@ -180,8 +191,9 @@ export function mountFilm(root: HTMLElement) {
   });
   const fitLine = (mbps: number | null) => {
     if (mbps === null) return;
-    const fits = ladder.filter((h) => h <= ceiling && NEED[h][hevc ? 1 : 0] > 0 && mbps >= NEED[h][hevc ? 1 : 0]);
-    rungH = Math.min(rungH, dropCap, fits.length ? fits[fits.length - 1] : ladder[0] ?? 720);
+    const fits = ladder.filter((h) => NEED[h][hevc ? 1 : 0] > 0 && mbps >= NEED[h][hevc ? 1 : 0]);
+    lineBest = fits.length ? fits[fits.length - 1] : ladder[0] ?? 720;
+    rungH = Math.min(rungH, dropCap, lineBest);
   };
   const srcOf = (c: Clip) => {
     if (c.rungs?.length) {
@@ -223,7 +235,14 @@ export function mountFilm(root: HTMLElement) {
     setTimeout(() => { old.pause(); old.classList.remove('is-under'); }, 900);
   };
   let holdClip: Clip | null = null;
-  addEventListener('resize', () => { if (state === 'stop' && holdClip) { placeCallout(idx, holdClip.hotspot); live?.place(holdClip.features, { w: videoW, h: videoH }); } });
+  addEventListener('resize', () => { tone.sample(front, true); glow.draw(front); if (state === 'stop' && holdClip) { placeCallout(idx, holdClip.hotspot); live?.place(holdClip.features, { w: videoW, h: videoH }); } });
+  // the screen turned: the band and the full screen want different rungs; the next move (already buffering at a stop) follows
+  upright.addEventListener?.('change', () => {
+    if (q.has('rung')) return;
+    const h = Math.min(target(), ceiling, lineBest, dropCap); if (h === rungH) return;
+    rungH = h;
+    if (state === 'stop') { const next = idx < n - 1 ? clips.get(stops[idx + 1]) : clips.get('outro'); if (next) prepare(back, next); }
+  });
 
   const play = async (c: Clip) => {
     state = 'travelling'; showCard(-1); ui.prompt.classList.remove('is-on'); root.classList.remove('is-prompt');
@@ -247,7 +266,7 @@ export function mountFilm(root: HTMLElement) {
     judge(front);
   };
   const arrive = (i: number, c: Clip) => {
-    state = 'stop'; idx = i; holdClip = c; tone.sample(front, true); showCard(i); placeCallout(i, c.hotspot);
+    state = 'stop'; idx = i; holdClip = c; tone.sample(front, true); glow.draw(front); showCard(i); placeCallout(i, c.hotspot);
     live?.show(i, shapes[i], c.features, { w: videoW, h: videoH }); // over the held frame, at rest: it comes up as the film shows it, then wakes
     if (i === appIdx && phone && room()) { const sc = room()!; phone.show(sc, c.marks); void sc.enter(); } // the living room: the phone comes up, the room is the visitor's
     else root.classList.add('is-hold'); // slow drift on the paused frame keeps it alive; the callout layer drifts with it
@@ -289,9 +308,14 @@ export function mountFilm(root: HTMLElement) {
     if (e.key === 'ArrowLeft') void back_();
   });
   // pause everything while the hero is off screen or the tab is hidden
-  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); } else { tone.watch(() => (scene?.canvas.classList.contains('is-on') ? scene.canvas : front)); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
+  const onScreen = () => (scene?.canvas.classList.contains('is-on') ? scene.canvas : front);
+  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); glow.stop(); } else { tone.watch(onScreen); glow.watch(onScreen); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
   io.observe(root);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) front.pause(); else if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { front.pause(); glow.stop(); return; }
+    if (root.getBoundingClientRect().bottom > 0) glow.watch(onScreen);
+    if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {});
+  });
 
   // ---------- start: the hero loop behind the headline ----------
   void chooseRung().then(() => {

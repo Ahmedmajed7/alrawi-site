@@ -4,6 +4,12 @@
    .walk-callouts, so they drift with the held frame. Positions come from the film (a matrix3d onto the recorded
    corners, or a point), so nothing here depends on the viewport. */
 .walk-live { position: absolute; inset: 0; pointer-events: none; }
+/* upright screens: the picture stands in a band (05-walkthrough.css), and so does this layer; it drifts with the held frame
+   itself, about the band's centre, since the HUD under the band does not */
+@media (orientation: portrait) {
+  .walk:not(.is-3d) .walk-live { inset: var(--stage-top) 0 auto; height: auto; aspect-ratio: 16 / 9; overflow: clip; transform: scale(1); transform-origin: 50% 50%; transition: transform 1.6s var(--ease-io); }
+  .walk.is-hold:not(.is-3d) .walk-live { transform: scale(1.04); transition: transform 18s cubic-bezier(0.2, 0.6, 0.3, 1); }
+}
 .walk-live [data-live] { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0; transition: opacity 0.5s var(--ease); }
 .walk-live [data-live].is-on { opacity: 1; }
 .walk-live button { pointer-events: auto; cursor: pointer; }
