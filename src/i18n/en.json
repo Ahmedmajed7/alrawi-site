@@ -293,7 +293,6 @@
   },
   "app": {
    "label": "The home app: try the curtains, the lights and the scenes",
-   "hint": "Drag a slider or tap a scene: the room follows",
    "curtains": "Curtains",
    "lights": "Lights",
    "on": "On",
@@ -304,6 +303,13 @@
    "settings": "Settings",
    "back": "Rooms",
    "more": "More"
+  },
+  "coach": {
+   "try": "Try it",
+   "switch": "Tap a light to switch it off",
+   "curtain": "Slide to close the curtains",
+   "lights": "Now tap the lights",
+   "scene": "Or tap a scene"
   },
   "hud": {
    "status": "Online",

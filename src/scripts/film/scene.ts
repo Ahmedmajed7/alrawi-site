@@ -3,8 +3,13 @@
  * in every state the phone can put it in (scripts/record-film.mjs `--only=app-scene`, film-encode.mjs `scene`): one video of three
  * pictures stacked (the rooms' lights on, the table lamps alone, all off), the drapes going from parted to drawn over `frames`
  * frames and back again. Here that becomes a picture that answers the phone:
- *   - the drapes' position is a frame: a drag seeks to it (one seek in flight, the latest wins); Open / Close / a scene plays the
- *     half of the clip that runs the right way, forwards, with a soft start and stop, and halts on the frame it was sent to;
+ *   - the drapes' position is a frame, and the drapes only ever get anywhere the way a motor gets them there: the half of the clip
+ *     that runs the right way plays forwards (drawing them is the first half, parting them the second) and halts on the frame it
+ *     was sent to. Open / Close / a scene start softly and run at 1.5×; a finger on the slider is followed quickly (up to 3×, a
+ *     few frames behind it): a new mark the same way only moves the stop, and a seek happens only when the drapes turn round
+ *     (onto the frame of the other half that shows them where they are). Seeking per pointer move made the drapes trail the
+ *     finger in steps and crawl on after it let go (3 Oct 2026);
+ *   - the room's file is fetched whole and played from memory (see `loadFile`);
  *   - the lights are light, added the way light adds: unlit room + the lamps' share × their level + the ceiling's share × its
  *     level, summed in linear light (a WebGL pass; a plain cross-fade of the encoded pictures greys the room on its way down).
  *     One dimmer runs both: the ceiling comes down first and the lamps' glow is what is left before the dark, as in a room.
@@ -14,7 +19,8 @@
  * state in that dissolve, nothing is played back to get there), and the room's video and its texture are let go of before the
  * camera sets off: a second decoder at work beside the film's own is what made the move out of the house stutter (3 Oct 2026).
  * Where the stacked video cannot be decoded (or the visitor gets stills instead of film: reduced motion, data saver), the six
- * corner stills are blended instead: the drapes dissolve between parted and drawn.
+ * corner stills are blended instead: the drapes dissolve between parted and drawn. The stills also stand in while the video is
+ * still on its way (a slow line), and the video takes over as soon as it is in, so the phone answers from the first touch.
  */
 export interface SceneRung { h: number; w: number; gap: number; avc: string | null; hevc: string | null }
 export interface SceneClip { frames: number; fps: number; layers?: string[]; rungs: SceneRung[]; stills: Record<string, string> }
@@ -22,11 +28,13 @@ export interface SceneClip { frames: number; fps: number; layers?: string[]; run
 export interface SceneState { curtain: number; lights: number }
 export interface Scene {
   canvas: HTMLCanvasElement; readonly state: SceneState; readonly moving: boolean;
+  /** the drapes' travel in frames: a curtain position the room can show exactly is a multiple of 1 / steps */
+  readonly steps: number;
   /** start fetching (the stop before this one has been reached) */
   prepare(): void;
   /** the first frame is drawn (the film's own last frame) and the canvas is up */
   enter(): Promise<void>;
-  /** `drag`: follow the finger · `travel`: run there as the motor would */
+  /** `drag`: follow the finger (quickly) · `travel`: run there as the motor would */
   curtainTo(c: number, how: 'drag' | 'travel'): void;
   /** halt the drapes where they are */
   halt(): void;
@@ -44,6 +52,10 @@ const ease = (t: number) => t * t * (3 - 2 * t);
 /** what the one dimmer asks of each circuit: the lamps are up by a third of its travel, the ceiling follows over the rest */
 const lampsAt = (d: number) => ease(clamp(d / 0.3)), ceilingAt = (d: number) => Math.pow(clamp((d - 0.1) / 0.9), 1.5);
 type RVFC = (cb: (now: number, m: { mediaTime: number }) => void) => number;
+/** how the drapes get to their mark: top speed (× the recording), ms to reach it, frames over which they slow to a stop */
+interface Pace { top: number; ramp: number; brake: number }
+const MOTOR: Pace = { top: 1.5, ramp: 320, brake: 7 }, FINGER: Pace = { top: 3, ramp: 120, brake: 9 };
+const wait = <T>(ms: number, v: T) => new Promise<T>((res) => setTimeout(() => res(v), ms));
 
 const VERT = 'attribute vec2 p; varying vec2 vUv; void main() { vUv = vec2(p.x * 0.5 + 0.5, 0.5 - p.y * 0.5); gl_Position = vec4(p, 0.0, 1.0); }';
 const FRAG = `precision highp float; varying vec2 vUv; uniform sampler2D t; uniform float uLamps, uCeil, uH, uPitch, uInset;
@@ -64,8 +76,13 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
   const N = clip.frames, last = N - 1, fps = clip.fps;
   const st: SceneState = { curtain: 1, lights: 1 };
   const subs: ((s: SceneState, moving: boolean) => void)[] = [];
-  let mode: 'none' | 'video' | 'still' = 'none', moving = false, lightTween = 0;
-  const tell = () => { for (const f of subs) f(st, moving || !!lightTween); };
+  let mode: 'none' | 'video' | 'still' = 'none', lightTween = 0, stillTween = 0, entered = false, epoch = 0;
+  /** where the visitor last sent the drapes (1 = parted): carried over when the picture changes hands (stills → video) */
+  let aim = 1;
+  /** where the drapes are headed in frames (0 = parted … last = drawn); null = at rest */
+  let goal: number | null = null;
+  const moving = () => goal !== null || !!stillTween;
+  const tell = () => { for (const f of subs) f(st, moving() || !!lightTween); };
 
   /* ---------------- the painter: one source holding the three pictures, summed as light ---------------- */
   let gl: WebGLRenderingContext | null = null, ctx: CanvasRenderingContext2D | null = null, uni: Record<string, WebGLUniformLocation | null> = {};
@@ -120,7 +137,11 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
   };
 
   /* ---------------- video: one stacked clip, there and back ---------------- */
-  let v: HTMLVideoElement | null = null, rung: SceneRung | null = null, seeking = false, pending: number | null = null, playTo: number | null = null, playRate = 1.5, playT0 = 0, onArrive: (() => void) | null = null;
+  let v: HTMLVideoElement | null = null, rung: SceneRung | null = null;
+  let seeking = false, watch = 0, landed: (() => void) | null = null;
+  /** `stopAt`: the frame the clip is running to · `gen`: which play() a refusal belongs to · `stuck`: the browser will not play
+   *  this video (power saving): the drapes step there by seeks instead */
+  let stopAt = 0, gen = 0, t0 = 0, stuck = false, pace = MOTOR;
   const frameOf = (t: number) => clamp(Math.round(t * fps - 0.5 + 1e-3), 0, 2 * last);      // a frame shows from f / fps
   const posOf = (f: number) => (f <= last ? f : 2 * last - f);                                  // the drapes' position (0 = parted … last = drawn) on frame f
   const timeOf = (f: number) => (f + 0.5) / fps;
@@ -130,41 +151,66 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
     paint(v, rung.w, rung.h, rung.gap); shown = f; st.curtain = 1 - posOf(f) / last;
   };
   const draw = (frame = false) => { if (mode === 'video') { if (frame || !held) drawVideo(shown); else repaint(); } else if (mode === 'still') drawStill(); tell(); };
-  const seek = (f: number) => {
-    if (!v) return; if (seeking) { pending = f; return; }
-    if (f === shown && Math.abs(v.currentTime - timeOf(f)) < 0.4 / fps) return;
-    seeking = true; v.currentTime = timeOf(f);
+  const seekTo = (f: number) => {
+    if (!v) return; seeking = true; clearTimeout(watch);
+    // a seek that never lands (a decoder that gave up) must not hold the drapes for good
+    watch = window.setTimeout(() => { if (seeking) { seeking = false; drive(); } }, 1500);
+    v.currentTime = timeOf(f);
   };
   const seeked = () => {
-    seeking = false; if (!v) return; drawVideo(frameOf(v.currentTime)); tell();
-    if (pending !== null) { const f = pending; pending = null; seek(f); return; }
-    if (playTo !== null && v.paused) void v.play().catch(() => { arrived(); });
+    seeking = false; clearTimeout(watch); if (!v) return;
+    if (mode !== 'still') { drawVideo(frameOf(v.currentTime)); tell(); } // (over the stills only once the video takes over: toVideo)
+    const l = landed; landed = null; l?.();
+    drive();
   };
-  const arrived = () => {
-    if (!v) return; const f = playTo; playTo = null; moving = false; v.pause(); v.playbackRate = 1;
-    if (f !== null) seek(f); // exactly the frame it was sent to
-    tell(); const done = onArrive; onArrive = null; done?.();
+  const pause = () => { if (!v) return; gen++; v.pause(); v.playbackRate = 1; };
+  const run = () => {
+    const el = v; if (!el) return; const g = ++gen; t0 = performance.now(); el.playbackRate = 0.55;
+    // a pause() of ours rejects the play() it cuts short (AbortError): only a real refusal changes how the drapes move
+    el.play().catch((e: unknown) => { if (g !== gen || v !== el || (e as DOMException | null)?.name === 'AbortError') return; stuck = true; drive(); });
+  };
+  /** the clip has reached the frame it ran to: hold exactly that frame (one run past is sought back) */
+  const land = () => {
+    if (!v) return; pause();
+    const f = frameOf(v.currentTime);
+    if (f !== stopAt) { seekTo(stopAt); return; } // seeked → drive → at rest, or on to a newer mark
+    drawVideo(f); tell(); drive();
+  };
+  /** head for `goal` from the frame on screen */
+  const drive = () => {
+    if (!v || seeking || goal === null || mode !== 'video') return;
+    const playing = !v.paused, p = posOf(shown);
+    if (goal === p) { if (playing) { stopAt = shown; land(); } else { goal = null; tell(); } return; }
+    const fwd = goal > p, end = fwd ? goal : 2 * last - goal;
+    if (playing) {
+      if (fwd === (shown < last)) { stopAt = end; return; } // the same way: the stop moves, the drapes run on
+      pause();                                          // turning round
+    }
+    if (stuck || opts.reduced) { // no motor to show: straight there (reduced motion), or a few frames per seek
+      const q = opts.reduced ? goal : p + Math.sign(goal - p) * Math.min(Math.abs(goal - p), 4);
+      seekTo(shown <= last ? q : 2 * last - q); return;
+    }
+    const start = fwd ? p : 2 * last - p;
+    if (shown !== start || Math.abs(frameOf(v.currentTime) - start) > 1) {
+      // a hop of a frame or three is a seek in the half on screen; anything longer starts from the frame that shows the drapes
+      // where they are in the half that runs the right way
+      if (Math.abs(goal - p) <= 3) seekTo(shown <= last ? goal : 2 * last - goal); else seekTo(start);
+      return;
+    }
+    stopAt = end; run();
   };
   const onFrame = (t: number) => {
-    if (!v || playTo === null) return; const f = frameOf(t); drawVideo(f); tell();
-    if (f >= playTo) { arrived(); return; }
-    // a motor's start and stop: the drapes gather speed over a third of a second and lose it over the last few frames
-    const left = playTo - f, k = ease(clamp(Math.min((performance.now() - playT0) / 320, left / 7)));
-    const r = Math.round((0.55 + (playRate - 0.55) * k) * 20) / 20; if (Math.abs(v.playbackRate - r) > 0.04) v.playbackRate = r;
+    if (!v || goal === null || seeking || v.paused) return;
+    const f = frameOf(t); if (f !== shown) { drawVideo(f); tell(); }
+    if (f >= stopAt) { land(); return; }
+    // a motor's start and stop: the drapes gather speed and lose it again over the last few frames
+    const left = stopAt - f, k = ease(clamp(Math.min((performance.now() - t0) / pace.ramp, left / pace.brake)));
+    const r = Math.round((0.55 + (pace.top - 0.55) * k) * 20) / 20; if (Math.abs(v.playbackRate - r) > 0.04) v.playbackRate = r;
   };
-  const pump = () => { // per decoded frame where the browser tells us, else per display frame
-    if (!v) return; const rv = (v as HTMLVideoElement & { requestVideoFrameCallback?: RVFC }).requestVideoFrameCallback;
-    if (rv) { const cb = (_: number, m: { mediaTime: number }) => { if (!v) return; if (playTo !== null) onFrame(m.mediaTime); rv.call(v, cb); }; rv.call(v, cb); }
-    else { const loop = () => { if (!v) return; if (playTo !== null && !v.paused) onFrame(v.currentTime); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
-  };
-  const travel = (k: number, rate: number, done?: () => void) => {
-    if (!v) { done?.(); return; }
-    const now = posOf(shown); if (k === now && playTo === null) { done?.(); return; }
-    // drawing the drapes is the first half of the clip, parting them the second: either way the clip plays forwards
-    const f0 = k > now ? now : 2 * last - now, f1 = k > now ? k : 2 * last - k;
-    onArrive = done ?? null; playTo = f1; playRate = rate; playT0 = performance.now(); moving = true; pending = null; v.pause();
-    if (frameOf(v.currentTime) !== f0 || seeking) seek(f0); else void v.play().catch(() => { arrived(); });
-    tell();
+  const pump = (el: HTMLVideoElement) => { // per decoded frame where the browser tells us, else per display frame
+    const rv = (el as HTMLVideoElement & { requestVideoFrameCallback?: RVFC }).requestVideoFrameCallback;
+    if (rv) { const cb = (_: number, m: { mediaTime: number }) => { if (v !== el) return; onFrame(m.mediaTime); rv.call(el, cb); }; rv.call(el, cb); }
+    else { const loop = () => { if (v !== el) return; onFrame(el.currentTime); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
   };
   const usable = (r: SceneRung) => !!(opts.hevc ? r.hevc : r.avc) && (!gl || LAYERS * r.h + (LAYERS - 1) * r.gap <= (gl.getParameter(gl.MAX_TEXTURE_SIZE) as number));
   const pick = () => { const ok = clip.rungs.filter(usable).sort((a, b) => a.h - b.h); return [...ok].reverse().find((r) => r.h <= opts.rungH()) ?? ok[0] ?? null; };
@@ -176,28 +222,69 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
       return !info || info.supported;
     } catch { return true; }
   };
+  // The room's file is fetched whole and played from memory. Every move of the drapes may start with a seek, and seeking a video
+  // needs a server that answers byte ranges: the live host sends the whole file to a range request, and Chrome then takes the
+  // video for a stream it can seek only to its start, so every drag and every scene began from parted drapes (3 Oct 2026). From
+  // memory a seek always lands. The file is kept for the visit (a return to the room starts at once) unless it was cut short.
+  type Loaded = { r: SceneRung; url: string };
+  let file: Loaded | null = null, fileReady: Promise<Loaded | null> | null = null, fetching: AbortController | null = null;
+  const loadFile = () => (fileReady ??= (async () => {
+    let r = pick();
+    while (r && !(await supported(r))) { const lower: SceneRung[] = clip.rungs.filter((x) => x.h < r!.h && usable(x)).sort((a, b) => a.h - b.h); r = lower[lower.length - 1] ?? null; }
+    if (!r) return null;
+    const ac = new AbortController(); fetching = ac;
+    try {
+      const res = await fetch((opts.hevc ? r.hevc : r.avc)!, { signal: ac.signal });
+      if (!res.ok) throw new Error(String(res.status));
+      const b = await res.blob();
+      return (file = { r, url: URL.createObjectURL(b.type.startsWith('video/') ? b : b.slice(0, b.size, 'video/mp4')) });
+    } catch { fileReady = null; return null; } // (cut short, or the line failed: fetched again on the next visit)
+    finally { if (fetching === ac) fetching = null; }
+  })());
   let videoReady: Promise<boolean> | null = null;
-  /** the room's video and its picture on the graphics card, given back (they are fetched again from the cache if the visitor returns) */
+  /** the room's video element and its picture on the graphics card, given back (the file in memory is kept) */
   const release = () => {
+    epoch++; clearTimeout(watch);
     if (v) { const el = v; v = null; el.removeAttribute('src'); el.load(); el.remove(); }
-    rung = null; videoReady = null; seeking = false; held = null; mode = 'none';
+    rung = null; videoReady = null; seeking = false; landed = null; held = null; mode = 'none'; goal = null;
     if (gl && !lost) { try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(3)); } catch { /* gone already */ } }
   };
   const loadVideo = () => (videoReady ??= (async () => {
-    let r = pick();
-    while (r && !(await supported(r))) { const lower: SceneRung[] = clip.rungs.filter((x) => x.h < r!.h && usable(x)).sort((a, b) => a.h - b.h); r = lower[lower.length - 1] ?? null; }
-    if (!r) return false;
+    const at = epoch, f = await loadFile();
+    if (!f || at !== epoch) { if (at === epoch) videoReady = null; return false; }
     const el = document.createElement('video'); el.muted = true; el.defaultMuted = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.setAttribute('muted', ''); el.preload = 'auto'; el.disablePictureInPicture = true;
     el.className = 'walk-scene-src'; el.setAttribute('aria-hidden', 'true'); el.tabIndex = -1; host.appendChild(el);
     const ok = await new Promise<boolean>((res) => {
-      const t = setTimeout(() => res(false), 12000);
+      const t = setTimeout(() => res(false), 8000);
       el.addEventListener('loadeddata', () => { clearTimeout(t); res(true); }, { once: true }); el.addEventListener('error', () => { clearTimeout(t); res(false); }, { once: true });
-      el.src = (opts.hevc ? r!.hevc : r!.avc)!; el.load();
+      el.src = f.url; el.load();
     });
-    if (!ok) { el.remove(); return false; }
-    v = el; rung = r; el.addEventListener('seeked', seeked); el.addEventListener('ended', () => { if (playTo !== null) arrived(); }); pump();
+    if (!ok || at !== epoch) { el.removeAttribute('src'); el.load(); el.remove(); if (at === epoch) videoReady = null; return false; }
+    v = el; rung = f.r; el.addEventListener('seeked', seeked); el.addEventListener('ended', () => { if (goal !== null) land(); }); pump(el);
     return true;
   })());
+  /** the video on frame `f`, decoded and drawn into the canvas (whatever the canvas showed before) */
+  const startVideo = async (f: number) => {
+    const el = v; if (!el) return false;
+    // played once (some browsers draw nothing from a video that has never played), then onto the frame
+    await Promise.race([el.play().then(() => {}, () => {}), wait(800, undefined)]); el.pause(); gen++;
+    if (v !== el || !entered) return false;
+    goal = null; shown = -1;
+    await new Promise<void>((res) => { landed = res; setTimeout(res, 1600); seekTo(f); });
+    if (v !== el || !entered || el.readyState < 2) return false;
+    drawVideo(frameOf(el.currentTime));
+    return true;
+  };
+  /** the picture becomes the video's (from the stills, or from nothing): the drapes then go on to wherever they were sent */
+  const toVideo = async () => {
+    if (mode === 'video' || !v) return;
+    const from = mode === 'still' ? 1 - st.curtain : 0;
+    if (!(await startVideo(Math.round(from * last))) || !entered || (mode as string) === 'video') return;
+    cancelAnimationFrame(stillTween); stillTween = 0;
+    mode = 'video'; canvas.classList.add('is-on');
+    if (Math.abs(aim - st.curtain) > 0.5 / last) { goal = Math.round((1 - aim) * last); pace = MOTOR; drive(); }
+    draw();
+  };
 
   // the lights: the dimmer is eased to its new level, and the two circuits follow it each on its own curve (lampsAt, ceilingAt):
   // switched on, the lamps are up first and the ceiling comes after them; switched off, the ceiling goes and the lamps linger
@@ -206,49 +293,52 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
     const step = (now: number) => { const k = clamp((now - t0) / ms); st.lights = from + (to - from) * ease(k); lightTween = k < 1 ? requestAnimationFrame(step) : 0; draw(); };
     lightTween = requestAnimationFrame(step);
   };
-  let stillTween = 0;
-  const tweenStill = (to: number, ms: number, done?: () => void) => {
-    cancelAnimationFrame(stillTween); const from = st.curtain, t0 = performance.now(); moving = true;
-    const step = (now: number) => { const k = clamp((now - t0) / ms); st.curtain = from + (to - from) * ease(k); if (k < 1) stillTween = requestAnimationFrame(step); else { stillTween = 0; moving = false; done?.(); } draw(); };
+  const tweenStill = (to: number, ms: number) => {
+    cancelAnimationFrame(stillTween); const from = st.curtain, s0 = performance.now();
+    const step = (now: number) => { const k = clamp((now - s0) / ms); st.curtain = from + (to - from) * ease(k); stillTween = k < 1 ? requestAnimationFrame(step) : 0; draw(); };
     stillTween = requestAnimationFrame(step);
+  };
+  const curtainTo = (c: number, how: 'drag' | 'travel') => {
+    c = clamp(c); aim = c;
+    if (mode === 'video') {
+      // a finger is followed quickly, the motor starts softly (a run under way keeps the speed it has, whichever sends it on)
+      pace = how === 'drag' ? FINGER : MOTOR; goal = Math.round((1 - c) * last); drive(); tell();
+    } else if (mode === 'still') {
+      if (how === 'travel' && !opts.reduced) tweenStill(c, 300 + 1300 * Math.abs(c - st.curtain));
+      else { cancelAnimationFrame(stillTween); stillTween = 0; st.curtain = c; draw(); }
+    } // (no picture yet: the drapes go to `aim` as soon as there is one)
   };
 
   return {
-    canvas, get state() { return st; }, get moving() { return moving; },
-    prepare() { if (opts.still) void loadStills(); else void loadVideo(); },
+    canvas, get state() { return st; }, get moving() { return moving(); }, steps: last,
+    prepare() { void loadStills().catch(() => {}); if (!opts.still) void loadVideo(); },
     async enter() {
-      st.curtain = 1; st.lights = 1; held = null; mixed = -1;
-      const film = !opts.still && (await Promise.race([loadVideo(), new Promise<boolean>((res) => setTimeout(() => res(false), 5000))]));
-      if (film && v) {
-        mode = 'video'; shown = -1;
-        try { await v.play(); v.pause(); } catch { /* a frame is decoded all the same once it is sought */ }
-        // onto the first frame (the film's own last frame), whatever the clip was showing when it was last left
-        playTo = null; pending = null; moving = false;
-        await new Promise<void>((res) => { const done = () => { clearTimeout(t); v!.removeEventListener('seeked', done); seeking = false; res(); }; const t = setTimeout(done, 1500); v!.addEventListener('seeked', done); seeking = true; v!.currentTime = timeOf(0); });
-        drawVideo(0);
-      } else { await loadStills().catch(() => {}); mode = 'still'; drawStill(); }
-      canvas.classList.add('is-on'); tell();
+      entered = true; st.curtain = 1; st.lights = 1; aim = 1; goal = null; stuck = false; held = null; mixed = -1; mode = 'none';
+      // the room's own first frame (the film's last) from the video when it is in; when it is not (yet), from the stills
+      const film = !opts.still && (await Promise.race([loadVideo(), wait(400, false)]));
+      if (!entered) return;
+      if (film) await toVideo();
+      if (!entered || mode !== 'none') { tell(); return; }
+      const ok = await loadStills().then(() => true, () => false);
+      if (!entered) return;
+      if (ok && mode === 'none') { mode = 'still'; drawStill(); canvas.classList.add('is-on'); if (aim !== 1) curtainTo(aim, 'travel'); }
+      if (!opts.still) void loadVideo().then((ready) => { if (ready && entered) void toVideo(); });
+      tell();
     },
-    curtainTo(c, how) {
-      c = clamp(c);
-      if (mode === 'video') {
-        const k = Math.round((1 - c) * last);
-        if (how === 'travel' && !opts.reduced) { travel(k, 1.5); return; }
-        if (playTo !== null) { playTo = null; moving = false; onArrive = null; v?.pause(); }
-        seek(Math.abs(k - shown) <= Math.abs(2 * last - k - shown) ? k : 2 * last - k); // the nearer of the two frames that show this position
-      } else if (mode === 'still') { if (how === 'travel' && !opts.reduced) tweenStill(c, 300 + 1300 * Math.abs(c - st.curtain)); else { cancelAnimationFrame(stillTween); stillTween = 0; moving = false; st.curtain = c; draw(); } }
-    },
+    curtainTo,
     halt() {
-      if (mode === 'video' && playTo !== null && v) { playTo = null; onArrive = null; moving = false; v.pause(); v.playbackRate = 1; drawVideo(frameOf(v.currentTime)); tell(); }
-      else if (stillTween) { cancelAnimationFrame(stillTween); stillTween = 0; moving = false; tell(); }
+      aim = st.curtain;
+      if (mode === 'video') { if (goal === null) return; goal = null; if (v && !v.paused) pause(); tell(); }
+      else if (stillTween) { cancelAnimationFrame(stillTween); stillTween = 0; tell(); }
     },
     lightsTo(l, animate) { l = clamp(l); if (animate && !opts.reduced) tweenLights(l, 420 + 620 * Math.abs(l - st.lights)); else { cancelAnimationFrame(lightTween); lightTween = 0; st.lights = l; draw(); } },
     leave(now = false) {
-      cancelAnimationFrame(lightTween); lightTween = 0; cancelAnimationFrame(stillTween); stillTween = 0;
-      if (v) { playTo = null; onArrive = null; pending = null; moving = false; v.pause(); }
+      entered = false; cancelAnimationFrame(lightTween); lightTween = 0; cancelAnimationFrame(stillTween); stillTween = 0;
+      goal = null; if (v) pause();
+      if (fetching && !file) fetching.abort(); // a file still on its way does not compete with the film's next move (fetched again next visit)
       canvas.classList.remove('is-on');
       return new Promise<void>((res) => setTimeout(() => {
-        if (!canvas.classList.contains('is-on')) release();
+        if (!entered) release();
         res();
       }, now || opts.reduced ? 0 : 520));
     },

@@ -5,14 +5,16 @@
  * recorded states, scripts/film/phone.ts wires these controls to it). On a wide screen it is a phone held up at the side of the
  * frame; on an upright phone the picture moves to the top and this becomes the lower half of the visitor's own screen
  * (styles/15-phone.css). Two markers in the room, tied to their cards by a fine dashed line, show what each control moves.
- * Every control is a real one (slider, switch, button), so a tap on it never advances the tour.
+ * Every control is a real one (slider, switch, button), so a tap on it never advances the tour. Until the visitor has tried
+ * them, a coach shows what to do, one move at a time: a hand on the control and a tip under the phone (scripts/film/phone.ts).
  */
 import type { Locale } from '@/i18n/utils';
 import { strings } from '@/i18n/utils';
 import { ICONS } from '@/data/panel-ui';
+import { handHtml } from '@/scripts/film/hand';
 interface Props { locale: Locale }
 const { locale } = Astro.props;
-const w = strings(locale).walk, a = w.app, p = w.panel;
+const w = strings(locale).walk, a = w.app, p = w.panel, c = w.coach;
 const room = (w.stops as Record<string, string>).app;
 // what each scene sets: how far the curtains are open and how bright the lights are (the control panel's own four scenes)
 const SCENES = [[100, 100], [35, 70], [0, 14], [0, 0]];
@@ -61,7 +63,7 @@ const I = {
             <i class="app-ico app-ico-curtain" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h18" /><path class="l" d="M5 4v15c2.2-1.2 3.4-4.6 3.6-9.5M5 4c1.6 2.6 2.9 4.2 3.6 5.5" /><path class="r" d="M19 4v15c-2.2-1.2-3.4-4.6-3.6-9.5M19 4c-1.6 2.6-2.9 4.2-3.6 5.5" /></svg></i>
             <div><h3>{a.curtains}</h3><p><span data-app-curtain-word data-open={w.hud.open} data-closed={w.hud.closed}>{w.hud.open}</span> <b dir="ltr"><span data-app-curtain-n>100</span>%</b></p></div>
           </header>
-          <div class="app-slider" data-app-slider="curtain" role="slider" tabindex="0" aria-label={a.curtains} aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--v:1"><i class="app-track"><i></i></i><i class="app-thumb-knob"></i></div>
+          <div class="app-slider" data-app-slider="curtain" role="slider" tabindex="0" aria-label={a.curtains} aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="--v:1"><i class="app-track"><i></i></i><i class="app-thumb-knob"></i><b class="coach-hand" data-coach-hand aria-hidden="true" set:html={handHtml}></b></div>
           <div class="app-seg">
             <button type="button" data-app-curtain="open"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M6 5v13h3V5M18 5v13h-3V5" /></svg></i>{p.open}</button>
             <button type="button" data-app-curtain="pause"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6.5v11M15 6.5v11" /></svg></i>{p.pause}</button>
@@ -89,5 +91,5 @@ const I = {
       </div>
       <i class="phone-sheen" aria-hidden="true"></i>
     </div>
-  </div><p class="app-hint" data-app-hint>{a.hint}</p></div>
+  </div><p class="coach-tip app-coach" data-app-coach aria-hidden="true" data-curtain={c.curtain} data-lights={c.lights} data-scene={c.scene}><i></i><b>{c.try}</b><span data-coach-text>{c.curtain}</span></p></div>
 </div>

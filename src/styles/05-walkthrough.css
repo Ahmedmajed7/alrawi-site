@@ -60,9 +60,11 @@ html[lang='ar'] .walk-skip { text-transform: none; letter-spacing: 0; font-size:
 .walk.is-prompt .walk-skip:hover { color: var(--slate); }
 
 .walk-mid { display: grid; align-items: start; justify-items: start; padding-top: clamp(6vh, 9vh, 120px); }
-.walk-prompt { display: grid; justify-items: start; gap: 18px; max-width: 640px; opacity: 0; transform: translateY(10px) scale(0.985); transform-origin: 0 0; transition: opacity 1.2s var(--ease), transform 1.2s var(--ease); }
+/* faded out, the prompt is also out of reach: its button lies under the app's sheet on an upright phone, where an unseen
+   "tap" took the visitor's Open to the next device (3 Oct 2026) */
+.walk-prompt { display: grid; justify-items: start; gap: 18px; max-width: 640px; opacity: 0; visibility: hidden; transform: translateY(10px) scale(0.985); transform-origin: 0 0; transition: opacity 1.2s var(--ease), transform 1.2s var(--ease), visibility 0s linear 1.2s; }
 [dir='rtl'] .walk-prompt { transform-origin: 100% 0; }
-.walk-prompt.is-on { opacity: 1; transform: none; }
+.walk-prompt.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
 /* the eyebrow over the film: a paper halo keeps the brass legible where it crosses the logo or a palm */
 .walk-prompt .eyebrow { color: var(--brass-deep); text-shadow: 0 0 2px rgba(247, 245, 240, 0.9), 0 0 12px rgba(247, 245, 240, 0.85), 0 0 26px rgba(247, 245, 240, 0.6); }
 /* phones: the headline stack spans the width and the frame crops onto the logo and the villa, so the haze is a
@@ -70,10 +72,26 @@ html[lang='ar'] .walk-skip { text-transform: none; letter-spacing: 0; font-size:
 @media (max-width: 640px) {
   .walk-shade::after, [dir='rtl'] .walk-shade::after { background: linear-gradient(to bottom, rgba(247, 245, 240, 0.5), rgba(247, 245, 240, 0.4) 28%, rgba(247, 245, 240, 0.18) 48%, transparent 62%); }
 }
-/* spaced geometric caps in the sky, top-start (the key visual): Jost is already the site's caps voice */
-.walk-prompt h1 { font-family: var(--f-sans); font-size: clamp(1.5rem, 2.6vw, 2.5rem); font-weight: 400; line-height: 1.45; letter-spacing: 0.34em; text-transform: uppercase; text-align: start; color: var(--slate); text-shadow: 0 1px 24px rgba(255, 255, 255, 0.35); }
-html[lang='ar'] .walk-prompt h1 { letter-spacing: 0; font-weight: 600; font-size: clamp(1.9rem, 3vw, 3rem); line-height: 1.5; }
-.walk-prompt h1 em { color: var(--brass-deep); font-style: normal; }
+/* the key visual's headline, top-start in the sky (3 Oct 2026, the client: the same place, bigger and more elegant): the site's
+   display serif set wide, its second line in brass, a fine brass rule under it. On arrival the lines come into focus one after
+   the other, the way the lens pulls focus in the film, then the rule draws and the rest follows (again when the tour hands back
+   to the hero) */
+.walk-prompt { max-width: 760px; }
+.walk-prompt h1 { margin: 0; font-family: var(--f-head); font-weight: 400; font-size: clamp(2.7rem, 5.4vw, 6rem); line-height: 1.04; letter-spacing: 0.15em; text-transform: uppercase; text-align: start; color: var(--slate); }
+html[lang='ar'] .walk-prompt h1 { letter-spacing: 0; font-weight: 500; font-size: clamp(3rem, 5.8vw, 6.4rem); line-height: 1.24; }
+.walk-prompt h1 .ln { display: block; }
+.walk-prompt h1 .ln > span { display: inline-block; text-shadow: 0 0 2px rgba(247, 245, 240, 0.7), 0 0 28px rgba(247, 245, 240, 0.6); }
+.walk-prompt h1 .ln + .ln > span { color: var(--brass-deep); }
+.walk-rule { display: block; width: clamp(56px, 5.5vw, 84px); height: 1.5px; margin-top: 2px; background: var(--brass-deep); box-shadow: 0 0 10px 1px rgba(247, 245, 240, 0.75); transform-origin: 0 50%; }
+[dir='rtl'] .walk-rule { transform-origin: 100% 50%; }
+.walk-prompt.is-on h1 .ln > span { animation: walk-focus 1.6s cubic-bezier(0.19, 1, 0.22, 1) calc(0.2s + var(--k) * 0.16s) backwards; }
+.walk-prompt.is-on .eyebrow { animation: walk-in 1s var(--ease) 0.05s backwards; }
+.walk-prompt.is-on .walk-rule { animation: walk-draw 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.75s backwards; }
+.walk-prompt.is-on p { animation: walk-in 1s var(--ease) 0.9s backwards; }
+.walk-prompt.is-on .walk-tap { animation: walk-in 1s var(--ease) 1.05s backwards; }
+@keyframes walk-focus { from { opacity: 0; transform: translateY(0.32em); filter: blur(10px); } 40% { opacity: 1; } }
+@keyframes walk-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes walk-draw { from { transform: scaleX(0); } }
 .walk-prompt p { color: var(--slate); max-width: 42ch; font-size: 1rem; text-shadow: 0 0 2px rgba(247, 245, 240, 0.85), 0 0 14px rgba(247, 245, 240, 0.8), 0 0 30px rgba(247, 245, 240, 0.55); }
 .walk-tap { display: inline-flex; align-items: center; gap: 14px; margin-top: 10px; padding: 14px 26px; border: 1px solid rgba(56, 65, 90, 0.4); border-radius: var(--r); font-family: var(--f-sans); font-weight: 500; font-size: 0.74rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--slate); background: rgba(247, 245, 240, 0.74); box-shadow: 0 8px 30px rgba(14, 13, 12, 0.12); transition: background var(--dur-fast), border-color var(--dur-fast); }
 html[lang='ar'] .walk-tap { text-transform: none; letter-spacing: 0; font-size: 0.95rem; }
@@ -129,7 +147,10 @@ html[lang='ar'] .walk-hint { text-transform: none; letter-spacing: 0; font-size:
 /* author mode */
 .walk-author { position: absolute; top: 12px; inset-inline-start: 12px; z-index: 5; font: 12px/1.5 ui-monospace, monospace; background: rgba(0, 0, 0, 0.7); color: #fff; padding: 10px 12px; border-radius: 4px; white-space: pre; max-width: 46ch; }
 .walk-crosshair { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px; border: 1px solid #fff; border-radius: 50%; z-index: 5; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .walk-tap i::after { animation: none; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .walk-tap i::after { animation: none; opacity: 0; }
+  .walk-prompt.is-on :is(h1 .ln > span, .eyebrow, .walk-rule, p, .walk-tap) { animation: none; }
+}
 
 /* ============================ UPRIGHT SCREENS: THE WHOLE PICTURE IN A BAND ============================
    (3 Oct 2026) A 16:9 film covering an upright phone showed a quarter of its width, stretched 2–3×: zoomed and soft. Here
@@ -156,8 +177,10 @@ html[lang='ar'] .walk-hint { text-transform: none; letter-spacing: 0; font-size:
   .walk:not(.is-3d) .walk-mid { padding-top: calc(var(--stage-gap) + var(--stage-h) + 24px); overflow: hidden; }
   .walk:not(.is-3d) .walk-prompt { gap: 14px; }
   .walk:not(.is-3d) .walk-prompt .eyebrow { color: var(--brass-light); text-shadow: none; }
-  .walk:not(.is-3d) .walk-prompt h1 { color: var(--on-night); text-shadow: none; }
-  .walk:not(.is-3d) .walk-prompt h1 em { color: var(--brass-light); }
+  .walk:not(.is-3d) .walk-prompt h1 { color: var(--on-night); }
+  .walk:not(.is-3d) .walk-prompt h1 .ln > span { text-shadow: none; }
+  .walk:not(.is-3d) .walk-prompt h1 .ln + .ln > span { color: var(--brass-light); }
+  .walk:not(.is-3d) .walk-rule { background: var(--brass-light); opacity: 0.8; }
   .walk:not(.is-3d) .walk-prompt p { color: var(--on-night-soft); text-shadow: none; }
   .walk:not(.is-3d) .walk-tap { margin-top: 6px; border-color: rgba(241, 237, 230, 0.5); }
   .walk:not(.is-3d) :is(.walk-hint, .walk-steps span) { color: var(--on-night-soft); text-shadow: none; }
@@ -194,7 +217,53 @@ html[lang='ar'] .walk-hint { text-transform: none; letter-spacing: 0; font-size:
   .walk:not(.is-3d) .walk-ui { --ui-pad: 14px; grid-template-rows: auto minmax(0, 1fr) auto; }
   .walk:not(.is-3d) .walk-mid { padding-top: 3vh; overflow: hidden; }
   .walk:not(.is-3d) .walk-prompt { gap: 10px; }
-  .walk:not(.is-3d) .walk-prompt h1 { font-size: 1.35rem; line-height: 1.35; }
+  .walk:not(.is-3d) .walk-prompt h1 { font-size: 2.1rem; line-height: 1.04; }
+  html[lang='ar'] .walk:not(.is-3d) .walk-prompt h1 { font-size: 2.3rem; line-height: 1.22; }
   .walk:not(.is-3d) .walk-prompt p { display: none; }
   .walk:not(.is-3d) .walk-tap { margin-top: 4px; padding: 11px 20px; }
+}
+
+/* ============================ THE COACH: WHAT TO TRY, SHOWN AS A GAME SHOWS IT ============================
+   (3 Oct 2026, the client: make it clear the visitor can work the light switch and the phone, like a video game but not in
+   their face.) On the control itself a hand shows the move (a press and a slide, or a tap, with a brass ring where the fingertip
+   lands), and a small glass tip beside it says it in words, after the same pulsing brass dot as "Tap to enter". Both come a beat
+   after the stop is reached, and go the moment the visitor does it (film/phone.ts, film/device-live.ts; the hand is
+   film/hand.ts). Everything here is drawn in the coach's em, so each place sizes it with one font-size. */
+.coach-hand { position: absolute; width: 0; height: 0; z-index: 2; pointer-events: none; opacity: 0; }
+.walk .coach-hand svg { position: absolute; left: -0.94em; top: -0.21em; width: 2.5em; height: 2.5em; max-width: none; overflow: visible; /* (the reset's max-width: 100% of a point is nothing) */ fill: rgba(255, 255, 255, 0.94); stroke: rgba(14, 13, 12, 0.55); stroke-width: 0.9; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0.14em 0.32em rgba(0, 0, 0, 0.5)); }
+.walk .coach-hand svg .k { fill: none; stroke: rgba(14, 13, 12, 0.32); }
+.coach-ring { position: absolute; left: -0.85em; top: -0.85em; width: 1.7em; height: 1.7em; border-radius: 50%; border: 0.11em solid rgba(236, 212, 166, 0.95); box-shadow: 0 0 0.6em rgba(236, 212, 166, 0.45); opacity: 0; }
+/* a tap: in, press, a ring, lift, gone (and a pause before the next) */
+@keyframes coach-tap {
+  0% { opacity: 0; transform: translate(0.45em, 0.8em) scale(1.06); }
+  16% { opacity: 1; transform: translate(0, 0) scale(1.06); }
+  26% { opacity: 1; transform: scale(0.88); }
+  38% { opacity: 1; transform: scale(1.03); }
+  52% { opacity: 1; transform: none; }
+  66%, 100% { opacity: 0; transform: translate(0.4em, 0.6em) scale(1.04); }
+}
+@keyframes coach-tap-ring { 0%, 23% { opacity: 0; transform: scale(0.45); } 27% { opacity: 1; transform: scale(0.6); } 60%, 100% { opacity: 0; transform: scale(2); } }
+/* a slide: in, press, carry the knob along (--run), lift, gone */
+@keyframes coach-slide {
+  0% { opacity: 0; transform: translate(0.45em, 0.8em) scale(1.06); }
+  12% { opacity: 1; transform: translate(0, 0) scale(1.06); }
+  20% { opacity: 1; transform: translate(0, 0) scale(0.88); }
+  58% { opacity: 1; transform: translate(var(--run, -4em), 0) scale(0.88); }
+  66% { opacity: 1; transform: translate(var(--run, -4em), 0) scale(1.04); }
+  78%, 100% { opacity: 0; transform: translate(calc(var(--run, -4em) + 0.4em), 0.6em) scale(1.04); }
+}
+@keyframes coach-slide-ring { 0%, 17% { opacity: 0; transform: scale(0.45); } 21% { opacity: 1; transform: scale(0.6); } 40%, 100% { opacity: 0; transform: scale(1.8); } }
+/* the tip: dark glass, a brass hairline, the "try it" in brass caps and the move in plain words */
+.coach-tip { display: inline-flex; align-items: center; gap: 0.7em; margin: 0; padding: 0.62em 1.1em 0.62em 0.8em; white-space: nowrap; border-radius: 2em; border: 1px solid rgba(217, 189, 138, 0.5); background: rgba(16, 15, 17, 0.56); -webkit-backdrop-filter: blur(12px) saturate(1.2); backdrop-filter: blur(12px) saturate(1.2); box-shadow: 0 0.6em 1.8em rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.04); color: #f4f0e9; font: 400 1em/1.1 var(--f-sans); letter-spacing: 0.02em; pointer-events: none; }
+[dir='rtl'] .coach-tip { padding: 0.62em 0.8em 0.62em 1.1em; }
+.coach-tip b { font-weight: 500; font-size: 0.78em; letter-spacing: 0.22em; text-transform: uppercase; color: #e2c895; }
+html[lang='ar'] .coach-tip b { letter-spacing: 0; text-transform: none; font-size: 0.92em; }
+.coach-tip > i { position: relative; flex: none; width: 0.5em; height: 0.5em; border-radius: 50%; background: #d9bd8a; }
+.coach-tip > i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: rgba(217, 189, 138, 0.6); animation: tap 2.2s var(--ease-io) infinite; }
+.coach-tip > span { color: rgba(244, 240, 233, 0.92); }
+/* the tip comes up a beat after its stop is reached, with a breath of float, and goes at once */
+@keyframes coach-float { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) {
+  .coach-hand { display: none; }
+  .coach-tip, .coach-tip > i::after { animation: none !important; }
 }

@@ -72,7 +72,7 @@ const ld = [org, ...offices, ...jsonLd];
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={`${siteUrl}${image}`} />
 <meta name="generator" content={Astro.generator} />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self' blob: https://api.web3forms.com; font-src 'self' data:; frame-src https://www.google.com; base-uri 'self'; form-action 'self' https://api.web3forms.com mailto:;" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self' blob: https://api.web3forms.com; font-src 'self' data:; frame-src https://www.google.com; base-uri 'self'; form-action 'self' https://api.web3forms.com mailto:;" />
 <script type="application/ld+json" set:html={JSON.stringify(ld)} />
 <script is:inline>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
 <span class="sr-only">{t('meta.siteTitle')}</span>

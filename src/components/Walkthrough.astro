@@ -23,6 +23,9 @@ const two = (n: number) => String(n).padStart(2, '0');
 const print = fingerprint();
 // the spectrum's resting shape: a fixed curve (bass high, a dip, a presence bump), never random — the film must not flicker
 const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k / 5) + 0.3 * Math.exp(-((k - 13) ** 2) / 14) + 0.08 * Math.sin(k * 2.4)).toFixed(2));
+// the key visual's headline, a line at a time (each rises in from under its own edge: 05-walkthrough.css)
+const titleLines = t('walk.title').split(/<br\s*\/?>/i).map((x) => x.trim()).filter(Boolean);
+const c = s.walk.coach;
 ---
 <section class="walk is-prompt" data-walk data-dark-hero data-aria={t('walk.title').replace(/<[^>]+>/g, '')} aria-label={t('walk.eyebrow')}>
   <!-- before first paint: the live 3D (a dev and recording tool) keeps the full-screen stage on every screen; a first visit hides
@@ -41,7 +44,7 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
        (placed by scripts/film/callout.ts, styled in styles/11-hud.css). All of it is real text; the drawn parts are hidden from readers -->
   <div class="walk-callouts" data-walk-callouts aria-live="polite"><div class="hud-pan">
     <!-- live devices: real HTML pinned onto the paused device (scripts/film/device-live.ts); under the panel -->
-    <div class="walk-live" data-walk-live data-t-light={t('walk.live.light')} data-t-test={t('walk.live.test')} data-t-unlocked={t('walk.live.unlocked')} data-t-sound={t('walk.live.sound')}>
+    <div class="walk-live" data-walk-live data-t-light={t('walk.live.light')} data-t-test={t('walk.live.test')} data-t-unlocked={t('walk.live.unlocked')} data-t-sound={t('walk.live.sound')} data-t-coach-try={c.try} data-t-coach-switch={c.switch}>
       <PanelScreen locale={locale} />
     </div>
     <!-- inert: player.ts still looks this node up (the reticle it held was removed, 29 Sep 2026) -->
@@ -147,7 +150,8 @@ const spectrum = Array.from({ length: 22 }, (_, k) => +(0.34 + 0.5 * Math.exp(-k
     <div class="walk-mid">
       <div class="walk-prompt is-on" data-walk-prompt>
         <span class="eyebrow">{t('walk.eyebrow')}</span>
-        <h1 set:html={t('walk.title')} />
+        <h1>{titleLines.map((ln, k) => <>{k > 0 && ' '}<span class="ln" style={`--k:${k}`}><span>{ln}</span></span></>)}</h1>
+        <i class="walk-rule" aria-hidden="true"></i>
         <p>{t('walk.subtitle')}</p>
         <button class="walk-tap" type="button" data-walk-tap><i></i>{t('walk.tap')}</button>
       </div>

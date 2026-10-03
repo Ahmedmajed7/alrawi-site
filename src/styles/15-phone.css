@@ -123,9 +123,18 @@
 .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(5) { transition-delay: 0.82s; } .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(6) { transition-delay: 0.91s; }
 .walk-app:is(.is-rising, .is-on) .phone-screen > :nth-child(7) { transition-delay: 1s; }
 
-.app-hint { position: absolute; inset-inline: -4em; top: calc(100% + 1.5em); margin: 0; text-align: center; font: 500 0.62rem/1.4 var(--f-sans); letter-spacing: 0.2em; text-transform: uppercase; color: var(--on-night); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.6s var(--ease); pointer-events: none; }
-html[lang='ar'] .app-hint { letter-spacing: 0; text-transform: none; font-size: 0.84rem; }
-.walk-app.is-on:not(.is-touched) .app-hint { opacity: 1; transition-delay: 1.3s; }
+/* the coach (05-walkthrough.css, film/phone.ts): one move at a time, curtains → lights → a scene. The tip stands under the phone
+   (in the header row of the app when the app is a sheet or a side panel), the hand on the control it means */
+.app-coach { position: absolute; left: 0; right: 0; top: calc(100% + 1.6em); width: max-content; margin-inline: auto; font-size: clamp(11px, 0.82vw, 13px); opacity: 0; transition: opacity 0.25s var(--ease); }
+.walk-app.is-coach .app-coach { opacity: 1; transition: opacity 0.6s var(--ease) 0.15s; animation: coach-float 2.8s ease-in-out 0.8s infinite alternate; }
+.app-scene { position: relative; }
+.app-slider > .coach-hand { inset-inline-start: calc(100% - 0.85em); top: 50%; }
+.app-switch > .coach-hand { inset-inline-start: calc(100% - 0.83em); top: 50%; }
+.app-scene > .coach-hand { left: 50%; top: 42%; }
+.walk-app.is-coach[data-coach='curtain'] .coach-hand { animation: coach-slide 3.6s ease-in-out infinite; }
+.walk-app.is-coach[data-coach='curtain'] .coach-ring { animation: coach-slide-ring 3.6s ease-in-out infinite; }
+.walk-app.is-coach:is([data-coach='lights'], [data-coach='scene']) .coach-hand { animation: coach-tap 2.6s ease-in-out infinite; }
+.walk-app.is-coach:is([data-coach='lights'], [data-coach='scene']) .coach-ring { animation: coach-tap-ring 2.6s ease-in-out infinite; }
 
 /* ---------------- the markers in the room ---------------- */
 .app-mark { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28); opacity: 0; transform: scale(0.6); transition: opacity 0.5s var(--ease), transform 0.6s var(--ease-snap); }
@@ -157,9 +166,11 @@ html[lang='ar'] .app-hint { letter-spacing: 0; text-transform: none; font-size: 
   .phone-glass { padding: 0; border-radius: inherit; background: none; }
   .phone-screen { border-radius: inherit; padding: 1.5em 1.1em calc(76px + env(safe-area-inset-bottom, 0px)); box-shadow: inset 0 0.06em 0 rgba(255, 255, 255, 0.12); justify-content: flex-start; overflow: hidden; }
   .phone-screen::before { content: ''; position: absolute; top: 0.55em; left: 50%; width: 2.6em; height: 0.26em; margin-left: -1.3em; border-radius: 1em; background: rgba(255, 255, 255, 0.24); opacity: 1 !important; transform: none !important; }
-  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav, .app-hint { display: none; }
+  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav { display: none; }
   .app-head { grid-template-columns: 1fr; margin-top: 0; }
   .app-head h2 { text-align: start; font-size: 1.2em; }
+  .app-coach { top: 1.32em; inset-inline: auto 1.1em; margin: 0; font-size: 0.7em; }
+  .app-coach b { display: none; }
   .app-scenes { margin-top: 0.7em; }
   .app-card { margin-top: 0.6em; }
   .app-mark { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
@@ -186,6 +197,7 @@ html[lang='ar'] .app-hint { letter-spacing: 0; text-transform: none; font-size: 
 /* a wide upright screen (a tablet): the app keeps a phone's measure, centred under the band */
 @media (orientation: portrait) and (min-width: 701px) {
   .phone-screen { padding-inline: max(1.1em, calc((100% - 560px) / 2)); }
+  .app-coach { inset-inline-end: max(1.1em, calc((100% - 560px) / 2)); }
 }
 /* a phone held sideways: no room for a device drawn inside it; the app is a panel down the side, the room beside it */
 @media (max-height: 520px) and (orientation: landscape) {
@@ -193,11 +205,14 @@ html[lang='ar'] .app-hint { letter-spacing: 0; text-transform: none; font-size: 
   .phone, .walk-app.is-on .phone { height: 100%; aspect-ratio: auto; padding: 0; border-radius: 1.3em 0 0 1.3em; transform: none; animation: none; background: none; box-shadow: -1em 0 2.6em rgba(0, 0, 0, 0.5); }
   .phone-glass { padding: 0; border-radius: inherit; background: none; }
   .phone-screen { border-radius: inherit; padding: 0.9em max(1em, env(safe-area-inset-right, 0px)) 0.8em 1em; }
-  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav, .app-hint { display: none; }
+  .phone-island, .phone-keys, .phone-sheen, .app-status, .app-view, .app-tabs, .app-nav { display: none; }
   .app-head { grid-template-columns: 1fr; margin-top: 0; }
   .app-head h2 { text-align: start; }
+  .app-coach { top: 0.95em; inset-inline: auto 1em; margin: 0; font-size: 0.74em; }
+  .app-coach b { display: none; }
   .app-seg i { width: 3.1em; height: 3.1em; }
-  .walk.is-app:not(.is-3d) .walk-skip { opacity: 0; pointer-events: none; } /* the app panel runs the screen's height, under the skip link */
+  /* the app panel runs the screen's height on the right, under the skip link (in Arabic, under the brand) */
+  html:not([dir='rtl']) .walk.is-app:not(.is-3d) .walk-skip, [dir='rtl'] .walk.is-app:not(.is-3d) .walk-brand { opacity: 0; pointer-events: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .phone-wrap, .phone-screen > *, .app-mark { transition-duration: 0.01s !important; transition-delay: 0s !important; }

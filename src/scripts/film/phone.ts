@@ -1,7 +1,8 @@
 /**
  * The phone at the film's app stop (components/PhoneScreen.astro, styles/15-phone.css): its controls run the room behind it
- * through film/scene.ts, and what it shows always comes back from the picture itself (the curtain slider's knob rides with the
- * drapes while the motor runs them; the percentage is the frame on screen), so the phone and the room can never disagree.
+ * through film/scene.ts, and what it shows comes back from the picture itself (the curtain slider's knob rides with the drapes
+ * while the motor runs them; the percentage is the frame on screen), so the phone and the room can never disagree. The one
+ * exception is the knob a finger sets: it stays where it was put while the drapes catch up with it, as a real app's would.
  *   - curtains: drag the slider (the drapes follow the finger), Open / Pause / Close (the motor runs them), arrow keys;
  *   - lights: the switch, the dimmer;
  *   - scenes: the control panel's own four, each a curtain position and a light level set together.
@@ -34,9 +35,13 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     clearTimeout(liveTimer[k]); liveTimer[k] = window.setTimeout(() => { marks[k].classList.remove('is-live'); links[k].classList.remove('is-live'); cards[k].classList.remove('is-live'); }, 900);
   };
   let prev: SceneState = { curtain: 1, lights: 1 };
+  /** the curtain slider's knob: under the finger while it drags, then held on the mark it was let go on until the drapes are
+   *  there (null: it rides with the drapes, as it does for Open / Close / a scene) */
+  let setTo: number | null = null;
   const show = (s: SceneState) => {
-    const c = Math.round(s.curtain * 100), l = Math.round(s.lights * 100), lit = s.lights > 0.02;
-    sliders.curtain.style.setProperty('--v', s.curtain.toFixed(4)); sliders.curtain.setAttribute('aria-valuenow', String(c));
+    if (setTo !== null && !sliders.curtain.classList.contains('is-drag') && !scene?.moving) setTo = null;
+    const cv = setTo ?? s.curtain, c = Math.round(cv * 100), l = Math.round(s.lights * 100), lit = s.lights > 0.02;
+    sliders.curtain.style.setProperty('--v', cv.toFixed(4)); sliders.curtain.setAttribute('aria-valuenow', String(c));
     cNum.textContent = String(c); cWord.textContent = c > 0 ? cWord.dataset.open! : cWord.dataset.closed!; cNum.parentElement!.hidden = c === 0;
     sliders.lights.style.setProperty('--v', s.lights.toFixed(4)); sliders.lights.setAttribute('aria-valuenow', String(l));
     lNum.textContent = String(l); lWord.textContent = lit ? lWord.dataset.on! : lWord.dataset.off!; lPc.hidden = !lit;
@@ -54,6 +59,27 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
   const thumbSoon = () => { if (thumbT) clearTimeout(thumbT); thumbT = window.setTimeout(drawThumb, performance.now() - thumbLast > 200 ? 0 : 200); };
   const chip = (i: number) => chips.forEach((b, k) => { b.classList.toggle('is-on', k === i); b.setAttribute('aria-pressed', String(k === i)); });
   const first = () => { if (!touched) { touched = true; el.classList.add('is-touched'); } };
+
+  /* ---------------- the coach: what to try, one move at a time ---------------- */
+  // A hand shows the move on its control and the tip under the phone says it (05-walkthrough.css, 15-phone.css): slide the
+  // curtains, then tap the lights, then a scene. Whatever the visitor touches puts the coach away at once; a move they have made
+  // is not shown again, and the next one comes only once the room is still, so it never talks over what they are doing
+  const coachTip = $('[data-app-coach]'), coachText = $('[data-coach-text]'), hand = $('[data-coach-hand]');
+  const STEPS = ['curtain', 'lights', 'scene'] as const; type Step = (typeof STEPS)[number];
+  const tried = new Set<Step>(); let coachT = 0;
+  const targetOf = (s: Step) => (s === 'curtain' ? sliders.curtain : s === 'lights' ? sw : chips[1]);
+  /** how far the hand carries the curtain's knob: most of the way from parted to drawn (towards the start side) */
+  const reach = () => { const s = sliders.curtain; hand.style.setProperty('--run', `${((rtl ? 1 : -1) * 0.62 * Math.max(0, s.offsetWidth - s.offsetHeight)).toFixed(1)}px`); };
+  const coach = (wait: number) => {
+    clearTimeout(coachT); el.classList.remove('is-coach');
+    const s = STEPS.find((k) => !tried.has(k)); if (!s || !on) return;
+    const go = () => {
+      if (!on) return; if (scene?.moving) { coachT = window.setTimeout(go, 400); return; }
+      el.dataset.coach = s; targetOf(s).appendChild(hand); coachText.textContent = coachTip.dataset[s] ?? ''; reach(); el.classList.add('is-coach');
+    };
+    coachT = window.setTimeout(go, wait);
+  };
+  const did = (s: Step | 'all') => { if (s === 'all') STEPS.forEach((k) => tried.add(k)); else tried.add(s); coach(1700); };
 
   /* ---------------- the phone → the room ---------------- */
   const wire = () => {
@@ -73,15 +99,18 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
         e.preventDefault(); e.stopPropagation(); first(); chip(-1); set(clamp(Number(node.getAttribute('aria-valuenow')) / 100 + d), true);
       });
     };
-    drag(sliders.curtain, (v, end) => scene?.curtainTo(v, end && sliders.curtain.matches(':focus-visible') ? 'travel' : 'drag'));
-    drag(sliders.lights, (v) => { if (v > 0.02) lastLevel = v; scene?.lightsTo(v < 0.02 ? 0 : v, false); });
-    sw.addEventListener('click', (e) => { e.stopPropagation(); first(); chip(-1); const lit = (scene?.state.lights ?? 0) > 0.02; if (lit) lastLevel = Math.max(0.3, scene!.state.lights); scene?.lightsTo(lit ? 0 : lastLevel, true); });
+    drag(sliders.curtain, (v, end) => {
+      did('curtain'); if (!scene) return; const k = scene.steps; setTo = 1 - Math.round((1 - v) * k) / k; // a mark the room can show exactly
+      scene.curtainTo(setTo, end && sliders.curtain.matches(':focus-visible') ? 'travel' : 'drag'); show(scene.state);
+    });
+    drag(sliders.lights, (v) => { did('lights'); if (v > 0.02) lastLevel = v; scene?.lightsTo(v < 0.02 ? 0 : v, false); });
+    sw.addEventListener('click', (e) => { e.stopPropagation(); first(); chip(-1); did('lights'); const lit = (scene?.state.lights ?? 0) > 0.02; if (lit) lastLevel = Math.max(0.3, scene!.state.lights); scene?.lightsTo(lit ? 0 : lastLevel, true); });
     for (const b of Array.from(el.querySelectorAll<HTMLButtonElement>('[data-app-curtain]'))) b.addEventListener('click', (e) => {
-      e.stopPropagation(); first(); chip(-1); const k = b.dataset.appCurtain;
+      e.stopPropagation(); first(); chip(-1); did('curtain'); setTo = null; const k = b.dataset.appCurtain;
       if (k === 'pause') scene?.halt(); else scene?.curtainTo(k === 'open' ? 1 : 0, 'travel');
     });
     chips.forEach((b, i) => b.addEventListener('click', (e) => {
-      e.stopPropagation(); first(); chip(i); const l = Number(b.dataset.lights) / 100; if (l > 0.02) lastLevel = l;
+      e.stopPropagation(); first(); chip(i); did('all'); setTo = null; const l = Number(b.dataset.lights) / 100; if (l > 0.02) lastLevel = l;
       scene?.curtainTo(Number(b.dataset.curtain) / 100, 'travel'); scene?.lightsTo(l, true);
     }));
     phone.addEventListener('click', (e) => e.stopPropagation()); // a tap on the phone is never a tap on the film
@@ -101,6 +130,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     root.classList.toggle('is-sheet', g.sheet && up);
     if (g.sheet && up) root.style.setProperty('--app-h', `${g.bh.toFixed(1)}px`); else root.style.removeProperty('--app-h');
     if (!on) return;
+    reach();
     const r0 = root.getBoundingClientRect(), pr = phone.getBoundingClientRect();
     for (const k of ['curtain', 'lights'] as const) {
       const p = marksAt?.[k], m = marks[k], line = links[k];
@@ -131,15 +161,16 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     /** the stop is reached: the room's picture is `s`, its markers stand at `m` (normalised in the 16:9 frame) */
     show(s: Scene, m: Marks) {
       if (scene !== s) { scene = s; s.onChange((st) => { if (on) show(st); }); }
-      marksAt = m; rise(); on = true; touched = false; el.classList.remove('is-touched'); chip(0); prev = { curtain: 1, lights: 1 };
+      marksAt = m; rise(); on = true; touched = false; el.classList.remove('is-touched'); chip(0); prev = { curtain: 1, lights: 1 }; setTo = null;
       layout(); el.classList.add('is-on');
       show(s.state); clearInterval(clock); clock = window.setInterval(tick, 20000);
       settle(opts.reduced ? 100 : 1500);
+      coach(opts.reduced ? 600 : 2100); // once the phone has come up and its app has settled in
     },
     /** the tour moves on: the phone goes down (the room dissolves back into the film's frame: scene.leave) */
     hide(now = false) {
-      if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock);
-      el.classList.remove('is-on', 'is-rising'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h');
+      if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock); clearTimeout(coachT);
+      el.classList.remove('is-on', 'is-rising', 'is-coach'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h');
       return new Promise<void>((res) => setTimeout(() => { if (!on && !risen) el.hidden = true; res(); }, now || opts.reduced ? 0 : 560));
     },
     get shown() { return on || risen; },

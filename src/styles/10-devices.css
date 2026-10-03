@@ -94,6 +94,14 @@
 /* the room darkens when the switch turns its lights off */
 .live-dim { position: absolute; inset: 0; background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(10, 8, 6, 0.1), rgba(10, 8, 6, 0.62) 70%); opacity: 0; transition: opacity 0.8s var(--ease); pointer-events: none; }
 .live-dim.is-on { opacity: 1; }
+/* the coach on the switch (05-walkthrough.css): once the HUD has opened, the hand taps the lights in turn and the tip stands under
+   the switch; the first real tap sends both away for the visit. The hand is sized off the lights' spacing on screen (--u) */
+.live-coach { position: absolute; left: 0; top: 0; font-size: max(9px, calc(var(--u, 60px) * 0.18)); }
+.live-coach .coach-at { position: absolute; }
+.live-coach .coach-tip { font-size: clamp(11px, 0.95vw, 14px); opacity: 0; transition: opacity 0.3s var(--ease); }
+.live-coach.is-on .coach-tip { opacity: 1; transition: opacity 0.7s var(--ease) 1.6s; animation: coach-float 2.8s ease-in-out 2.3s infinite alternate; }
+.live-coach.is-on .coach-hand { animation: coach-tap 2.6s ease-in-out 1.6s infinite; }
+.live-coach.is-on .coach-ring { animation: coach-tap-ring 2.6s ease-in-out 1.6s infinite; }
 /* the lock's keypad: digits wake one by one, then the unlocked tick */
 .live-keypad { width: 256px; height: 512px; color: #fff; font-family: 'Jost', system-ui, sans-serif; }
 .live-keypad button { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; font: 300 44px/64px 'Jost', system-ui, sans-serif; color: rgba(255, 255, 255, 0); text-shadow: none; transition: color 0.25s, text-shadow 0.25s; }

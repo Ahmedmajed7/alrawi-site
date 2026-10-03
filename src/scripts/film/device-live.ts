@@ -2,7 +2,8 @@
  * Live devices on the paused film: when the tour stops on a device, real HTML is pinned onto it — onto the quads and
  * points recorded with the film (film.json `features`, or projected every frame in the live 3D) — and it comes alive:
  *   panel   the control panel's screen as a working UI (components/PanelScreen.astro, same layout as the baked pixels)
- *   switch  backlit dots you can tap: each gang toggles, and the room dims as its lights go off
+ *   switch  backlit dots you can tap: each gang toggles, and the room dims as its lights go off; until the first tap a hand shows
+ *           the move on the lights and a tip under the switch says it (the coach, 05-walkthrough.css)
  *   lock    the four ways in, one after another, each where it happens on the lock and named in the HUD beside it: a card read,
  *           a fingerprint, a face scanned, a password keyed in; after each the lock's light goes green. Digits are tappable
  *   puck    the smoke detector's green heartbeat; "Test" pulses it red with a spreading ring
@@ -18,6 +19,8 @@
 import { toPx, quadMatrix, type Frame } from './homography';
 import { SCENES, PANEL_DEFAULT, PW, PH, FULL, PILL_HEAD, type PanelState } from '@/data/panel-ui';
 import { publishDevice } from './hud';
+import { handHtml } from './hand';
+import { upright } from './stage';
 
 export interface Features { quads: Record<string, number[][]>; points: Record<string, number[]> }
 interface Live { place(f: Features, w: number, H: number, frame?: Frame): void; enter(): void; leave(): void }
@@ -100,21 +103,38 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
   function switchLive(): Live {
     const box = el('div', 'live-switch', layer, { 'data-live': '', 'data-live-ui': '' });
     const dim = el('i', 'live-dim', layer);
-    let n = 0; const dots: HTMLElement[] = [], hits: HTMLButtonElement[] = [], on: boolean[] = [];
+    // the coach (05-walkthrough.css): a hand tapping the lights one after another and a tip under the switch, until the visitor's
+    // first tap of the visit
+    const coach = el('div', 'live-coach', box, { 'aria-hidden': 'true' });
+    const hand = el('b', 'coach-hand', coach); hand.innerHTML = handHtml;
+    const tipAt = el('div', 'coach-at', coach), tip = el('p', 'coach-tip', tipAt);
+    el('i', '', tip); el('b', '', tip).textContent = t.tCoachTry ?? ''; el('span', '', tip).textContent = t.tCoachSwitch ?? '';
+    let n = 0, pts: [number, number][] = [], next = 0, tried = false; const dots: HTMLElement[] = [], hits: HTMLButtonElement[] = [], on: boolean[] = [];
+    hand.addEventListener('animationiteration', () => { if (pts.length) { next = (next + 1) % pts.length; at(hand, pts[next]); } }); // (between taps, while it is out of sight)
     const update = () => { const off = on.filter((v) => !v).length; dim.classList.toggle('is-on', off > 0); dim.style.opacity = off ? String(0.35 + 0.65 * (off / Math.max(1, n))) : ''; dots.forEach((d, i) => d.classList.toggle('is-off', !on[i])); hits.forEach((h, i) => h.setAttribute('aria-pressed', String(on[i]))); };
     const ensure = (k: number) => {
       while (n < k) { const i = n++; on.push(true); const d = el('i', 'live-dot', box); dots.push(d);
         const b = el('button', 'live-hit', box, { type: 'button', 'aria-label': `${t.tLight ?? 'Light'} ${i + 1}`, 'aria-pressed': 'true' }) as HTMLButtonElement; hits.push(b);
-        b.addEventListener('click', (e) => { e.stopPropagation(); on[i] = !on[i]; update(); }); }
+        b.addEventListener('click', (e) => { e.stopPropagation(); on[i] = !on[i]; update(); tried = true; coach.classList.remove('is-on'); }); }
     };
     return {
       place(f, w, H, frame) {
-        const pts = Object.keys(f.points).filter((k) => k.startsWith('led_')).sort().map((k) => toPx(f.points[k], w, H, frame)); ensure(pts.length);
+        pts = Object.keys(f.points).filter((k) => k.startsWith('led_')).sort().map((k) => toPx(f.points[k], w, H, frame)); ensure(pts.length);
         pts.forEach((p, i) => { at(dots[i], p); at(hits[i], p); });
-        if (pts.length) { const cx = pts.reduce((a, p) => a + p[0], 0) / pts.length, cy = pts.reduce((a, p) => a + p[1], 0) / pts.length; dim.style.setProperty('--x', `${(cx / w) * 100}%`); dim.style.setProperty('--y', `${(cy / H) * 100}%`); }
+        if (!pts.length) return;
+        const cx = pts.reduce((a, p) => a + p[0], 0) / pts.length, cy = pts.reduce((a, p) => a + p[1], 0) / pts.length; dim.style.setProperty('--x', `${(cx / w) * 100}%`); dim.style.setProperty('--y', `${(cy / H) * 100}%`);
+        // the lights' spacing on screen is the coach's unit; the tip stands under the switch (over it where the picture ends first),
+        // reaching away from the HUD where the HUD stands beside the switch (film/callout.ts: the stop's side, on any screen but
+        // an upright one or a narrow one), else centred under it; never past the picture's edge
+        const u = pts.length > 1 ? Math.hypot(pts[pts.length - 1][0] - pts[0][0], pts[pts.length - 1][1] - pts[0][1]) / (pts.length - 1) : 60;
+        const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]), below = Math.max(...ys) + u * 0.95;
+        coach.style.setProperty('--u', `${u.toFixed(1)}px`); at(hand, pts[next % pts.length]);
+        const beside = !upright.matches && (w >= 720 || H < 500), hudLeft = (root.querySelector<HTMLElement>('.walk-callout[data-shape="switch"]')?.dataset.side ?? 'left') === 'left';
+        const tw = tip.offsetWidth, x = beside ? (hudLeft ? Math.min(...xs) - u * 0.3 : Math.max(...xs) + u * 0.3 - tw) : cx - tw / 2;
+        at(tipAt, [Math.max(8, Math.min(w - 8 - tw, x)), below + 40 < H ? below : Math.min(...ys) - u * 2.4 - 34]);
       },
-      enter() { box.classList.add('is-on'); },
-      leave() { box.classList.remove('is-on'); on.fill(true); update(); },
+      enter() { box.classList.add('is-on'); if (!tried) coach.classList.add('is-on'); },
+      leave() { box.classList.remove('is-on'); coach.classList.remove('is-on'); on.fill(true); update(); },
     };
   }
 
