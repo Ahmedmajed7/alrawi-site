@@ -1,0 +1,148 @@
+{
+  "clips": [
+    {
+      "id": "panel",
+      "size": "l",
+      "audio": false,
+      "label": {
+        "en": "The control panel, the switches and the hall",
+        "ar": "لوحة التحكم والمفاتيح والممر"
+      },
+      "poster": "/look/panel-60cc9ab4.webp",
+      "src": {
+        "g": {
+          "url": "/look/panel-g-d420e833.mp4",
+          "w": 720,
+          "h": 1280,
+          "bytes": 2218633
+        },
+        "v": {
+          "url": "/look/panel-v-23f94305.mp4",
+          "w": 1080,
+          "h": 1920,
+          "bytes": 6480118
+        }
+      },
+      "w": 1080,
+      "h": 1920,
+      "duration": 11.23
+    },
+    {
+      "id": "curtains",
+      "size": "l",
+      "audio": false,
+      "label": {
+        "en": "The curtains open from the phone",
+        "ar": "الستائر تُفتح من الهاتف"
+      },
+      "poster": "/look/curtains-76e09b27.webp",
+      "src": {
+        "g": {
+          "url": "/look/curtains-g-1c3093ee.mp4",
+          "w": 720,
+          "h": 1280,
+          "bytes": 2084920
+        },
+        "v": {
+          "url": "/look/curtains-v-b0dbe2ee.mp4",
+          "w": 1080,
+          "h": 1920,
+          "bytes": 4995166
+        }
+      },
+      "w": 1080,
+      "h": 1920,
+      "duration": 12.37
+    },
+    {
+      "id": "film",
+      "size": "l",
+      "audio": true,
+      "label": {
+        "en": "Al Rawi Smart Home, the film",
+        "ar": "فيلم الراوي للمنازل الذكية"
+      },
+      "poster": "/look/film-317978a1.webp",
+      "src": {
+        "g": {
+          "url": "/look/film-g-ff1f7a38.mp4",
+          "w": 720,
+          "h": 928,
+          "bytes": 9181506
+        },
+        "v": {
+          "url": "/look/film-v-df131a68.mp4",
+          "w": 1080,
+          "h": 1392,
+          "bytes": 19325801
+        }
+      },
+      "w": 1080,
+      "h": 1392,
+      "duration": 73.7
+    },
+    {
+      "id": "ramadan",
+      "size": "m",
+      "audio": false,
+      "label": {
+        "en": "One press on your phone and Ramadan mode is on: the lights adjust, the air conditioning starts, and the whole mood of the house changes. All in one moment.",
+        "ar": "بضغطة زر من هاتفك يعمل وضع رمضان: تُضبط الإضاءة، ويعمل التكييف، ويتغيّر جو البيت بالكامل. كل شيء في لحظة واحدة."
+      },
+      "poster": "/look/ramadan-5ff6bf98.webp",
+      "src": {
+        "g": {
+          "url": "/look/ramadan-g-84bd2c0a.mp4",
+          "w": 720,
+          "h": 960,
+          "bytes": 870221
+        }
+      },
+      "w": 720,
+      "h": 960,
+      "duration": 5.16
+    },
+    {
+      "id": "touch",
+      "size": "s",
+      "audio": false,
+      "label": {
+        "en": "One touch, and the whole scene changes.",
+        "ar": "لمسة واحدة، ويتغيّر المشهد بالكامل."
+      },
+      "poster": "/look/touch-8c6ab069.webp",
+      "src": {
+        "g": {
+          "url": "/look/touch-g-fbea7e03.mp4",
+          "w": 576,
+          "h": 832,
+          "bytes": 170055
+        }
+      },
+      "w": 576,
+      "h": 832,
+      "duration": 2.6
+    },
+    {
+      "id": "chandelier",
+      "size": "s",
+      "audio": false,
+      "label": {
+        "en": "One touch, and the light makes the scene.",
+        "ar": "لمسة واحدة، والإضاءة تصنع المشهد."
+      },
+      "poster": "/look/chandelier-8e30816d.webp",
+      "src": {
+        "g": {
+          "url": "/look/chandelier-g-8a0e0b8e.mp4",
+          "w": 576,
+          "h": 896,
+          "bytes": 574364
+        }
+      },
+      "w": 576,
+      "h": 896,
+      "duration": 4.33
+    }
+  ]
+}

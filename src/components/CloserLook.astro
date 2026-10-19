@@ -1,0 +1,79 @@
+---
+/** "A closer look" (the home, after the projects map; 19 Oct 2026): the client's own clips of homes the company fitted
+    (src/data/look.json, written by scripts/build-look.mjs: captions cut away, HDR tone-mapped, sized by resolution).
+    On a wide screen the six clips stand as a collage on the white page, overlapping at their corners like prints laid
+    on a table, each drifting with the scroll at its own pace (the nearer, larger ones faster: `--spd`), the crisp 4K
+    clips and the brand film large, the 720p clip medium and the two 576p clips small, every one a muted loop that
+    plays while it is in view. Under the pointer a tile lifts, its caption (the client's own words, set in type) and
+    a brass ring come up; a tap opens the clip large in a viewer on the site's navy, with sound where the clip has it,
+    the next and previous a swipe or an arrow away. On a phone the collage becomes a reel that snaps clip by clip,
+    the captions always on. scripts/motion/look.ts; styles/16-look.css. */
+import Icon from '@/components/Icons.astro';
+import SecHead from '@/components/SecHead.astro';
+import { useT, l, localePath, type Locale } from '@/i18n/utils';
+import look from '@/data/look.json';
+interface Props { locale: Locale; band?: 'paper' | 'mist' }
+const { locale, band = 'paper' } = Astro.props;
+const t = useT(locale);
+const two = (n: number) => String(n).padStart(2, '0');
+// the curtains clip in the middle, the film beside it (the client's choice, 19 Oct 2026). The collage (x, y, w in hundredths of the wall's width; z the stacking; spd the drift with the scroll) and the
+// reel's order (o) and height share (hs), by clip
+const LAYOUT: Record<string, { x: number; y: number; w: number; z: number; spd: number; o: number }> = {
+  curtains: { x: 37.5, y: 0.5, w: 27, z: 4, spd: 1, o: 3 },
+  panel: { x: 16, y: 10, w: 24, z: 3, spd: 0.7, o: 1 },
+  film: { x: 64.5, y: 15, w: 24, z: 3, spd: 0.8, o: 5 },
+  ramadan: { x: 3, y: 36, w: 17, z: 2, spd: 0.5, o: 4 },
+  touch: { x: 47, y: 40, w: 14, z: 2, spd: 0.45, o: 2 },
+  chandelier: { x: 83, y: 34, w: 14, z: 2, spd: 0.55, o: 6 },
+};
+const clips = look.clips.map((c, i) => ({ ...c, i, lay: LAYOUT[c.id] ?? { x: 0, y: 0, w: 20, z: 1, spd: 0.5, o: i + 1 }, big: c.src.v ?? c.src.g }));
+---
+<section class:list={['band', `band--${band}`, 'look']} id="look" data-tone="lime" data-look>
+  <div class="wrap">
+    <SecHead label={t('look.eyebrow')} title={t('look.title')} lead={t('look.lead')} />
+    <div class="look-wall" data-look-wall>
+      {clips.map((c) => (
+        <figure class:list={['look-tile', `is-${c.size}`]} data-look-tile={c.i}
+          style={`--x:${c.lay.x};--y:${c.lay.y};--w:${c.lay.w};--z:${c.lay.z};--spd:${c.lay.spd};--o:${c.lay.o};--ar:${c.src.g.w}/${c.src.g.h};--d:${(c.lay.o - 1) * 0.08}s`}
+          data-src={c.src.g.url} data-big={c.big.url} data-poster={c.poster} data-audio={c.audio ? '1' : undefined} data-w={c.big.w} data-h={c.big.h} data-label={l(c.label, locale)}>
+          <div class="look-card" data-reveal="rise">
+            <video class="look-vid" muted playsinline loop preload="none" poster={c.poster} width={c.src.g.w} height={c.src.g.h} disablepictureinpicture aria-hidden="true"></video>
+            <button class="look-open" type="button" data-look-open={c.i} aria-label={`${t('look.open')}: ${l(c.label, locale)}`}>
+              <i class="look-ring" aria-hidden="true"><Icon name="expand" /></i>
+            </button>
+            <figcaption class="look-cap">
+              <span class="look-no num">{two(c.i + 1)}</span>
+              <span class="look-cap-text">{l(c.label, locale)}</span>
+            </figcaption>
+          </div>
+        </figure>
+      ))}
+    </div>
+    <p class="sec-more" data-reveal><a class="link" href={localePath(locale, 'products')}>{t('look.more')} <Icon name="arrow" class="icon-dir" /></a></p>
+  </div>
+
+  <!-- the viewer: one clip large on the site's navy, its caption and place in the set under it -->
+  <dialog class="look-view" data-look-view aria-label={t('look.title')}>
+    <div class="look-view-in">
+      <button class="look-ib look-x" type="button" data-look-close aria-label={t('look.close')}><Icon name="close" /></button>
+      <div class="look-stage" data-look-stage>
+        <i class="look-frame" aria-hidden="true"></i>
+        <video class="look-big" playsinline loop preload="auto" data-look-big></video>
+      </div>
+      <div class="look-bar">
+        <span class="look-count num"><b data-look-i>01</b><span class="look-count-of"> / {two(clips.length)}</span></span>
+        <p class="look-view-cap" data-look-cap></p>
+        <div class="look-ctl">
+          <button class="look-ib look-sound" type="button" data-look-sound aria-label={t('look.soundOff')} data-on={t('look.soundOn')} data-off={t('look.soundOff')} hidden><i class="look-ic-on"><Icon name="sound" /></i><i class="look-ic-off"><Icon name="mute" /></i></button>
+          <button class="look-ib" type="button" data-look-prev aria-label={t('look.prev')}><Icon name="arrow" class="icon-dir look-back" /></button>
+          <button class="look-ib" type="button" data-look-next aria-label={t('look.next')}><Icon name="arrow" class="icon-dir" /></button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  import { initLook } from '@/scripts/motion/look';
+  initLook();
+</script>

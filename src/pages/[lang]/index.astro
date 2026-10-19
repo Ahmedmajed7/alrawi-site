@@ -7,6 +7,7 @@ import Stat from '@/components/Stat.astro';
 import ProjectsMap from '@/components/ProjectsMap.astro';
 import CeoMessage from '@/components/CeoMessage.astro';
 import ControlWays from '@/components/ControlWays.astro';
+import CloserLook from '@/components/CloserLook.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { staticLangPaths, useT, strings, l, localePath, type Locale } from '@/i18n/utils';
 import site from '@/data/site.json';
@@ -23,7 +24,8 @@ const two = (n: number) => String(n).padStart(2, '0');
 const helpline = site.offices[0].phones[0];
 const wa = `https://wa.me/${site.whatsapp}`;
 // The home tells one story, in the order a visitor's questions come (1 Oct 2026; words from the live site and the
-// company profile only):  the film (attention) → the promise, with the way to a quote → proof (the projects map) →
+// company profile only):  the film (attention) → the promise, with the way to a quote → proof (the projects map, then
+// the client's clips of finished homes, "A closer look") →
 // what living with it is like (the ways to control) → what we do (services) → why us → how it goes (the four steps,
 // then the quote button) → who we are (About us, the CEO's message) → the two questions → the closing call.
 // Each part hands on to the next page a reader would want; nothing repeats.
@@ -77,6 +79,9 @@ const wa = `https://wa.me/${site.whatsapp}`;
 
   <!-- proof: the company profile's map, the projects delivered across Oman region by region -->
   <ProjectsMap {locale} />
+
+  <!-- proof, seen: the client's clips of homes the company fitted (19 Oct 2026), autoplaying loops in a collage -->
+  <CloserLook {locale} />
 
   <!-- what living with it is like: the four ways to control the home (company profile) -->
   <ControlWays {locale} more />

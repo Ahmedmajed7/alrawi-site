@@ -34,6 +34,10 @@ const paths: Record<string, string> = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
   top: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+  sound: '<path d="M4 10v4h4l5 4V6L8 10H4Z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>',
+  mute: '<path d="M4 10v4h4l5 4V6L8 10H4Z"/><path d="m17 9 4 6M21 9l-4 6"/>',
+  expand: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
 };
 const d = paths[name] ?? paths.arrow;
 const filled = name === 'whatsapp';
