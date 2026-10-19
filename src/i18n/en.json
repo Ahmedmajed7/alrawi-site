@@ -63,6 +63,19 @@
   "unit": "projects",
   "map": "Map of Oman showing the projects delivered in each governorate"
  },
+ "look": {
+  "eyebrow": "From our projects",
+  "title": "A closer look",
+  "lead": "Moments from homes we have completed, filmed in the rooms themselves.",
+  "open": "Closer look",
+  "close": "Close",
+  "prev": "Previous clip",
+  "next": "Next clip",
+  "soundOn": "Sound on",
+  "soundOff": "Sound off",
+  "of": "of",
+  "more": "Our products"
+ },
  "ceo": {
   "eyebrow": "CEO Message",
   "body": [
@@ -242,6 +255,10 @@
   "tap": "Tap to enter",
   "loading": "Preparing the house",
   "skip": "Skip the tour",
+  "sound": {
+   "on": "Sound on",
+   "off": "Sound off"
+  },
   "next": "Next device",
   "finish": "Explore the site",
   "back": "Back",

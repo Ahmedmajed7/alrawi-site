@@ -145,7 +145,13 @@ const c = s.walk.coach;
   <div class="walk-ui">
     <div class="walk-top">
       <a class="walk-brand" href={localePath(locale)}><Logo /><span>{locale === 'ar' ? 'الراوي' : 'AL RAWI'}</span></a>
-      <a class="walk-skip" href="#philosophy" data-walk-skip>{t('walk.skip')}</a>
+      <span class="walk-top-end">
+        <!-- the sound (scripts/film/sfx.ts): on by default, remembered when turned off -->
+        <button class="walk-sound" type="button" data-walk-sound aria-pressed="true" aria-label={t('walk.sound.on')} data-on={t('walk.sound.on')} data-off={t('walk.sound.off')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="s-body" d="M4 9.5v5h3.4l4.6 4V5.5l-4.6 4H4Z" /><path class="s-w1" d="M15 9.6a3.4 3.4 0 0 1 0 4.8" /><path class="s-w2" d="M17.6 7.2a6.8 6.8 0 0 1 0 9.6" /><path class="s-x" d="m15.5 9.5 5 5M20.5 9.5l-5 5" /></svg>
+        </button>
+        <a class="walk-skip" href="#philosophy" data-walk-skip>{t('walk.skip')}</a>
+      </span>
     </div>
     <div class="walk-mid">
       <div class="walk-prompt is-on" data-walk-prompt>

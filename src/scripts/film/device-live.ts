@@ -15,12 +15,15 @@
  * The hand-over is only ever made at rest (2 Oct 2026). A layer comes up over the held frame once the move has ended, and `hide()`
  * takes it down quickly before the next move starts (the player waits for it): HTML pinned to a moving picture trails it by a
  * frame, which at the film's pace is a third of the panel's own width, so nothing is pinned while the film moves.
+ * Each layer has its sounds (film/sfx.ts): the panel waking and its taps, the switch's tock, the detector's chirp and its test
+ * alarm, the speaker's music, the lock reading each way in and granting it.
  */
 import { toPx, quadMatrix, type Frame } from './homography';
 import { SCENES, PANEL_DEFAULT, PW, PH, FULL, PILL_HEAD, type PanelState } from '@/data/panel-ui';
 import { publishDevice } from './hud';
 import { handHtml } from './hand';
 import { upright } from './stage';
+import { sfx } from './sfx';
 
 export interface Features { quads: Record<string, number[][]>; points: Record<string, number[]> }
 interface Live { place(f: Features, w: number, H: number, frame?: Frame): void; enter(): void; leave(): void }
@@ -59,15 +62,15 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     };
     const set = (patch: Partial<PanelState>) => { const prev = st; st = { ...st, ...patch }; render(prev); };
     // wiring (once)
-    $$('[data-ps-scene]').forEach((b, i) => b.addEventListener('click', () => set({ scene: i, ...SCENES[i] })));
-    $$('[data-ps-temp-step]').forEach((b) => b.addEventListener('click', () => set({ temp: Math.min(30, Math.max(16, st.temp + Number(b.dataset.psTempStep))) })));
-    $$('[data-ps-curtain]').forEach((b, i) => b.addEventListener('click', () => set({ curtain: i as 0 | 1 | 2 })));
-    $('[data-ps-play]').addEventListener('click', () => set({ playing: !st.playing }));
+    $$('[data-ps-scene]').forEach((b, i) => b.addEventListener('click', () => { sfx.play('confirm'); set({ scene: i, ...SCENES[i] }); }));
+    $$('[data-ps-temp-step]').forEach((b) => b.addEventListener('click', () => { sfx.play('ui'); set({ temp: Math.min(30, Math.max(16, st.temp + Number(b.dataset.psTempStep))) }); }));
+    $$('[data-ps-curtain]').forEach((b, i) => b.addEventListener('click', () => { sfx.play('ui'); set({ curtain: i as 0 | 1 | 2 }); }));
+    $('[data-ps-play]').addEventListener('click', () => { sfx.play('ui'); set({ playing: !st.playing }); sfx.music(st.playing, 0.45); }); // the lounge, from the hall
     $$('[data-ps-slider]').forEach((s) => {
       const key = s.dataset.psSlider as 'main' | 'vanity';
       const fromEvent = (e: PointerEvent) => Math.round(Math.min(100, Math.max(0, (1 - (e.offsetY - PILL_HEAD) / (s.offsetHeight - PILL_HEAD)) * 100))); // offsetY is in the slider's own (projected) space; the fill track is below the head
       let drag = false;
-      s.addEventListener('pointerdown', (e) => { drag = true; s.setPointerCapture(e.pointerId); s.classList.add('is-drag'); const prev = st; st = { ...st, [key]: fromEvent(e) }; render(prev); e.stopPropagation(); });
+      s.addEventListener('pointerdown', (e) => { drag = true; s.setPointerCapture(e.pointerId); s.classList.add('is-drag'); sfx.play('ui'); const prev = st; st = { ...st, [key]: fromEvent(e) }; render(prev); e.stopPropagation(); });
       s.addEventListener('pointermove', (e) => { if (!drag) return; const prev = st; st = { ...st, [key]: fromEvent(e) }; render(prev); });
       const end = () => { drag = false; s.classList.remove('is-drag'); };
       s.addEventListener('pointerup', end); s.addEventListener('pointercancel', end);
@@ -90,12 +93,12 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
       enter() {
         showing = true; if (scr.hidden) { scr.hidden = false; void scr.offsetWidth; } scr.classList.add('is-on');
         if (!awake) wake = later(() => {
-          awake = true; scr.classList.add('is-awake', 'is-turning');
+          awake = true; scr.classList.add('is-awake', 'is-turning'); sfx.play('panel-wake');
           later(() => { if (!showing) return; tick(); clock = window.setInterval(tick, 1000); scr.classList.remove('is-turning'); }, 380);
         }, 420);
       },
       // back to what the film shows, and gone before the film moves (device-live `hide` gives it 170 ms)
-      leave() { showing = false; clearTimeout(wake); scr.classList.remove('is-on'); later(() => { if (!showing) { scr.hidden = true; reset(); } }, 240); },
+      leave() { showing = false; clearTimeout(wake); scr.classList.remove('is-on'); if (st.playing) sfx.music(false); later(() => { if (!showing) { scr.hidden = true; reset(); } }, 240); },
     };
   }
 
@@ -115,7 +118,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const ensure = (k: number) => {
       while (n < k) { const i = n++; on.push(true); const d = el('i', 'live-dot', box); dots.push(d);
         const b = el('button', 'live-hit', box, { type: 'button', 'aria-label': `${t.tLight ?? 'Light'} ${i + 1}`, 'aria-pressed': 'true' }) as HTMLButtonElement; hits.push(b);
-        b.addEventListener('click', (e) => { e.stopPropagation(); on[i] = !on[i]; update(); tried = true; coach.classList.remove('is-on'); }); }
+        b.addEventListener('click', (e) => { e.stopPropagation(); on[i] = !on[i]; sfx.play(on[i] ? 'switch-on' : 'switch-off'); update(); tried = true; coach.classList.remove('is-on'); }); }
     };
     return {
       place(f, w, H, frame) {
@@ -145,7 +148,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', ''];
     const btns: HTMLButtonElement[] = [];
     keys.forEach((k, i) => { if (!k) return; const b = el('button', '', kp, { type: 'button', 'aria-label': k }) as HTMLButtonElement; b.textContent = k; b.style.left = `${256 * (0.22 + (i % 3) * 0.28)}px`; b.style.top = `${512 * (0.2 + Math.floor(i / 3) * 0.17)}px`; btns.push(b);
-      b.addEventListener('click', (e) => { e.stopPropagation(); b.classList.add('is-lit'); window.setTimeout(() => b.classList.remove('is-lit'), 420); }); });
+      b.addEventListener('click', (e) => { e.stopPropagation(); sfx.play('lock-key'); b.classList.add('is-lit'); window.setTimeout(() => b.classList.remove('is-lit'), 420); }); });
     // where each way in happens on the lock: the reader under the camera, the handle's flank, the lens window, the keypad; and the
     // lock's own light, which goes green as each is accepted
     const fx = { card: el('i', 'live-card', box), finger: el('i', 'live-finger', box), face: el('i', 'live-face', box) }, led = el('i', 'live-lockled', box, { role: 'img', 'aria-label': t.tUnlocked ?? 'Unlocked' });
@@ -158,8 +161,8 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const run = (n: number) => {
       const way = WAYS[n % WAYS.length]; clear();
       if (hud) hud.dataset.m = way; chips.forEach((c) => c.classList.toggle('is-on', c.dataset.m === way)); if (cap) cap.textContent = chips.find((c) => c.dataset.m === way)?.textContent ?? cap.textContent;
-      after(() => { hud?.classList.add('is-scan'); if (way === 'password') [2, 6, 3, 9].forEach((d, k) => { const b = btns.find((x) => x.textContent === String(d))!; after(() => b.classList.add('is-lit'), k * 250); after(() => b.classList.remove('is-lit'), 330 + k * 250); }); else fx[way].classList.add('is-on'); }, 150);
-      after(() => { hud?.classList.remove('is-scan'); hud?.classList.add('is-ok'); led.classList.add('is-ok'); }, 1450);
+      after(() => { hud?.classList.add('is-scan'); if (way === 'password') [2, 6, 3, 9].forEach((d, k) => { const b = btns.find((x) => x.textContent === String(d))!; after(() => { b.classList.add('is-lit'); sfx.play('lock-key'); }, k * 250); after(() => b.classList.remove('is-lit'), 330 + k * 250); }); else { fx[way].classList.add('is-on'); sfx.play(`lock-${way}`); } }, 150);
+      after(() => { hud?.classList.remove('is-scan'); hud?.classList.add('is-ok'); led.classList.add('is-ok'); sfx.play('lock-granted'); }, 1450);
       after(() => run(n + 1), STEP);
     };
     return {
@@ -183,11 +186,12 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const box = el('div', 'live-smoke', layer, { 'data-live': '', 'data-live-ui': '' });
     const ledEl = el('i', 'live-led', box); const test = el('button', 'live-test', box, { type: 'button' }) as HTMLButtonElement; test.textContent = t.tTest ?? 'Test';
     let alarm = 0;
-    test.addEventListener('click', (e) => { e.stopPropagation(); ledEl.classList.remove('is-alarm'); void ledEl.offsetWidth; ledEl.classList.add('is-alarm'); clearTimeout(alarm); alarm = window.setTimeout(() => ledEl.classList.remove('is-alarm'), 3200); });
+    test.addEventListener('click', (e) => { e.stopPropagation(); sfx.play('sensor-alarm'); ledEl.classList.remove('is-alarm'); void ledEl.offsetWidth; ledEl.classList.add('is-alarm'); clearTimeout(alarm); alarm = window.setTimeout(() => ledEl.classList.remove('is-alarm'), 3200); });
+    let chirp = 0;
     return {
       place(f, w, H, frame) { const p = f.points.led_0; if (p) at(ledEl, toPx(p, w, H, frame)); const b = f.points.btn_test ?? p; if (b) at(test, toPx(b, w, H, frame)); },
-      enter() { box.classList.add('is-on'); },
-      leave() { box.classList.remove('is-on'); ledEl.classList.remove('is-alarm'); },
+      enter() { box.classList.add('is-on'); chirp = later(() => sfx.play('sensor-chirp'), 700); }, // the detector's chirp, a beat after the lens settles
+      leave() { box.classList.remove('is-on'); ledEl.classList.remove('is-alarm'); clearTimeout(chirp); },
     };
   }
 
@@ -196,11 +200,12 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const g = el('div', 'live-grille is-playing', layer, { 'data-live': '', 'data-live-ui': '' });
     for (let i = 0; i < 3; i++) el('i', '', g);
     const b = el('button', '', g, { type: 'button', 'aria-label': t.tSound ?? 'Sound', 'aria-pressed': 'true' }) as HTMLButtonElement;
-    b.addEventListener('click', (e) => { e.stopPropagation(); const on = !g.classList.contains('is-playing'); g.classList.toggle('is-playing', on); b.setAttribute('aria-pressed', String(on)); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); const on = !g.classList.contains('is-playing'); g.classList.toggle('is-playing', on); b.setAttribute('aria-pressed', String(on)); sfx.play('ui'); sfx.music(on, 1); });
+    let start = 0;
     return {
       place(f, w, H, frame) { const q = f.quads.grille; if (q) g.style.transform = quadMatrix(400, 400, quadPx(q, w, H, frame)); },
-      enter() { g.classList.add('is-on', 'is-playing'); },
-      leave() { g.classList.remove('is-on'); },
+      enter() { g.classList.add('is-on', 'is-playing'); start = later(() => sfx.music(true, 1), 500); }, // the lounge plays as the lens settles on the speaker
+      leave() { g.classList.remove('is-on'); clearTimeout(start); sfx.music(false); },
     };
   }
 

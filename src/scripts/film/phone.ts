@@ -12,6 +12,7 @@
  */
 import type { Scene, SceneState } from './scene';
 import { stageBox, stagePx, upright } from './stage';
+import { sfx } from './sfx';
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 type Marks = Record<string, number[]> | null | undefined;
@@ -88,7 +89,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
       // offsetX is in the slider's own space, whatever the phone's tilt; the knob's travel is the track less the knob
       const val = (e: PointerEvent) => { const w = node.offsetWidth, pad = node.offsetHeight / 2, x = clamp((e.offsetX - pad) / Math.max(1, w - pad * 2)); return rtl ? 1 - x : x; };
       let down = false;
-      node.addEventListener('pointerdown', (e) => { down = true; node.setPointerCapture(e.pointerId); node.classList.add('is-drag'); first(); chip(-1); set(val(e), false); e.stopPropagation(); e.preventDefault(); });
+      node.addEventListener('pointerdown', (e) => { down = true; node.setPointerCapture(e.pointerId); node.classList.add('is-drag'); first(); chip(-1); sfx.play('ui'); set(val(e), false); e.stopPropagation(); e.preventDefault(); });
       node.addEventListener('pointermove', (e) => { if (down) set(val(e), false); });
       const end = (e: PointerEvent) => { if (!down) return; down = false; node.classList.remove('is-drag'); set(val(e), true); };
       node.addEventListener('pointerup', end); node.addEventListener('pointercancel', () => { down = false; node.classList.remove('is-drag'); });
@@ -104,13 +105,13 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
       scene.curtainTo(setTo, end && sliders.curtain.matches(':focus-visible') ? 'travel' : 'drag'); show(scene.state);
     });
     drag(sliders.lights, (v) => { did('lights'); if (v > 0.02) lastLevel = v; scene?.lightsTo(v < 0.02 ? 0 : v, false); });
-    sw.addEventListener('click', (e) => { e.stopPropagation(); first(); chip(-1); did('lights'); const lit = (scene?.state.lights ?? 0) > 0.02; if (lit) lastLevel = Math.max(0.3, scene!.state.lights); scene?.lightsTo(lit ? 0 : lastLevel, true); });
+    sw.addEventListener('click', (e) => { e.stopPropagation(); first(); chip(-1); did('lights'); const lit = (scene?.state.lights ?? 0) > 0.02; if (lit) lastLevel = Math.max(0.3, scene!.state.lights); sfx.play(lit ? 'lights-off' : 'lights-on'); scene?.lightsTo(lit ? 0 : lastLevel, true); });
     for (const b of Array.from(el.querySelectorAll<HTMLButtonElement>('[data-app-curtain]'))) b.addEventListener('click', (e) => {
-      e.stopPropagation(); first(); chip(-1); did('curtain'); setTo = null; const k = b.dataset.appCurtain;
+      e.stopPropagation(); first(); chip(-1); did('curtain'); sfx.play('ui'); setTo = null; const k = b.dataset.appCurtain;
       if (k === 'pause') scene?.halt(); else scene?.curtainTo(k === 'open' ? 1 : 0, 'travel');
     });
     chips.forEach((b, i) => b.addEventListener('click', (e) => {
-      e.stopPropagation(); first(); chip(i); did('all'); setTo = null; const l = Number(b.dataset.lights) / 100; if (l > 0.02) lastLevel = l;
+      e.stopPropagation(); first(); chip(i); did('all'); sfx.play('confirm'); setTo = null; const l = Number(b.dataset.lights) / 100; if (l > 0.02) lastLevel = l;
       scene?.curtainTo(Number(b.dataset.curtain) / 100, 'travel'); scene?.lightsTo(l, true);
     }));
     phone.addEventListener('click', (e) => e.stopPropagation()); // a tap on the phone is never a tap on the film
@@ -151,7 +152,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
 
   /** the phone starts up into the frame (on an upright phone: the picture starts making room for the app) */
   const rise = () => {
-    if (risen) return; risen = true; wire(); tick();
+    if (risen) return; risen = true; wire(); tick(); sfx.play('phone-up');
     el.hidden = false; void el.offsetWidth; layout(); root.classList.add('is-app'); el.classList.add('is-rising');
   };
   return {
@@ -169,7 +170,7 @@ export function createPhone(root: HTMLElement, el: HTMLElement, opts: { reduced:
     },
     /** the tour moves on: the phone goes down (the room dissolves back into the film's frame: scene.leave) */
     hide(now = false) {
-      if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock); clearTimeout(coachT);
+      if (!on && !risen) return Promise.resolve(); on = false; risen = false; clearInterval(clock); clearTimeout(coachT); if (!now) sfx.play('phone-down');
       el.classList.remove('is-on', 'is-rising', 'is-coach'); root.classList.remove('is-app', 'is-sheet'); root.style.removeProperty('--app-h');
       return new Promise<void>((res) => setTimeout(() => { if (!on && !risen) el.hidden = true; res(); }, now || opts.reduced ? 0 : 560));
     },

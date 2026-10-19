@@ -23,6 +23,10 @@ Each clip starts where the previous one ends, so the film reads as one continuou
 
 On an upright screen (a phone held upright, a tablet) the player shows the whole 16:9 frame in a full-width band rather than covering the screen with a cropped quarter of it, and fetches the rung that band needs (`src/scripts/film/stage.ts`; CLAUDE.md "Upright screens"). Clips stay 16:9: nothing about recording or encoding changes for phones.
 
+## Sound
+
+The film has sound since 19 Oct 2026 (`src/scripts/film/sfx.ts` + `sfx-engine.ts`): nothing is downloaded (every sound is synthesised in Web Audio when it is needed) and the engine is a separate chunk fetched only after the visitor's first tap, so the page's load is untouched. The clips themselves stay silent: the sound is laid over them by the player. Moments inside a clip (the door unlatching and swinging on the way in, the threshold where the street's wind gives way to the rooms, the drapes parting, the way out and the door closing in front of the lens) are not timed by ear: `npm run film:cues` runs the camera planner on `house.json` exactly as the recorder does and writes them to `src/data/film-cues.json`. Re-run it whenever a pose or the pace changes, before recording. An AI clip that moves these moments wants its times set there by hand. The devices' own sounds (the switch, the detector, the lock, the speaker's music, the phone) hang on the live layers' events, so they follow whatever clip is in. The switch in the brand row turns it all off and is remembered.
+
 ## Files and commands
 
 ```

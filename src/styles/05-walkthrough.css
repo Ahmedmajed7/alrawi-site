@@ -54,6 +54,19 @@ body.is-walking .walk { touch-action: none; } /* the tour holds the page; otherw
 .walk-skip { font-family: var(--f-sans); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--on-night-soft); border-bottom: 1px solid currentColor; padding-bottom: 3px; transition: color var(--dur-fast); }
 html[lang='ar'] .walk-skip { text-transform: none; letter-spacing: 0; font-size: 0.9rem; }
 .walk-skip:hover { color: var(--on-night); }
+/* the sound switch (scripts/film/sfx.ts): a round brass-hairline ring with the speaker in the row's own ink; off, the waves give
+   way to a cross */
+.walk-top-end { display: inline-flex; align-items: center; gap: 18px; }
+.walk-sound { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(201, 169, 110, 0.55); color: inherit; background: rgba(11, 19, 48, 0.12); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: border-color var(--dur-fast), background-color var(--dur-fast), opacity 0.6s var(--ease); }
+.walk-sound svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.walk-sound .s-body { fill: currentColor; stroke: none; }
+.walk-sound .s-w1, .walk-sound .s-w2, .walk-sound .s-x { transition: opacity 0.3s var(--ease), transform 0.3s var(--ease); transform-origin: 12px 12px; }
+.walk-sound .s-x { opacity: 0; transform: scale(0.6); }
+.walk-sound.is-off .s-w1, .walk-sound.is-off .s-w2 { opacity: 0; transform: scale(0.6); }
+.walk-sound.is-off .s-x { opacity: 1; transform: none; }
+.walk-sound:hover { border-color: var(--brass); background: rgba(11, 19, 48, 0.22); }
+.walk-sound:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.walk.is-prompt .walk-sound { background: rgba(255, 255, 255, 0.2); }
 /* the hero opens on a bright sky: brand row, headline and tap button read in slate until the tour begins */
 .walk.is-prompt .walk-top { color: var(--slate); }
 .walk.is-prompt .walk-skip { color: var(--slate-soft); }
@@ -172,6 +185,8 @@ html[lang='ar'] .walk-hint { text-transform: none; letter-spacing: 0; font-size:
   /* the chrome stands on the night ground: ivory, no paper halos (the tone sampler reads "dark" here too) */
   .walk:not(.is-3d) .walk-ui { grid-template-rows: auto minmax(0, 1fr) auto; }
   .walk:not(.is-3d) .walk-top { height: 30px; color: var(--on-night); text-shadow: none; }
+  .walk:not(.is-3d) .walk-sound { width: 30px; height: 30px; background: rgba(255, 255, 255, 0.06); }
+  .walk:not(.is-3d) .walk-sound svg { width: 16px; height: 16px; }
   .walk:not(.is-3d) .walk-skip { color: var(--on-night-soft); }
   .walk:not(.is-3d) .walk-skip:hover { color: var(--on-night); }
   .walk:not(.is-3d) .walk-mid { padding-top: calc(var(--stage-gap) + var(--stage-h) + 24px); overflow: hidden; }

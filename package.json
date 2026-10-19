@@ -18,6 +18,7 @@
     "trees:build": "node scripts/build-trees.mjs",
     "film:record": "node scripts/record-film.mjs",
     "film:encode": "node scripts/film-encode.mjs",
+    "film:cues": "node scripts/film-cues.mjs",
     "serve": "node scripts/serve.mjs",
     "terrain:build": "node scripts/build-terrain.mjs"
   },

@@ -1,0 +1,38 @@
+{
+  "note": "seconds into each clip of the film: node scripts/film-cues.mjs (from house.json through camera-rig.ts); the player (film/sfx.ts) hangs the sound on these",
+  "clips": {
+    "panel": {
+      "T": 5.643,
+      "gate": 3.283,
+      "door": 1.092,
+      "inside": 3.092,
+      "threshold": 4.092
+    },
+    "switch": {
+      "T": 2.434
+    },
+    "curtain": {
+      "T": 3.306,
+      "drapes": 1.006
+    },
+    "speaker": {
+      "T": 1.601
+    },
+    "sensor": {
+      "T": 2.941
+    },
+    "app": {
+      "T": 2.481
+    },
+    "lock": {
+      "T": 4.817,
+      "outside": 1.467,
+      "threshold": 2.267,
+      "close": 2.317
+    },
+    "outro": {
+      "T": 4.793,
+      "gate": 1.5
+    }
+  }
+}

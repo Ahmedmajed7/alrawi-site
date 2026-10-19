@@ -5,7 +5,10 @@
  * (H.264 / HEVC), so it is as smooth on an old office PC as on a new Mac. Clips come from
  * src/data/film.json (scripts/film-encode.mjs); the 3D walkthrough is still available with ?live3d.
  * Nothing in HTML is ever pinned to a moving picture: every live layer comes up once a move has
- * ended and is taken down before the next begins.
+ * ended and is taken down before the next begins. Sound (film/sfx.ts, synthesised, fetched after the first tap): the street and
+ * the rooms crossed at the threshold (the street is gone within a second of it), the door, the camera's glide, each device's own
+ * sounds, hung on the clips' own clocks (src/data/film-cues.json) and on the live layers' events; a switch in the brand row turns
+ * it off.
  */
 import film from '@/data/film.json';
 import house from '@/data/house.json';
@@ -16,6 +19,8 @@ import { createScene, type Scene, type SceneClip } from './scene';
 import { createPhone } from './phone';
 import { createGlow } from './glow';
 import { stageBox, upright } from './stage';
+import { sfx } from './sfx';
+import cuesData from '@/data/film-cues.json';
 
 interface Rung { h: number; w: number; avc: string | null; hevc: string | null }
 interface Clip { id: string; loop: boolean; ends: string | null; duration: number; src: string; srcMobile: string; srcHevc?: string; srcHevcMobile?: string; rungs?: Rung[]; poster: string; last: string; hotspot: number[] | null; features?: Features | null; fps?: number; /** the app stop: where its markers stand, and the room in every state the phone can put it in */ marks?: Record<string, number[]> | null; scene?: SceneClip | null }
@@ -42,6 +47,27 @@ export function mountFilm(root: HTMLElement) {
     hint: root.querySelector<HTMLElement>('[data-walk-hint]')!, host: root.querySelector<HTMLElement>('[data-walk-canvas]')!,
     callouts: root.querySelector<HTMLElement>('[data-walk-callouts]')!, hotspot: root.querySelector<HTMLElement>('[data-walk-hotspot]')!,
     leader: root.querySelector<SVGSVGElement>('[data-walk-leader]')!, halo: root.querySelector<SVGPathElement>('[data-walk-leader-halo]')!, line: root.querySelector<SVGPathElement>('[data-walk-leader-line]')!,
+    sound: root.querySelector<HTMLButtonElement>('[data-walk-sound]'),
+  };
+  // ---------- sound: the switch in the brand row, and the first gesture that lets the page make a sound ----------
+  const soundUi = (muted: boolean) => { const b = ui.sound; if (!b) return; b.classList.toggle('is-off', muted); b.setAttribute('aria-pressed', String(!muted)); b.setAttribute('aria-label', (muted ? b.dataset.off : b.dataset.on) ?? ''); };
+  soundUi(sfx.muted); sfx.onMute(soundUi);
+  ui.sound?.addEventListener('click', (e) => { e.stopPropagation(); sfx.mute(!sfx.muted); if (!sfx.muted) sfx.play('ui'); });
+  // (a tap anywhere, a key: the browser lets a page sound only after one; the engine's chunk is fetched then, never before)
+  const gesture = (e: Event) => { if (!(e.target as Element | null)?.closest?.('[data-walk-sound]')) sfx.unlock(); }; // (the switch itself decides)
+  root.addEventListener('pointerdown', gesture, { passive: true }); root.addEventListener('click', gesture);
+  window.addEventListener('keydown', () => sfx.unlock());
+  /** the sounds hung on a move's own clock (src/data/film-cues.json, from the camera plan: where the door, the threshold and the
+   *  drapes fall in each clip); the glide itself runs the move's length */
+  const CUE = (cuesData as { clips: Record<string, Record<string, number>> }).clips;
+  const cueList = (id: string, dur: number): [number, () => void][] => {
+    const c = CUE[id] ?? {}, L: [number, () => void][] = [[0, () => sfx.move(c.T ?? Math.max(0.5, dur - 0.3))]];
+    if (c.door !== undefined) L.push([c.door, () => sfx.play('door-open')]);
+    if (c.inside !== undefined) L.push([c.inside, () => sfx.ambience('indoor', 1.6)]);
+    if (c.outside !== undefined) L.push([c.outside, () => sfx.ambience('outdoor', 1.4)]);
+    if (c.close !== undefined) L.push([c.close, () => sfx.play('door-close')]);
+    if (id === 'outro') L.push([Math.max(0, dur - 1.6), () => sfx.ambience('none', 1.4)], [Math.max(0, dur - 0.9), () => sfx.play('end')]);
+    return L.sort((a, b) => a[0] - b[0]);
   };
   const nav = document.querySelector<HTMLElement>('[data-nav]');
   let state: State = 'loading'; let idx = -1;
@@ -99,8 +125,8 @@ export function mountFilm(root: HTMLElement) {
         phone.show(scene, appClip.marks); void scene.enter(); tone.watch(() => (phone.shown && scene ? scene.canvas : null)); glow.watch(() => (phone.shown && scene ? scene.canvas : null)); // the chrome's ink (and the glow) follow the room as it is dimmed
       }
     };
-    const advance = () => { const nx = step(k, 1); if (nx < 0) { finish(); return; } show(nx); };
-    const finish = () => { appOff(); showCard(-1); lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ } setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' }), 300); show(Math.max(0, step(-1, 1))); };
+    const advance = () => { const nx = step(k, 1); if (nx < 0) { finish(); return; } sfx.play('tap'); if (nx > 0 && nx - 1 !== appIdx) sfx.play('holo'); show(nx); };
+    const finish = () => { sfx.silence(0.8); appOff(); showCard(-1); lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ } setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth' }), 300); show(Math.max(0, step(-1, 1))); };
     show(k); root.classList.add('is-live'); ui.load.classList.add('is-done'); if (!returning) lockScroll(true);
     root.addEventListener('click', (e) => { if (!isControl(e)) advance(); }); ui.nexts.forEach((b) => b.addEventListener('click', advance)); ui.tap.addEventListener('click', advance);
     ui.skip.addEventListener('click', (e) => { e.preventDefault(); finish(); });
@@ -258,6 +284,7 @@ export function mountFilm(root: HTMLElement) {
     await firstFrame(back);
     root.classList.remove('is-hold'); // the held drift eases back to rest as the new move begins
     swap();
+    runCues(front, c);
     // the move into the living room: the phone starts up while the lens is still settling (the last three quarters of a second),
     // so the two arrive together, as one shot
     if (phone && c.id === stops[appIdx]) { const v = front; const early = () => { if (v !== front || v.dataset.clip !== c.id || state !== 'travelling') return; if (v.currentTime >= c.duration - 0.8) phone.rise(); else requestAnimationFrame(early); }; requestAnimationFrame(early); }
@@ -265,8 +292,15 @@ export function mountFilm(root: HTMLElement) {
     await new Promise<void>((res) => { const done = () => { front.removeEventListener('ended', done); res(); }; front.addEventListener('ended', done); });
     judge(front);
   };
+  /** fire the clip's cues as its own clock passes them (a frame's precision: the moves run at 60 fps) */
+  const runCues = (v: HTMLVideoElement, c: Clip) => {
+    const list = cueList(c.id, c.duration); let k = 0;
+    const step = () => { if (v !== front || v.dataset.clip !== c.id || state !== 'travelling') return; const t = v.currentTime; while (k < list.length && list[k][0] <= t) list[k++][1](); if (k < list.length) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
   const arrive = (i: number, c: Clip) => {
     state = 'stop'; idx = i; holdClip = c; tone.sample(front, true); glow.draw(front); showCard(i); placeCallout(i, c.hotspot);
+    if (i !== appIdx) sfx.play('holo');
     live?.show(i, shapes[i], c.features, { w: videoW, h: videoH }); // over the held frame, at rest: it comes up as the film shows it, then wakes
     if (i === appIdx && phone && room()) { const sc = room()!; phone.show(sc, c.marks); void sc.enter(); } // the living room: the phone comes up, the room is the visitor's
     else root.classList.add('is-hold'); // slow drift on the paused frame keeps it alive; the callout layer drifts with it
@@ -274,7 +308,7 @@ export function mountFilm(root: HTMLElement) {
     if (i + 1 === appIdx) room()?.prepare(); // … and the room's states, one stop ahead
   };
   const finish = () => {
-    state = 'done'; showCard(-1); void live?.hide(true); void leaveApp(true); root.classList.remove('is-hold');
+    state = 'done'; showCard(-1); void live?.hide(true); void leaveApp(true); root.classList.remove('is-hold'); sfx.silence(1);
     lockScroll(false); try { sessionStorage.setItem('alrawi-walk', 'done'); } catch { /* ignore */ }
     root.classList.add('is-done');
     setTimeout(() => document.getElementById('philosophy')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
@@ -284,7 +318,8 @@ export function mountFilm(root: HTMLElement) {
   const advance = async () => {
     if (state === 'travelling' || state === 'loading' || state === 'done') return;
     const id = nextClipId(); const c = clips.get(id); if (!c) { finish(); return; }
-    if (state === 'exterior') lockScroll(true);
+    if (state === 'exterior') { lockScroll(true); sfx.ambience('outdoor', 1.5); } // the street comes up with the first step
+    sfx.play('tap');
     await play(c);
     if (id === 'outro') { finish(); return; }
     arrive(stops.indexOf(id), c);
@@ -309,11 +344,11 @@ export function mountFilm(root: HTMLElement) {
   });
   // pause everything while the hero is off screen or the tab is hidden
   const onScreen = () => (scene?.canvas.classList.contains('is-on') ? scene.canvas : front);
-  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); glow.stop(); } else { tone.watch(onScreen); glow.watch(onScreen); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
+  const io = new IntersectionObserver(([en]) => { if (!en.isIntersecting) { front.pause(); tone.stop(); glow.stop(); sfx.pause(); } else { tone.watch(onScreen); glow.watch(onScreen); if (!document.hidden) sfx.resume(); if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {}); } }, { threshold: 0.05 });
   io.observe(root);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { front.pause(); glow.stop(); return; }
-    if (root.getBoundingClientRect().bottom > 0) glow.watch(onScreen);
+    if (document.hidden) { front.pause(); glow.stop(); sfx.pause(); return; }
+    if (root.getBoundingClientRect().bottom > 0) { glow.watch(onScreen); sfx.resume(); }
     if (state === 'exterior' || state === 'travelling') void front.play().catch(() => {});
   });
 
