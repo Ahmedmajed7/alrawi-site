@@ -118,7 +118,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const ensure = (k: number) => {
       while (n < k) { const i = n++; on.push(true); const d = el('i', 'live-dot', box); dots.push(d);
         const b = el('button', 'live-hit', box, { type: 'button', 'aria-label': `${t.tLight ?? 'Light'} ${i + 1}`, 'aria-pressed': 'true' }) as HTMLButtonElement; hits.push(b);
-        b.addEventListener('click', (e) => { e.stopPropagation(); on[i] = !on[i]; sfx.play(on[i] ? 'switch-on' : 'switch-off'); update(); tried = true; coach.classList.remove('is-on'); }); }
+        b.addEventListener('click', (e) => { e.stopPropagation(); if (!box.classList.contains('is-on')) return; on[i] = !on[i]; sfx.play(on[i] ? 'switch-on' : 'switch-off'); update(); tried = true; coach.classList.remove('is-on'); }); }
     };
     return {
       place(f, w, H, frame) {
@@ -148,7 +148,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', ''];
     const btns: HTMLButtonElement[] = [];
     keys.forEach((k, i) => { if (!k) return; const b = el('button', '', kp, { type: 'button', 'aria-label': k }) as HTMLButtonElement; b.textContent = k; b.style.left = `${256 * (0.22 + (i % 3) * 0.28)}px`; b.style.top = `${512 * (0.2 + Math.floor(i / 3) * 0.17)}px`; btns.push(b);
-      b.addEventListener('click', (e) => { e.stopPropagation(); sfx.play('lock-key'); b.classList.add('is-lit'); window.setTimeout(() => b.classList.remove('is-lit'), 420); }); });
+      b.addEventListener('click', (e) => { e.stopPropagation(); if (!kp.classList.contains('is-on')) return; sfx.play('lock-key'); b.classList.add('is-lit'); window.setTimeout(() => b.classList.remove('is-lit'), 420); }); });
     // where each way in happens on the lock: the reader under the camera, the handle's flank, the lens window, the keypad; and the
     // lock's own light, which goes green as each is accepted
     const fx = { card: el('i', 'live-card', box), finger: el('i', 'live-finger', box), face: el('i', 'live-face', box) }, led = el('i', 'live-lockled', box, { role: 'img', 'aria-label': t.tUnlocked ?? 'Unlocked' });
@@ -186,7 +186,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const box = el('div', 'live-smoke', layer, { 'data-live': '', 'data-live-ui': '' });
     const ledEl = el('i', 'live-led', box); const test = el('button', 'live-test', box, { type: 'button' }) as HTMLButtonElement; test.textContent = t.tTest ?? 'Test';
     let alarm = 0;
-    test.addEventListener('click', (e) => { e.stopPropagation(); sfx.play('sensor-alarm'); ledEl.classList.remove('is-alarm'); void ledEl.offsetWidth; ledEl.classList.add('is-alarm'); clearTimeout(alarm); alarm = window.setTimeout(() => ledEl.classList.remove('is-alarm'), 3200); });
+    test.addEventListener('click', (e) => { e.stopPropagation(); if (!box.classList.contains('is-on')) return; sfx.play('sensor-alarm'); ledEl.classList.remove('is-alarm'); void ledEl.offsetWidth; ledEl.classList.add('is-alarm'); clearTimeout(alarm); alarm = window.setTimeout(() => ledEl.classList.remove('is-alarm'), 3200); });
     let chirp = 0;
     return {
       place(f, w, H, frame) { const p = f.points.led_0; if (p) at(ledEl, toPx(p, w, H, frame)); const b = f.points.btn_test ?? p; if (b) at(test, toPx(b, w, H, frame)); },
@@ -200,12 +200,13 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     const g = el('div', 'live-grille is-playing', layer, { 'data-live': '', 'data-live-ui': '' });
     for (let i = 0; i < 3; i++) el('i', '', g);
     const b = el('button', '', g, { type: 'button', 'aria-label': t.tSound ?? 'Sound', 'aria-pressed': 'true' }) as HTMLButtonElement;
-    b.addEventListener('click', (e) => { e.stopPropagation(); const on = !g.classList.contains('is-playing'); g.classList.toggle('is-playing', on); b.setAttribute('aria-pressed', String(on)); sfx.play('ui'); sfx.music(on, 1); });
+    // the grille pauses and resumes the lounge, and only while the tour is at the speaker (the music lives nowhere else)
+    b.addEventListener('click', (e) => { e.stopPropagation(); if (!g.classList.contains('is-on')) return; const on = !g.classList.contains('is-playing'); g.classList.toggle('is-playing', on); b.setAttribute('aria-pressed', String(on)); sfx.play('ui'); sfx.music(on, 1); });
     let start = 0;
     return {
       place(f, w, H, frame) { const q = f.quads.grille; if (q) g.style.transform = quadMatrix(400, 400, quadPx(q, w, H, frame)); },
       enter() { g.classList.add('is-on', 'is-playing'); start = later(() => sfx.music(true, 1), 500); }, // the lounge plays as the lens settles on the speaker
-      leave() { g.classList.remove('is-on'); clearTimeout(start); sfx.music(false); },
+      leave() { g.classList.remove('is-on'); clearTimeout(start); sfx.music(false); g.classList.add('is-playing'); b.setAttribute('aria-pressed', 'true'); },
     };
   }
 

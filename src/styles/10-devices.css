@@ -10,11 +10,13 @@
   .walk:not(.is-3d) .walk-live { inset: var(--stage-top) 0 auto; height: auto; aspect-ratio: 16 / 9; overflow: clip; transform: scale(1); transform-origin: 50% 50%; transition: transform 1.6s var(--ease-io); }
   .walk.is-hold:not(.is-3d) .walk-live { transform: scale(1.04); transition: transform 18s cubic-bezier(0.2, 0.6, 0.3, 1); }
 }
-.walk-live [data-live] { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0; transition: opacity 0.5s var(--ease); }
-.walk-live [data-live].is-on { opacity: 1; }
-.walk-live button { pointer-events: auto; cursor: pointer; }
+/* a live layer that is not up is gone, not just transparent: hidden, so none of its buttons can be pressed at another stop
+   (23 Oct 2026: the speaker's invisible tap circle sat over the ceiling at the sensor stop and started the music) */
+.walk-live [data-live] { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0; visibility: hidden; transition: opacity 0.5s var(--ease), visibility 0s linear 0.5s; }
+.walk-live [data-live].is-on { opacity: 1; visibility: visible; transition: opacity 0.5s var(--ease), visibility 0s; }
+.walk-live [data-live].is-on button { pointer-events: auto; cursor: pointer; }
 /* the tour moves on: every layer is off the picture before the film moves under it (device-live.ts `hide`) */
-.walk-live.is-leaving [data-live], .walk-live.is-leaving .pscreen { transition: opacity 0.15s linear !important; }
+.walk-live.is-leaving [data-live], .walk-live.is-leaving .pscreen { transition: opacity 0.15s linear, visibility 0s linear 0.15s !important; }
 
 /* ---------- the control panel's screen: the painted layout (data/panel-ui.ts) in real HTML ---------- */
 .pscreen { position: absolute; left: 0; top: 0; transform-origin: 0 0; direction: ltr; overflow: hidden; color: #eef3ff; font-family: 'Jost', 'Cairo', system-ui, sans-serif; line-height: 1; background: radial-gradient(circle at 86% 6%, rgba(47, 128, 255, 0.3), rgba(47, 128, 255, 0) 40%), linear-gradient(135deg, #0d1526, #070b16); -webkit-font-smoothing: antialiased; user-select: none; pointer-events: auto; opacity: 0;
