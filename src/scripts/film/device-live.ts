@@ -65,7 +65,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
     $$('[data-ps-scene]').forEach((b, i) => b.addEventListener('click', () => { sfx.play('confirm'); set({ scene: i, ...SCENES[i] }); }));
     $$('[data-ps-temp-step]').forEach((b) => b.addEventListener('click', () => { sfx.play('ui'); set({ temp: Math.min(30, Math.max(16, st.temp + Number(b.dataset.psTempStep))) }); }));
     $$('[data-ps-curtain]').forEach((b, i) => b.addEventListener('click', () => { sfx.play('ui'); set({ curtain: i as 0 | 1 | 2 }); }));
-    $('[data-ps-play]').addEventListener('click', () => { sfx.play('ui'); set({ playing: !st.playing }); sfx.music(st.playing, 0.45); }); // the lounge, from the hall
+    $('[data-ps-play]').addEventListener('click', () => { sfx.play('ui'); set({ playing: !st.playing }); }); // (only the speaker stop plays the lounge: the client, 23 Oct 2026)
     $$('[data-ps-slider]').forEach((s) => {
       const key = s.dataset.psSlider as 'main' | 'vanity';
       const fromEvent = (e: PointerEvent) => Math.round(Math.min(100, Math.max(0, (1 - (e.offsetY - PILL_HEAD) / (s.offsetHeight - PILL_HEAD)) * 100))); // offsetY is in the slider's own (projected) space; the fill track is below the head
@@ -98,7 +98,7 @@ export function createDeviceLive(root: HTMLElement, layer: HTMLElement, opts: { 
         }, 420);
       },
       // back to what the film shows, and gone before the film moves (device-live `hide` gives it 170 ms)
-      leave() { showing = false; clearTimeout(wake); scr.classList.remove('is-on'); if (st.playing) sfx.music(false); later(() => { if (!showing) { scr.hidden = true; reset(); } }, 240); },
+      leave() { showing = false; clearTimeout(wake); scr.classList.remove('is-on'); later(() => { if (!showing) { scr.hidden = true; reset(); } }, 240); },
     };
   }
 

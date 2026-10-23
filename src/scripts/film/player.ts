@@ -57,11 +57,11 @@ export function mountFilm(root: HTMLElement) {
   const gesture = (e: Event) => { if (!(e.target as Element | null)?.closest?.('[data-walk-sound]')) sfx.unlock(); }; // (the switch itself decides)
   root.addEventListener('pointerdown', gesture, { passive: true }); root.addEventListener('click', gesture);
   window.addEventListener('keydown', () => sfx.unlock());
-  /** the sounds hung on a move's own clock (src/data/film-cues.json, from the camera plan: where the door, the threshold and the
-   *  drapes fall in each clip); the glide itself runs the move's length */
+  /** the sounds hung on a move's own clock (src/data/film-cues.json, from the camera plan: where the door and the threshold
+   *  fall in each clip) */
   const CUE = (cuesData as { clips: Record<string, Record<string, number>> }).clips;
   const cueList = (id: string, dur: number): [number, () => void][] => {
-    const c = CUE[id] ?? {}, L: [number, () => void][] = [[0, () => sfx.move(c.T ?? Math.max(0.5, dur - 0.3))]];
+    const c = CUE[id] ?? {}, L: [number, () => void][] = [];
     if (c.door !== undefined) L.push([c.door, () => sfx.play('door-open')]);
     if (c.inside !== undefined) L.push([c.inside, () => sfx.ambience('indoor', 1.6)]);
     if (c.outside !== undefined) L.push([c.outside, () => sfx.ambience('outdoor', 1.4)]);

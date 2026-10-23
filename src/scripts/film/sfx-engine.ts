@@ -1,19 +1,19 @@
 /**
  * The film's instrument (film/sfx.ts is the switch that loads it after the first tap). Nothing here is a recording: every
  * sound is built from oscillators, shaped noise and filters the moment it is asked for, so the site ships no audio files and
- * the page loads as it did without sound. The sounds are small and quiet on purpose: the film is the thing, the sound only
- * makes it feel inhabited. What there is:
- *   - the street (a low wind through the trees, a bird far off now and then) and the rooms (room tone, the faintest hum): the
- *     street is cut to nothing within a second of the lens crossing the threshold, and comes back the same way on the way out;
- *   - the camera's glide: a breath of air that rises and settles with each move;
+ * the page loads as it did without sound. Minimal on purpose (the client, 23 Oct 2026: fewer and softer sounds, nothing that
+ * calls attention to itself; no air under the camera's moves): the film is the thing, the sound only makes it feel inhabited.
+ *   - the street (a low wind through the trees, a bird far off now and then) and the rooms (a faint room tone): the street is
+ *     cut to nothing within a second of the lens crossing the threshold, and comes back the same way on the way out;
  *   - the front door: the bolts drawing back and the heavy leaf swinging on the way in; on the way out the closer's sweep, the
  *     leaf landing on its seal, the bolts throwing, the lock's light;
- *   - the devices: the HUD arriving (one soft glass note, barely there), the panel waking, a real light switch's tock, the smoke
- *     detector's chirp and its test alarm, the lock reading each way in and granting it (at the minimum: a tick, a soft note, a
- *     quiet bolt; the curtain motor is silent: the client found its hum in the way, 19 Oct 2026);
+ *   - the devices: the HUD arriving (one soft, short note, felt more than heard), the panel waking, a real light switch's tock,
+ *     the smoke detector's soft chirp and its test alarm, the lock reading each way in and granting it (a tick, a soft note, a
+ *     quiet bolt; the curtain motor is silent);
  *   - the lounge: a quick, playful, clean little house tune (a plucked riff over a soft kick, a bouncing bass and chords, 118 to
- *     the minute) from the ceiling speaker, and quieter from the control panel's player;
- *   - the phone coming up and going down, its taps, the lights going on and off.
+ *     the minute), from the ceiling speaker ONLY: it starts as the lens settles on the speaker and every one of its notes is
+ *     stopped the moment the tour leaves it (nothing else in the film ever starts it);
+ *   - the phone coming up and going down, its taps, the lights going on and off: all soft and low.
  * Everything goes through one gentle compressor so nothing can ever jump out of the mix.
  */
 import type { Engine, Cue, Where } from './sfx';
@@ -62,7 +62,7 @@ export function createEngine(ctx: AudioContext): Engine {
   const env = (t: number, dur: number, g: number, a = 0.004, r = 0.05) => { const e = ctx.createGain(); const hold = Math.max(t + a, t + dur - r); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + a); e.gain.setValueAtTime(g, hold); e.gain.setTargetAtTime(0, hold, r / 3); return e; };
   const tone = (t: number, o: ToneOpt) => {
     const s = osc(o.type ?? 'sine', o.f); s.frequency.setValueAtTime(o.f, t); if (o.f1) s.frequency.exponentialRampToValueAtTime(o.f1, t + o.dur);
-    const e = env(t, o.dur, o.g, o.a, o.r); s.connect(e); route(e, o); s.start(t); s.stop(t + o.dur + (o.r ?? 0.05) * 4 + 0.05); return e;
+    const e = env(t, o.dur, o.g, o.a, o.r); s.connect(e); route(e, o); s.start(t); s.stop(t + o.dur + (o.r ?? 0.05) * 4 + 0.05); return s;
   };
   const noise = (t: number, o: NoiseOpt) => {
     const s = ctx.createBufferSource(); s.buffer = noiseBuf(o.kind ?? 'white'); s.loop = true; let n: AudioNode = s;
@@ -70,7 +70,7 @@ export function createEngine(ctx: AudioContext): Engine {
     if (o.hp) { const f = filter('highpass', o.hp, 0.7); n.connect(f); n = f; }
     if (o.bp) { const f = filter('bandpass', o.bp[0], o.bp[1]); sweep(f.frequency, o.bp[0], o.bp1); n.connect(f); n = f; }
     if (o.lp) { const f = filter('lowpass', o.lp, 0.7); sweep(f.frequency, o.lp, o.lp1); n.connect(f); n = f; }
-    const e = env(t, o.dur, o.g, o.a ?? 0.002, o.r ?? 0.03); n.connect(e); route(e, o); s.start(t, rnd(0, 2)); s.stop(t + o.dur + (o.r ?? 0.03) * 4 + 0.05); return e;
+    const e = env(t, o.dur, o.g, o.a ?? 0.002, o.r ?? 0.03); n.connect(e); route(e, o); s.start(t, rnd(0, 2)); s.stop(t + o.dur + (o.r ?? 0.03) * 4 + 0.05); return s;
   };
   /** a short mechanical click: a bright burst with a little body under it */
   const click = (t: number, bright: number, body: number, g: number, o: Opt = {}) => { noise(t, { bp: [bright, 2.5], dur: 0.01, g: g * 2.2, r: 0.012, ...o }); tone(t, { f: body, f1: body * 0.7, dur: 0.035, g: g * 0.8, r: 0.025, ...o }); };
@@ -83,19 +83,20 @@ export function createEngine(ctx: AudioContext): Engine {
   };
 
   /* ---------------- the one-shots ---------------- */
+  /** a soft, low tick for a tap on the film or on one of its controls: a short sine with a little body, no bright noise */
+  const tick = (t: number, f: number, g: number, dur = 0.03) => { tone(t, { f, f1: f * 0.8, dur, g, a: 0.003, r: 0.02 }); tone(t, { f: f * 0.5, dur: dur * 1.3, g: g * 0.5, a: 0.003, r: 0.03 }); };
   const CUES: Record<Cue, (t: number) => void> = {
-    tap: (t) => { noise(t, { bp: [3200, 1.5], dur: 0.007, g: 0.1, r: 0.01 }); tone(t, { f: 1900, f1: 1500, dur: 0.03, g: 0.045, r: 0.02 }); },
-    ui: (t) => { noise(t, { bp: [4200, 1.5], dur: 0.006, g: 0.1, r: 0.008 }); tone(t, { f: 2200, f1: 1800, dur: 0.018, g: 0.06, r: 0.015 }); },
-    confirm: (t) => chime(t, [1046.5, 1568], 0.09, 0.2, 0.05, 0.25),
-    // the HUD arriving: one soft glass note with a breath of air under it, felt more than heard
-    holo: (t) => { tone(t, { f: 1046.5, dur: 0.3, g: 0.02, a: 0.02, r: 0.28, send: 0.4 }); tone(t, { f: 2093, dur: 0.2, g: 0.004, a: 0.02, r: 0.18, send: 0.4 }); noise(t, { bp: [3000, 0.8], dur: 0.16, g: 0.006, a: 0.04, r: 0.12 }); },
+    tap: (t) => tick(t, 720, 0.03),
+    ui: (t) => tick(t, 1100, 0.022, 0.024),
+    confirm: (t) => tone(t, { f: 1046.5, dur: 0.14, g: 0.02, a: 0.006, r: 0.1, send: 0.2 }),
+    // the HUD arriving: one short, soft note gliding up a little, felt more than heard
+    holo: (t) => { tone(t, { f: 980, f1: 1240, dur: 0.07, g: 0.014, a: 0.012, r: 0.07 }); tone(t, { f: 490, f1: 620, dur: 0.07, g: 0.006, a: 0.012, r: 0.07 }); },
     // the front door on its way in (door.ts: 0.25 s of bolts drawing back, then a 1.9 s swing: a gentle push-off, a long settle)
     'door-open': (t) => {
       bolt(t, 0.06, 2); // the bolts draw back
       const s = t + 0.25;
       tone(s, { f: 130, f1: 95, dur: 0.09, g: 0.07, r: 0.05 }); noise(s, { lp: 900, dur: 0.03, g: 0.06 }); // the push-off
-      noise(s, { kind: 'pink', lp: 380, lp1: 320, dur: 1.9, g: 0.09, a: 0.5, r: 0.8 }); // the leaf's air
-      noise(s + 0.4, { kind: 'pink', bp: [700, 0.8], bp1: 500, dur: 1.2, g: 0.03, a: 0.3, r: 0.6 });
+      noise(s, { kind: 'pink', lp: 380, lp1: 320, dur: 1.9, g: 0.05, a: 0.5, r: 0.8 }); // the leaf's air, low
       noise(s + 1.9, { lp: 1500, dur: 0.02, g: 0.06 }); tone(s + 1.9, { f: 180, f1: 140, dur: 0.05, g: 0.045, r: 0.03 }); // onto the stay
     },
     // the front door closing in front of the lens (door.ts SWING.close over 2.2 s: off the stay, a steady sweep to the last
@@ -108,12 +109,13 @@ export function createEngine(ctx: AudioContext): Engine {
       bolt(t + 2.2, 0.08, 2); // the bolts throw
       beep(t + 2.45, 1760, 0.045, 0.03); beep(t + 2.54, 1760, 0.045, 0.03); // the lock's light
     },
-    'panel-wake': (t) => chime(t, [1318.5, 1975.5], 0.11, 0.3, 0.045, 0.25),
-    'switch-on': (t) => { click(t, 1500, 210, 0.12); tone(t, { f: 1100, f1: 700, dur: 0.025, g: 0.08, r: 0.02 }); },
-    'switch-off': (t) => { click(t, 1200, 170, 0.12); tone(t, { f: 900, f1: 600, dur: 0.025, g: 0.07, r: 0.02 }); },
-    'sensor-chirp': (t) => { for (let k = 0; k < 3; k++) beep(t + k * 0.14, 3150, 0.06, 0.08); },
-    // the detector's test: the temporal-three pattern of a smoke alarm, twice (3.15 s, the LED's own 3.2 s)
-    'sensor-alarm': (t) => { for (let c = 0; c < 2; c++) for (let k = 0; k < 3; k++) beep(t + c * 1.8 + k * 0.45, 3150, 0.28, 0.08, { send: 0.15 }); },
+    'panel-wake': (t) => tone(t, { f: 1318.5, dur: 0.22, g: 0.018, a: 0.01, r: 0.16, send: 0.25 }),
+    'switch-on': (t) => { click(t, 1500, 210, 0.09); tone(t, { f: 1100, f1: 700, dur: 0.025, g: 0.05, r: 0.02 }); },
+    'switch-off': (t) => { click(t, 1200, 170, 0.09); tone(t, { f: 900, f1: 600, dur: 0.025, g: 0.045, r: 0.02 }); },
+    // the detector: three short, soft chirps as the lens settles on it
+    'sensor-chirp': (t) => { for (let k = 0; k < 3; k++) beep(t + k * 0.13, 3150, 0.035, 0.022); },
+    // its test: the temporal-three pattern of a smoke alarm, twice over the LED's 3.2 s, kept soft and dry
+    'sensor-alarm': (t) => { for (let c = 0; c < 2; c++) for (let k = 0; k < 3; k++) beep(t + c * 1.7 + k * 0.42, 3150, 0.2, 0.035); },
     // the smart lock's own sounds, at the minimum (the client, 19 Oct 2026): the faintest tick as each way in is read, a single
     // soft note and a quiet bolt when it is granted; the door's own closing and locking is the louder part, above
     'lock-card': (t) => beep(t, 2400, 0.05, 0.012),
@@ -121,20 +123,11 @@ export function createEngine(ctx: AudioContext): Engine {
     'lock-face': (t) => tone(t + 0.4, { f: 2200, dur: 0.03, g: 0.01, r: 0.015 }),
     'lock-key': (t) => beep(t, 1900, 0.04, 0.012),
     'lock-granted': (t) => { tone(t, { f: 1568, dur: 0.22, g: 0.016, a: 0.01, r: 0.18, send: 0.3 }); bolt(t + 0.2, 0.025); },
-    'phone-up': (t) => { noise(t, { bp: [700, 1], bp1: 1600, dur: 0.32, g: 0.03, a: 0.08, r: 0.12 }); tone(t + 0.25, { f: 1300, f1: 900, dur: 0.05, g: 0.045, r: 0.03 }); },
-    'phone-down': (t) => { noise(t, { bp: [1500, 1], bp1: 600, dur: 0.3, g: 0.025, a: 0.05, r: 0.12 }); tone(t, { f: 1000, f1: 700, dur: 0.05, g: 0.035, r: 0.03 }); },
-    'lights-on': (t) => { click(t, 1500, 210, 0.12); tone(t, { f: 330, dur: 0.5, g: 0.028, a: 0.15, r: 0.25, send: 0.3 }); tone(t, { f: 660, dur: 0.4, g: 0.01, a: 0.15, r: 0.2, send: 0.3 }); },
-    'lights-off': (t) => { click(t, 1200, 170, 0.12); tone(t, { f: 330, f1: 220, dur: 0.35, g: 0.022, a: 0.05, r: 0.2, send: 0.2 }); },
-    end: (t) => { chime(t, [587.3, 880], 0.25, 0.6, 0.035, 0.5); tone(t, { f: 293.7, dur: 0.8, g: 0.015, a: 0.1, r: 0.5, send: 0.5 }); },
-  };
-
-  /* ---------------- the camera's glide ---------------- */
-  const move = (T: number) => {
-    if (T < 0.5) return; const t = now(), up = Math.min(0.75, T * 0.35), down = Math.min(0.95, T * 0.4);
-    noise(t, { kind: 'pink', bp: [180, 0.6], bp1: 170, dur: T, g: 0.07, a: up, r: down });
-    noise(t, { kind: 'brown', lp: 120, dur: T, g: 0.06, a: up, r: down });
-    // the band of the air rises through the move and falls as it settles
-    noise(t, { kind: 'pink', bp: [220, 0.7], bp1: 420, dur: T * 0.5, g: 0.03, a: up, r: T * 0.2 }); noise(t + T * 0.5, { kind: 'pink', bp: [420, 0.7], bp1: 200, dur: T * 0.5, g: 0.03, a: 0.01, r: down });
+    'phone-up': (t) => { noise(t, { bp: [700, 1], bp1: 1600, dur: 0.3, g: 0.016, a: 0.08, r: 0.12 }); tick(t + 0.25, 900, 0.02); },
+    'phone-down': (t) => { noise(t, { bp: [1500, 1], bp1: 600, dur: 0.28, g: 0.012, a: 0.05, r: 0.12 }); tick(t, 700, 0.016); },
+    'lights-on': (t) => { click(t, 1500, 210, 0.08); tone(t, { f: 330, dur: 0.4, g: 0.012, a: 0.12, r: 0.2, send: 0.2 }); },
+    'lights-off': (t) => { click(t, 1200, 170, 0.08); tone(t, { f: 330, f1: 220, dur: 0.3, g: 0.01, a: 0.05, r: 0.18, send: 0.2 }); },
+    end: (t) => { chime(t, [587.3, 880], 0.25, 0.6, 0.03, 0.5); tone(t, { f: 293.7, dur: 0.8, g: 0.012, a: 0.1, r: 0.5, send: 0.5 }); },
   };
 
   /* ---------------- the street and the rooms ---------------- */
@@ -161,7 +154,7 @@ export function createEngine(ctx: AudioContext): Engine {
     const hp = filter('bandpass', 900, 0.5); const hg = gain(0.008, out); pink().connect(hp); hp.connect(hg);
     const lfo3 = osc('sine', 0.05, gain(0.006, hg.gain)); lfo3.start();
     // indoors: room tone, the faintest mains hum, a thread of air
-    const br = ctx.createBufferSource(); br.buffer = noiseBuf('brown'); br.loop = true; br.start(now(), rnd(0, 2)); br.connect(filter('lowpass', 220, 0.7, gain(0.05, inn)));
+    const br = ctx.createBufferSource(); br.buffer = noiseBuf('brown'); br.loop = true; br.start(now(), rnd(0, 2)); br.connect(filter('lowpass', 220, 0.7, gain(0.035, inn)));
     osc('sine', 100, gain(0.004, inn)).start(); osc('sine', 200, gain(0.0012, inn)).start();
     pink().connect(filter('highpass', 4000, 0.7, gain(0.002, inn)));
     return { out, in: inn };
@@ -190,31 +183,34 @@ export function createEngine(ctx: AudioContext): Engine {
     [[0, 67, 2], [2, 69, 2], [4, 72, 3], [8, 69, 2], [11, 67, 2], [14, 65, 2]],
   ];
   const RUN: [number, number, number][] = [[12, 72, 1], [13, 74, 1], [14, 77, 1], [15, 79, 1]]; // the last bar's little run up
-  const musicIn = gain(1, bus.music); musicIn.connect(gain(0.18, verb));
+  const musicIn = gain(1, bus.music); bus.music.connect(gain(0.18, verb)); // (the room's share is taken after the bus: silent when the bus is)
   // the riff's echo: a dotted eighth behind, a little darker each time round
   const echo = ctx.createDelay(1); echo.delayTime.value = STEP * 3; const echoG = gain(0.3, echo); const echoLp = filter('lowpass', 2600, 0.7, echoG); echo.connect(echoLp); echo.connect(musicIn);
+  /** every source the tune has queued, so leaving the speaker can stop them all at once (a bar is queued ahead) */
+  const queued = new Set<AudioScheduledSourceNode>();
+  const reg = <T extends AudioScheduledSourceNode>(o: T) => { queued.add(o); o.addEventListener('ended', () => queued.delete(o)); return o; };
   const pluck = (t: number, f: number, len: number, vel: number) => { // two detuned saws through a closing filter: the house pluck
     const vcf = filter('lowpass', 4200, 2.2); vcf.frequency.setValueAtTime(4200, t); vcf.frequency.exponentialRampToValueAtTime(700, t + 0.16);
     const e = gain(0, vcf); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel, t + 0.004); e.gain.setTargetAtTime(0, t + 0.004, Math.max(0.05, len * 0.35));
-    for (const c of [-7, 7]) { const o = osc('sawtooth', f, e); o.detune.value = c; o.start(t); o.stop(t + len + 0.6); }
+    for (const c of [-7, 7]) { const o = reg(osc('sawtooth', f, e)); o.detune.value = c; o.start(t); o.stop(t + len + 0.6); }
     vcf.connect(musicIn); vcf.connect(echoG);
   };
   const bass = (t: number, f: number, vel: number) => {
     const vcf = filter('lowpass', 900, 1.2, musicIn); vcf.frequency.setValueAtTime(900, t); vcf.frequency.exponentialRampToValueAtTime(220, t + 0.12);
     const e = gain(0, vcf); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(vel, t + 0.005); e.gain.setTargetAtTime(0, t + 0.08, 0.05);
-    for (const o of [osc('sawtooth', f, e), osc('sine', f, e)]) { o.start(t); o.stop(t + 0.5); }
+    for (const o of [osc('sawtooth', f, e), osc('sine', f, e)]) { reg(o).start(t); o.stop(t + 0.5); }
   };
   const chord = (t: number, notes: number[], len: number) => { // soft, held under the bar
     const lp = filter('lowpass', 1400, 0.7, musicIn); const e = gain(0, lp); e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.045, t + 0.08); e.gain.setValueAtTime(0.045, t + len - 0.15); e.gain.linearRampToValueAtTime(0, t + len);
-    for (const n of notes) for (const c of [-5, 5]) { const o = osc('sawtooth', Hz(n), e); o.detune.value = c; o.start(t); o.stop(t + len + 0.1); }
+    for (const n of notes) for (const c of [-5, 5]) { const o = reg(osc('sawtooth', Hz(n), e)); o.detune.value = c; o.start(t); o.stop(t + len + 0.1); }
   };
-  const kick = (t: number) => { const o = osc('sine', 150, undefined); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.09); const e = env(t, 0.22, 0.4, 0.002, 0.12); o.connect(e); e.connect(musicIn); o.start(t); o.stop(t + 0.6); noise(t, { lp: 3000, dur: 0.008, g: 0.1, r: 0.006, to: musicIn }); };
-  const hat = (t: number, open: boolean) => noise(t, { hp: 7500, dur: open ? 0.07 : 0.025, g: open ? 0.05 : 0.035, r: open ? 0.05 : 0.015, to: musicIn });
-  const clap = (t: number) => { for (let k = 0; k < 3; k++) noise(t + k * 0.011, { bp: [1800, 1], dur: 0.012, g: 0.09, r: 0.01, to: musicIn, send: 0.25 }); noise(t + 0.03, { bp: [1800, 1], dur: 0.12, g: 0.06, a: 0.002, r: 0.08, to: musicIn, send: 0.25 }); };
+  const kick = (t: number) => { const o = reg(osc('sine', 150)); o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.09); const e = env(t, 0.22, 0.4, 0.002, 0.12); o.connect(e); e.connect(musicIn); o.start(t); o.stop(t + 0.6); reg(noise(t, { lp: 3000, dur: 0.008, g: 0.1, r: 0.006, to: musicIn })); };
+  const hat = (t: number, open: boolean) => reg(noise(t, { hp: 7500, dur: open ? 0.07 : 0.025, g: open ? 0.05 : 0.035, r: open ? 0.05 : 0.015, to: musicIn }));
+  const clap = (t: number) => { for (let k = 0; k < 3; k++) reg(noise(t + k * 0.011, { bp: [1800, 1], dur: 0.012, g: 0.09, r: 0.01, to: musicIn })); reg(noise(t + 0.03, { bp: [1800, 1], dur: 0.12, g: 0.06, a: 0.002, r: 0.08, to: musicIn })); };
   const bar = (t: number, b: number) => { // everything that happens in bar b (0 … 7) starting at t
     const k = b % 4, root = BASS[k]; chord(t, CHORDS[k], STEP * 16);
     for (const st of [0, 4, 8, 12]) kick(t + st * STEP);
-    for (let st = 2; st < 16; st += 4) hat(t + st * STEP, st === 14); for (let st = 1; st < 16; st += 2) if (st % 4 !== 2) noise(t + st * STEP, { hp: 9000, dur: 0.015, g: 0.012, r: 0.01, to: musicIn });
+    for (let st = 2; st < 16; st += 4) hat(t + st * STEP, st === 14); for (let st = 1; st < 16; st += 2) if (st % 4 !== 2) reg(noise(t + st * STEP, { hp: 9000, dur: 0.015, g: 0.012, r: 0.01, to: musicIn }));
     clap(t + 4 * STEP); clap(t + 12 * STEP);
     for (const st of [0, 3, 6, 8, 11, 14]) bass(t + st * STEP, Hz(root + (st === 3 || st === 11 ? 12 : 0)), 0.22);
     const riff = b === 7 ? [...HOOK[3].filter(([st]) => st < 12), ...RUN] : HOOK[k];
@@ -225,9 +221,15 @@ export function createEngine(ctx: AudioContext): Engine {
   const musicSet = (on: boolean, level = 1) => {
     const t = now();
     if (on) {
-      if (!music) { music = { timer: window.setInterval(schedule, 150), next: t + 0.15, bar: 0 }; schedule(); }
-      bus.music.gain.setTargetAtTime(0.24 * level, t, 0.25);
-    } else if (music) { clearInterval(music.timer); music = null; bus.music.gain.setTargetAtTime(0, t, 0.2); }
+      if (!music) { music = { timer: window.setInterval(schedule, 150), next: t + 0.15, bar: 0 }; echoG.gain.setValueAtTime(0.3, t); schedule(); }
+      bus.music.gain.cancelScheduledValues(t); bus.music.gain.setValueAtTime(bus.music.gain.value, t); bus.music.gain.setTargetAtTime(0.24 * level, t, 0.25);
+    } else if (music) {
+      // the tour has left the speaker: the bus goes to an exact zero, every queued note is stopped, the echo is emptied
+      clearInterval(music.timer); music = null;
+      bus.music.gain.cancelScheduledValues(t); bus.music.gain.setValueAtTime(bus.music.gain.value, t); bus.music.gain.linearRampToValueAtTime(0, t + 0.25);
+      for (const o of queued) { try { o.stop(t + 0.3); } catch { /* not started yet, or already stopped */ } } queued.clear();
+      echoG.gain.setValueAtTime(0, t + 0.3);
+    }
   };
 
   /* ---------------- the desk's switches ---------------- */
@@ -235,7 +237,6 @@ export function createEngine(ctx: AudioContext): Engine {
   const settle = (to: number, tau: number) => master.gain.setTargetAtTime(to, now(), tau);
   return {
     play(cue) { if (muted) return; CUES[cue]?.(now() + 0.005); },
-    move(T) { if (!muted) move(T); },
     ambience, music: musicSet,
     pause() { if (held) return; held = true; settle(0, 0.08); window.setTimeout(() => { if (held) void ctx.suspend().catch(() => {}); }, 400); },
     resume() { if (!held) return; held = false; void ctx.resume().catch(() => {}); if (!muted) settle(LEVEL, 0.15); },

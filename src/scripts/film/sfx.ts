@@ -6,10 +6,9 @@
  * its way (the first tap's own) are kept for a moment and played the instant it lands.
  *
  * What the film asks for:
- *   play(cue)              one-shot sounds: taps, the HUD unfolding, the door, the switch, the beeps, the lock's ways in …
- *   move(seconds)          the glide of a camera move (a low breath of air, rising and settling with the move)
- *   ambience(where, fade)  the street (wind, birds) or the rooms (room tone), crossed at the threshold; `none` is silence
- *   music(on, level)       the lounge music from the ceiling speaker (and, quieter, from the control panel's player)
+ *   play(cue)              one-shot sounds: taps, the HUD arriving, the door, the switch, the beeps, the lock's ways in …
+ *   ambience(where, fade)  the street (wind, a bird) or the rooms (room tone), crossed at the threshold; `none` is silence
+ *   music(on, level)       the lounge music, from the ceiling speaker only
  *   pause() / resume()     the hero scrolled away or the tab hidden: everything continuous is held and taken up again
  *   mute(on)               the visitor's switch in the brand row; remembered for the next visit
  */
@@ -22,7 +21,7 @@ export type Cue =
   | 'phone-up' | 'phone-down' | 'lights-on' | 'lights-off' | 'end';
 export type Where = 'outdoor' | 'indoor' | 'none';
 export interface Engine {
-  play(cue: Cue): void; move(seconds: number): void; ambience(where: Where, fade: number): void;
+  play(cue: Cue): void; ambience(where: Where, fade: number): void;
   music(on: boolean, level?: number): void;
   pause(): void; resume(): void; mute(on: boolean): void; dispose(): void;
 }
@@ -33,7 +32,7 @@ let engine: Engine | null = null, loading: Promise<void> | null = null, ctx: Aud
 let muted = (() => { try { return localStorage.getItem(KEY) === 'off'; } catch { return false; } })();
 let paused = false;
 // what the film asked of the continuous sounds before the engine was in (and the engine's own memory while it is paused)
-const want: { where: Where; fade: number; music: [boolean, number]; move: number } = { where: 'none', fade: 1, music: [false, 1], move: 0 };
+const want: { where: Where; fade: number; music: [boolean, number] } = { where: 'none', fade: 1, music: [false, 1] };
 const pending: { cue: Cue; at: number }[] = [];
 const subs = new Set<(muted: boolean) => void>();
 
@@ -45,7 +44,6 @@ const load = () => {
     engine = createEngine(ctx);
     engine.ambience(want.where, Math.min(want.fade, 0.6)); engine.music(...want.music);
     const now = performance.now(); for (const p of pending.splice(0)) if (now - p.at < PENDING_FOR) engine.play(p.cue);
-    if (want.move > 0) { engine.move(want.move); want.move = 0; }
     if (paused) engine.pause();
   }).catch(() => { loading = null; });
 };
@@ -59,7 +57,6 @@ export const sfx = {
     load();
   },
   play(cue: Cue) { if (muted) return; if (engine) engine.play(cue); else if (loading) pending.push({ cue, at: performance.now() }); },
-  move(seconds: number) { if (muted) return; if (engine) engine.move(seconds); else want.move = seconds; },
   ambience(where: Where, fade = 1) { want.where = where; want.fade = fade; if (!muted) engine?.ambience(where, fade); },
   music(on: boolean, level = 1) { want.music = [on, level]; if (!muted) engine?.music(on, level); },
   pause() { paused = true; engine?.pause(); },
