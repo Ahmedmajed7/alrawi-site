@@ -5,10 +5,13 @@
  * frames and back again. Here that becomes a picture that answers the phone:
  *   - the drapes' position is a frame, and the drapes only ever get anywhere the way a motor gets them there: the half of the clip
  *     that runs the right way plays forwards (drawing them is the first half, parting them the second) and halts on the frame it
- *     was sent to. Open / Close / a scene start softly and run at 1.5×; a finger on the slider is followed quickly (up to 3×, a
- *     few frames behind it): a new mark the same way only moves the stop, and a seek happens only when the drapes turn round
- *     (onto the frame of the other half that shows them where they are). Seeking per pointer move made the drapes trail the
- *     finger in steps and crawl on after it let go (3 Oct 2026);
+ *     was sent to. Open / Close / a scene start softly and run at 1.5×; a new mark the same way only moves the stop, and a seek
+ *     happens only when the drapes turn round (onto the frame of the other half that shows them where they are);
+ *   - a finger on the slider is followed by seeks, never by playing: always to where the finger is now, one seek at a time (a
+ *     newer mark waits for the seek under way and replaces any older one, so nothing crawls on after the finger lets go), in
+ *     whichever half is on screen. Chasing the finger at up to 3× outran the decoder on the tall stacked picture (the drapes
+ *     moved in steps of two or three frames at 30 a second), every start waited about 250 ms for play(), and each turn or
+ *     pause switched between playing and seeking (23 Oct 2026);
  *   - the room's file is fetched whole and played from memory (see `loadFile`);
  *   - the lights are light, added the way light adds: unlit room + the lamps' share × their level + the ceiling's share × its
  *     level, summed in linear light (a WebGL pass; a plain cross-fade of the encoded pictures greys the room on its way down).
@@ -34,7 +37,7 @@ export interface Scene {
   prepare(): void;
   /** the first frame is drawn (the film's own last frame) and the canvas is up */
   enter(): Promise<void>;
-  /** `drag`: follow the finger (quickly) · `travel`: run there as the motor would */
+  /** `drag`: onto the finger, seek by seek · `travel`: run there as the motor would */
   curtainTo(c: number, how: 'drag' | 'travel'): void;
   /** halt the drapes where they are */
   halt(): void;
@@ -54,7 +57,7 @@ const lampsAt = (d: number) => ease(clamp(d / 0.3)), ceilingAt = (d: number) => 
 type RVFC = (cb: (now: number, m: { mediaTime: number }) => void) => number;
 /** how the drapes get to their mark: top speed (× the recording), ms to reach it, frames over which they slow to a stop */
 interface Pace { top: number; ramp: number; brake: number }
-const MOTOR: Pace = { top: 1.5, ramp: 320, brake: 7 }, FINGER: Pace = { top: 3, ramp: 120, brake: 9 };
+const MOTOR: Pace = { top: 1.5, ramp: 320, brake: 7 };
 const wait = <T>(ms: number, v: T) => new Promise<T>((res) => setTimeout(() => res(v), ms));
 
 const VERT = 'attribute vec2 p; varying vec2 vUv; void main() { vUv = vec2(p.x * 0.5 + 0.5, 0.5 - p.y * 0.5); gl_Position = vec4(p, 0.0, 1.0); }';
@@ -140,8 +143,8 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
   let v: HTMLVideoElement | null = null, rung: SceneRung | null = null;
   let seeking = false, watch = 0, landed: (() => void) | null = null;
   /** `stopAt`: the frame the clip is running to · `gen`: which play() a refusal belongs to · `stuck`: the browser will not play
-   *  this video (power saving): the drapes step there by seeks instead */
-  let stopAt = 0, gen = 0, t0 = 0, stuck = false, pace = MOTOR;
+   *  this video (power saving): the drapes step there by seeks instead · `scrub`: a finger has the drapes (seeks only) */
+  let stopAt = 0, gen = 0, t0 = 0, stuck = false, scrub = false;
   const frameOf = (t: number) => clamp(Math.round(t * fps - 0.5 + 1e-3), 0, 2 * last);      // a frame shows from f / fps
   const posOf = (f: number) => (f <= last ? f : 2 * last - f);                                  // the drapes' position (0 = parted … last = drawn) on frame f
   const timeOf = (f: number) => (f + 0.5) / fps;
@@ -180,6 +183,11 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
   const drive = () => {
     if (!v || seeking || goal === null || mode !== 'video') return;
     const playing = !v.paused, p = posOf(shown);
+    if (scrub) { // straight onto the finger's mark, in the half on screen (seeked → drive: on to wherever the finger is by then)
+      if (playing) pause();
+      if (goal === p) { goal = null; tell(); } else seekTo(shown <= last ? goal : 2 * last - goal);
+      return;
+    }
     if (goal === p) { if (playing) { stopAt = shown; land(); } else { goal = null; tell(); } return; }
     const fwd = goal > p, end = fwd ? goal : 2 * last - goal;
     if (playing) {
@@ -204,8 +212,8 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
     const f = frameOf(t); if (f !== shown) { drawVideo(f); tell(); }
     if (f >= stopAt) { land(); return; }
     // a motor's start and stop: the drapes gather speed and lose it again over the last few frames
-    const left = stopAt - f, k = ease(clamp(Math.min((performance.now() - t0) / pace.ramp, left / pace.brake)));
-    const r = Math.round((0.55 + (pace.top - 0.55) * k) * 20) / 20; if (Math.abs(v.playbackRate - r) > 0.04) v.playbackRate = r;
+    const left = stopAt - f, k = ease(clamp(Math.min((performance.now() - t0) / MOTOR.ramp, left / MOTOR.brake)));
+    const r = Math.round((0.55 + (MOTOR.top - 0.55) * k) * 20) / 20; if (Math.abs(v.playbackRate - r) > 0.04) v.playbackRate = r;
   };
   const pump = (el: HTMLVideoElement) => { // per decoded frame where the browser tells us, else per display frame
     const rv = (el as HTMLVideoElement & { requestVideoFrameCallback?: RVFC }).requestVideoFrameCallback;
@@ -282,7 +290,7 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
     if (!(await startVideo(Math.round(from * last))) || !entered || (mode as string) === 'video') return;
     cancelAnimationFrame(stillTween); stillTween = 0;
     mode = 'video'; canvas.classList.add('is-on');
-    if (Math.abs(aim - st.curtain) > 0.5 / last) { goal = Math.round((1 - aim) * last); pace = MOTOR; drive(); }
+    if (Math.abs(aim - st.curtain) > 0.5 / last) { goal = Math.round((1 - aim) * last); scrub = false; drive(); }
     draw();
   };
 
@@ -301,8 +309,8 @@ export function createScene(host: HTMLElement, clip: SceneClip, opts: { hevc: bo
   const curtainTo = (c: number, how: 'drag' | 'travel') => {
     c = clamp(c); aim = c;
     if (mode === 'video') {
-      // a finger is followed quickly, the motor starts softly (a run under way keeps the speed it has, whichever sends it on)
-      pace = how === 'drag' ? FINGER : MOTOR; goal = Math.round((1 - c) * last); drive(); tell();
+      // a finger is followed seek by seek, the motor starts softly (a run under way keeps the speed it has)
+      scrub = how === 'drag'; goal = Math.round((1 - c) * last); drive(); tell();
     } else if (mode === 'still') {
       if (how === 'travel' && !opts.reduced) tweenStill(c, 300 + 1300 * Math.abs(c - st.curtain));
       else { cancelAnimationFrame(stillTween); stillTween = 0; st.curtain = c; draw(); }
