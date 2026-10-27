@@ -35,7 +35,7 @@ export const dir = (locale: Locale) => (locale === 'ar' ? 'rtl' : 'ltr');
 
 /** `/ar/products/x` style path for a locale. `path` is locale-less, e.g. `/products/x`. */
 export function localePath(locale: Locale, path = '/') {
-  const clean = path.replace(/^\/+/, '');
+  const clean = path.replace(/^\/+|\/+$/g, '');
   return clean ? `/${locale}/${clean}/` : `/${locale}/`;
 }
 
